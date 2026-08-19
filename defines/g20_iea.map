@@ -1,0 +1,281 @@
+
+set rr  Regions in the aggregation /
+
+	ARG	Argentina
+	ANZ	Australia and New Zealand
+	BRA	Brazil
+	CAN	Canada
+	CHN	China and Hong Kong
+	FRA	France
+	DEU	Germany
+	IND	India
+	IDN	Indonesia
+	ITA	Italy
+	JPN	Japan
+	MEX	Mexico
+	RUS	Russia
+	SAU	Saudi Arabia
+	ZAF	South Africa
+	KOR	Korea
+	TUR	Turkey
+	GBR	United Kingdom
+	USA	United States
+	REU	European Union (excluding FRA - DEU - GBR - ITA)
+
+	OEX	Other oil exporters
+
+	LIC	Other low income countries
+	MIC	Other Middle income countries
+
+/;
+
+SET mapr(r,rr) Mapping of GTAP Regions (from-to) /
+	ARG.ARG	Argentina
+	BRA.BRA	Brazil
+	CAN.CAN	Canada
+	FRA.FRA	France
+	DEU.DEU	Germany
+	ITA.ITA	Italy
+	JPN.JPN	Japan
+	MEX.MEX	Mexico
+	RUS.RUS	Russia
+	SAU.SAU	Saudi Arabia
+	IND.IND	India
+	IDN.IDN	Indonesia
+	ZAF.ZAF	South Africa
+	KOR.KOR	Korea
+	TUR.TUR	Turkey
+	GBR.GBR	United Kingdom
+	USA.USA	United States
+
+$onembedded
+$eolcom !
+
+	( 	! China including Hong Kong
+		CHN	!	China
+		HKG	!	Hong Kong
+	).CHN	
+
+	(	! Other oil exporters 
+		VEN		!	Venezuela
+		BHR		!	Bahrain
+		KWT		!	Kuwait
+		QAT		!	Qatar
+		ARE		!	United Arab Emirates
+		IRN		!	Iran, Islamic Republic of
+	).OEX
+
+	(	 ! Australia and New Zealand
+		AUS	!	Australia
+		NZL	!	New Zealand
+	).ANZ,
+
+	(	! Rest of Europe
+		AUT	!	Austria
+		BEL	!	Belgium
+		DNK	!	Denmark
+		FIN	!	Finland
+		GRC	!	Greece
+		IRL	!	Ireland
+		LUX	!	Luxembourg
+		NLD	!	Netherlands
+		PRT	!	Portugal
+		ESP	!	Spain
+		SWE	!	Sweden
+		CZE	!	Czech Republic
+		HUN	!	Hungary
+		MLT	!	Malta
+		POL	!	Poland
+		ROU	!	Romania
+		SVK	!	Slovakia
+		SVN	!	Slovenia
+		EST	!	Estonia
+		LVA	!	Latvia
+		LTU	!	Lithuania
+		BGR	!	Bulgaria
+		CYP	!	Cyprus
+
+		CHE	!	Switzerland
+		NOR	!	Norway
+		XEF	!	Rest of EFTA
+		XER	!	Rest of Europe
+*			- Andorra
+*			- Bosnia and Herzegovina
+*			- Faroe Islands
+*			- Gibraltar
+*			- Macedonia, the former Yugoslav Republic of
+*			- Monaco
+*			- San Marino
+*			- Serbia and Montenegro
+*			- Iceland
+*			- Liechtenstein
+
+	).REU,
+
+	KHM.LIC		!	Cambodia
+	LAO.LIC		!	Lao People's Democratic Republic
+	BGD.LIC		!	Bangladesh
+	XSA.LIC		!	Rest of South Asia
+	KGZ.LIC		!	Kyrgyzstan
+	XWF.LIC		!	Rest of Western Africa
+	XCF.LIC		!	Rest of Central Africa
+	XAC.LIC		!	Rest of South Central Africa
+	KEN.LIC		!	Kenya
+	ETH.LIC		!	Ethiopia
+	MDG.LIC		!	Madagascar
+	MWI.LIC		!	Malawi
+	MOZ.LIC		!	Mozambique
+	TZA.LIC		!	Tanzania
+	UGA.LIC		!	Uganda
+	ZMB.LIC		!	Zambia
+	ZWE.LIC		!	Zimbabwe
+	XEC.LIC		!	Rest of Eastern Africa
+
+
+	MYS.MIC		!	Malaysia
+	XOC.MIC		!	Rest of Oceania
+	TWN.MIC		!	Taiwan
+	XEA.MIC		!	Rest of East Asia
+	PHL.MIC		!	Philippines
+	SGP.MIC		!	Singapore
+	THA.MIC		!	Thailand
+	VNM.MIC		!	Vietnam
+	XSE.MIC		!	Rest of Southeast Asia
+	PAK.MIC		!	Pakistan
+	LKA.MIC		!	Sri Lanka
+	XNA.MIC		!	Rest of North America
+	BOL.MIC		!	Bolivia
+	CHL.MIC		!	Chile
+	COL.MIC		!	Colombia
+	ECU.MIC		!	Ecuador
+	PRY.MIC		!	Paraguay
+	PER.MIC		!	Peru
+	URY.MIC		!	Uruguay
+	XSM.MIC		!	Rest of South America
+	CRI.MIC		!	Costa Rica
+	GTM.MIC		!	Guatemala
+	NIC.MIC		!	Nicaragua
+	PAN.MIC		!	Panama
+	XCA.MIC		!	Rest of Central America
+	XCB.MIC		!	Caribbean
+	ALB.MIC		!	Albania
+	BLR.MIC		!	Belarus
+	HRV.MIC		!	Croatia
+	UKR.MIC		!	Ukraine
+	XEE.MIC		!	Rest of Eastern Europe
+	KAZ.MIC		!	Kazakhstan
+	XSU.MIC		!	Rest of Former Soviet Union
+	ARM.MIC		!	Armenia
+	AZE.MIC		!	Azerbaijan
+	GEO.MIC		!	Georgia
+	EGY.MIC		!	Egypt
+	MAR.MIC		!	Morocco
+	TUN.MIC		!	Tunisia
+	XNF.MIC		!	Rest of North Africa
+	NGA.MIC		!	Nigeria
+	SEN.MIC		!	Senegal
+	MUS.MIC		!	Mauritius
+	BWA.MIC		!	Botswana
+	XSC.MIC		!	Rest of South African Customs Union 
+
+	OMN.MIC		!	Oman
+	ISR.MIC		!	Israel
+	MNG.MIC		!	Mongolia
+	NPL.MIC		!	Nepal
+	HND.MIC		!	Honduras
+	SLV.MIC		!	El Salvador
+	XWS.MIC		!	Rest of Western Asia
+	CMR.MIC		!	Cameroon
+	CIV.MIC		!	Cote d'Ivoire
+	GHA.MIC		!	Ghana
+	NAM.MIC		!	Namibia
+
+	XTW.MIC		!	Rest of the World 
+
+	BRN.MIC		!	Brunei Darussalam
+	DOM.MIC		!	Dominican Republic
+	JAM.MIC		!	Jamaica
+	PRI.MIC		!	Puerto Rico
+	TTO.LIC		!	Trinidad and Tobago
+	JOR.LIC		!	Jordan
+	BEN.LIC		!	Benin
+	BFA.LIC		!	Burkina Faso
+	GIN.LIC		!	Guinea
+	TGO.LIC		!	Togo
+	RWA.LIC		!	Rwanda
+
+	/;
+
+set ff /
+	skl	Skilled workers,
+	lab	Agricultural and unskilled workers,
+	lnd     Land,    
+	cap     Capital,    
+	res     Natural resources /;
+
+set mapf(f,ff) /
+	mgr.skl	Officials and Mangers legislators (ISCO-88 Major Groups 1-2), 
+	tec.skl	Technicians technicians and associate professionals
+	clk.skl	Clerks
+	srv.lab	Service and market sales workers
+	lab.lab	Agricultural and unskilled workers (Major Groups 6-9)
+	lnd.lnd Land,    
+	cap.cap Capital,    
+	res.res Natural resources /;
+
+abort$(card(mapf)<>card(f))	"Error: card(mapf)<>card(f).";
+
+
+set	ii	Goods in the IEA classification /
+	GAS	Natural gas works,
+	ELE	Electricity and heat ,
+	OIL	Refined oil products,
+	COL	Coal transformation,
+	CRU	Crude oil,
+	I_S	Iron and steel industry (IRONSTL),
+	CRP	Chemical industry (CHEMICAL),
+	NFM	Non-ferrous metals (NONFERR),
+	NMM	Non-metallic minerals (NONMET),
+	TEQ	Transport equipment (TRANSEQ),
+	OME	Other machinery (MACHINE),
+	OMN	Mining (MINING),
+	FPR	Food products (FOODPRO),
+	PPP	Paper-pulp-print (PAPERPRO),
+	LUM	Wood and wood-products (WOODPRO),
+	CNS	Construction (CONSTRUC),
+	TWL	Textiles-wearing apparel-leather (TEXTILES),
+	OMF	Other manufacturing (INONSPEC),
+	AGR	Agricultural products,
+	TRN	Transport,
+	ATP	Air transport,
+	SER	Commercial and public services,
+	DWE	Dwellings/;
+
+SET mapi(i,ii)  Mapping for sectors and goods /
+	(gas,gdt).GAS			Natural gas works
+	ele.ELE				Electricity and heat 
+	oil.OIL				Refined oil products
+	col.COL				Coal transformation
+	cru.CRU				Crude oil
+
+	i_s.I_S				Iron and steel industry (IRONSTL)
+	crp.CRP				Chemical industry (CHEMICAL)
+	nfm.NFM				Non-ferrous metals (NONFERR)
+	nmm.NMM				Non-metallic minerals (NONMET)
+	(mvh,OTN).TEQ			Transport equipment (TRANSEQ)
+	ome.OME				Other machinery (MACHINE)
+	omn.OMN				Mining (MINING)
+	(omt,vol,mil,pcr,sgr,ofd,b_t,cmt).FPR	Food products (FOODPRO)
+	ppp.PPP				Paper-pulp-print (PAPERPRO)
+	lum.LUM				Wood and wood-products (WOODPRO)
+	cns.CNS				Construction (CONSTRUC)
+	(tex,WAP,LEA).TWL		Textiles-wearing apparel-leather (TEXTILES)
+	(eeq,FMP,OMF).OMF		Other manufacturing (INONSPEC)
+	(pdr,wht,gro,v_f,osd,c_b,pfb,ocr,ctl,oap,rmk,wol,frs,fsh).AGR	Agricultural products
+	(otp,wtp).TRN			Transport
+	atp.ATP				Air transport
+	(trd,ofi,isr,obs,wtr,cmn,ros,osg).SER		Commercial and public services
+	dwe.DWE				Dwellings/;
+
+abort$(card(mapi)<>card(i))	"Error: card(mapi)<>card(i).";
+

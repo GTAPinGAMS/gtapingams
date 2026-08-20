@@ -1,11 +1,11 @@
-$title	 GTAP9inGAMS -- GAMS/MPSGE Formulation
+$title	 GTAP10inGAMS -- GAMS/MPSGE Formulation
 
-$if not set yr $set yr 11
+$if not set yr $set yr 14
 $if not set ds $set ds g20_macro
-$include "%system.fp%gtap9data"
+$include "%system.fp%gtap10data"
 
 $ontext
-$model:gtap9
+$model:gtap10
 
 $sectors:
 	Y(g,r)$(rm(r)*vom(g,r))		! Supply
@@ -35,7 +35,7 @@ $auxiliary:
 	CC(r)$(rm(r)*cde(r))	! Consumption cost index
 	W(r)$(rm(r)*cde(r))	! Per capita welfare (money metric index);
 
-$prod:Y(g,r)$(rm(r)*vom(g,r)) s:0 t:etadx(g) m:esub(g,r) va:esubva(g) i.tl(m):esubdm(i)  
+$prod:Y(g,r)$(rm(r)*vom(g,r)) s:0 t:etadx(g) m:esub(g,r) va:esubva(g) i.tl(m):esubdm(i)
 	o:P(g,r)	q:(vom(g,r)-vxm(g,r))	a:RA(r)  t:rto(g,r)	p:(1-rto(g,r))
 	o:PE(g,r)	q:vxm(g,r)		a:RA(r)  t:rto(g,r)	p:(1-rto(g,r))
 	i:P(i,r)	q:vdfm(i,g,r)	p:(1+rtfd0(i,g,r)) i.tl:  a:RA(r) t:rtfd(i,g,r)
@@ -51,12 +51,12 @@ $prod:YT(j)$vtw(j)  s:1
 
 $prod:M(i,r)$(rm(r)*vim(i,r))	s:esubm(i)  s.tl:0
 	o:PM(i,r)			q:vim(i,r)
-	i:PE(i,rm)$vxm(i,rm)		q:vxmd(i,rm,r)	p:pvxmd(i,rm,r) rm.tl: 
+	i:PE(i,rm)$vxm(i,rm)		q:vxmd(i,rm,r)	p:pvxmd(i,rm,r) rm.tl:
 +		a:RA(rm) t:(-rtxs(i,rm,r)) a:RA(r) t:(rtms(i,rm,r)*(1-rtxs(i,rm,r)))
 	i:P(i,rm)$(not vxm(i,rm))	q:vxmd(i,rm,r)	p:pvxmd(i,rm,r) rm.tl:
 +		a:RA(rm) t:(-rtxs(i,rm,r)) a:RA(r) t:(rtms(i,rm,r)*(1-rtxs(i,rm,r)))
 	i:PT(j)#(s)			q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl: a:RA(r) t:rtms(i,s,r)
-	i:PE(i,rx)$vem(i,rx)		q:vxmd(i,rx,r)	p:pvxmd(i,rx,r) rx.tl: 
+	i:PE(i,rx)$vem(i,rx)		q:vxmd(i,rx,r)	p:pvxmd(i,rx,r) rx.tl:
 +		a:ROW    t:(-rtxs(i,rx,r)) a:RA(r) t:(rtms(i,rx,r)*(1-rtxs(i,rx,r)))
 
 $prod:FT(sf,r)$(rm(r)*evom(sf,r))  t:etrae(sf)
@@ -117,16 +117,16 @@ $demand:ROW$card(rx)
 	e:PT(j)			q:(-sum((i,s,rx), vtwr(j,i,s,rx)))
 	d:PFX
 
-$prod:A(i,r)$(rm(r)*cde(r)*vcm(i,r))  s:esubdm(i)  
+$prod:A(i,r)$(rm(r)*cde(r)*vcm(i,r))  s:esubdm(i)
 	o:PA(i,r)	q:vcm(i,r)
 	i:P(i,r)	q:vdfm(i,"c",r)	p:(1+rtfd0(i,"c",r)) a:RA(r) t:rtfd(i,"c",r)
 	i:PM(i,r)	q:vifm(i,"c",r)	p:(1+rtfi0(i,"c",r)) a:RA(r) t:rtfi(i,"c",r)
 
 
 $constraint:D(i,r)$(cde(r)*rm(r)*vcm(i,r))
-	D(i,r) * sum(j$thetac(j,r), thetac(j,r) * 
-	  U(r)**((1-subpar(j,r))*incpar(j,r)) * 
-		(PA(j,r)/CC(r))**(1-subpar(j,r))) 
+	D(i,r) * sum(j$thetac(j,r), thetac(j,r) *
+	  U(r)**((1-subpar(j,r))*incpar(j,r)) *
+		(PA(j,r)/CC(r))**(1-subpar(j,r)))
 		   =e= U(r)**((1-subpar(i,r))*incpar(i,r)) *
 			(PA(i,r)/CC(r))**(-subpar(i,r));
 
@@ -134,11 +134,11 @@ $constraint:U(r)$(cde(r)*rm(r))
 	sum(f, PF(f,r)*evom(f,r)) =e= RA(r);
 
 $constraint:CC(r)$(cde(r)*rm(r))
-	sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+	sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) *
 		(PA(i,r)/CC(r))**(1-subpar(i,r))) =e= 1;
 
 $constraint:W(r)$(cde(r)*rm(r))
-	sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+	sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) *
 			 (1/W(r))**(1-subpar(i,r))) =e= 1;
 
 $report:
@@ -157,7 +157,7 @@ $report:
 	v:V_VIA(i,r)$(RM(R)*vcm(i,r)*vifm(i,"c",r))		i:PM(i,r)	PROD:A(i,r)
 
 $offtext
-$sysinclude mpsgeset gtap9
+$sysinclude mpsgeset gtap10
 alias (i,i_,j_), (f,f_);
 
 $macro pnum(r)		(sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))/sum(i_,vdfm(i_,"c",r)+vifm(i_,"c",r)))
@@ -174,10 +174,10 @@ $macro REV_TXS(i,s,r)	((XMD(i,s,r)*rtxs(i,s,r)*vxmd(i,s,r) * PX(i,s))$(rm(s)*vxm
 $macro REV_TMS(i,s,r)	((XMD(i,s,r)*rtms(i,s,r)*(PX(i,s)*(1-rtxs(i,s,r))*vxmd(i,s,r)  + \
 			 sum(j_$vtwr(j_,i,s,r), PT.L(j_)*vtwr(j_,i,s,r))))$(rm(r)*vxmd(i,s,r)*rtms(i,s,r)))
 
-gtap9.workspace = 1024;
-gtap9.iterlim = 0;
-$include gtap9.gen
-solve gtap9 using mcp;
+gtap10.workspace = 1024;
+gtap10.iterlim = 0;
+$include gtap10.gen
+solve gtap10 using mcp;
 
 parameter	maxdev /1e-3/;
-abort$(gtap9.objval > maxdev) "GTAP9 replication fails.", gtap9.objval;
+abort$(gtap10.objval > maxdev) "GTAP10 replication fails.", gtap10.objval;

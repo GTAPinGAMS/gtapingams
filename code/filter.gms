@@ -1,7 +1,7 @@
 $title	Generate a Sparse Version of the GTAP Dataset
 
 $if not set ds $set ds gsd
-$include "%system.fp%gtap9data"
+$include "%system.fp%gtap10data"
 
 *	Produce a report of the resulting change in nonzeros and dataset density:
 
@@ -19,7 +19,7 @@ density("region","vdfm",r,"before") = sum((i,g)$vdfm(i,g,r),1);
 density("region","vifm",r,"before") = sum((i,g)$vifm(i,g,r),1);
 density("commodity","vdfm",i,"before") = sum((r,g)$vdfm(i,g,r),1);
 density("commodity","vifm",i,"before") = sum((r,g)$vifm(i,g,r),1);
-density("total","total",array,"before") = 
+density("total","total",array,"before") =
 	sum(i,density("commodity",array,i,"before"));
 
 
@@ -72,7 +72,7 @@ abort$card(thetafchk)	"Error in thetaf0:", thetafchk;
 
 thetaf(f,i,r) = thetaf0(f,i,r);
 
-*	Use original GTAP data to define the value share of region r 
+*	Use original GTAP data to define the value share of region r
 *	in the provision of commodity i transportation services:
 
 thetat(i,r)$vst(i,r) = vst(i,r)/sum(s,vst(i,s));
@@ -91,11 +91,11 @@ delta = 1;
 loop(iteradj$delta,
 
 *	Provision of transportation services:
-	vst(j,r)$thetat(j,r) = thetat(j,r) * 
+	vst(j,r)$thetat(j,r) = thetat(j,r) *
 		sum((i,r.local,s), vtwr(j,i,r,s));
 
 *	Imports gross of taxes and transport costs:
-	vim(i,r) = sum(s, pvxmd(i,s,r)*vxmd(i,s,r) + 
+	vim(i,r) = sum(s, pvxmd(i,s,r)*vxmd(i,s,r) +
 			  pvtwr(i,s,r)*sum(j, vtwr(j,i,s,r)));
 
 *	Filter with nd digits:
@@ -105,7 +105,7 @@ loop(iteradj$delta,
 	vifm(i,g,r)$(not vim(i,r)) = 0;
 
 *	Scale sectoral demand for imports to match vim:
-	vifm(i,g,r)$vifm(i,g,r) = vim(i,r) * vifm(i,g,r) / 
+	vifm(i,g,r)$vifm(i,g,r) = vim(i,r) * vifm(i,g,r) /
 				  sum(g.local,vifm(i,g,r));
 	vifm(i,g,r)$(not round(vifm(i,g,r),nd)) = 0;
 
@@ -126,18 +126,18 @@ loop(iteradj$delta,
 	vdm(i,r)$(not round(vdm(i,r),nd)) = 0;
 	vdfm(i,g,r)$(not vdm(i,r)) = 0;
 
-*	Final demand (C, I and G) defined by the gross value of 
+*	Final demand (C, I and G) defined by the gross value of
 *	goods:
 	vom(g,r)$(not i(g)) = sum(i,vdfm(i,g,r)*(1+rtfd(i,g,r))+
 				    vifm(i,g,r)*(1+rtfi(i,g,r)))/(1-rto(g,r));
 
-*	Gross output equals exports and supply for the 
+*	Gross output equals exports and supply for the
 *	domestic market:
 	vom(i,r) = vxm(i,r) + vdm(i,r);
 
 *	Value added in goods production is determined as a
 *	residual:
-	va(j,r) = vom(j,r)*(1-rto(j,r)) -  
+	va(j,r) = vom(j,r)*(1-rto(j,r)) -
 		sum(i,	vdfm(i,j,r)*(1+rtfd(i,j,r))+
 			vifm(i,j,r)*(1+rtfi(i,j,r)));
 
@@ -149,7 +149,7 @@ loop(iteradj$delta,
 	vdfm(i,"i",r) = vdfm(i,"i",r) -    min(0,va(i,r))/(1-rto(i,r));
 	vom("i",r)    = vom("i",r) - sum(i,min(0,va(i,r))/(1-rto(i,r)));
 
-*	Adjust domestic supply now to account for adjustments in 
+*	Adjust domestic supply now to account for adjustments in
 *	investment:
 	vdm(i,r) = sum(g,vdfm(i,g,r));
 	vdm(i,r)$(not round(vdm(i,r),nd)) = 0;
@@ -170,8 +170,8 @@ loop(iteradj$delta,
 *	Verify that sectoral profits are zero:
 	yprofit(g,r) = 0;
 	yprofit(g,r)$vom(g,r) = round(vom(g,r)*(1-rto(g,r))
-		- sum(i,vdfm(i,g,r)*(1+rtfd(i,g,r)) + 
-			vifm(i,g,r)*(1+rtfi(i,g,r))) 
+		- sum(i,vdfm(i,g,r)*(1+rtfd(i,g,r)) +
+			vifm(i,g,r)*(1+rtfi(i,g,r)))
 		- sum(f,vfm(f,g,r)*(1+rtf(f,g,r))),3);
 	abort$card(yprofit) yprofit;
 
@@ -181,17 +181,17 @@ loop(iteradj$delta,
 
 *	Impute current account deficits using the
 *	regional budget constraint:
-	vb(r) = vom("c",r) + vom("g",r) + vom("i",r) 
+	vb(r) = vom("c",r) + vom("g",r) + vom("i",r)
 		- sum(f, evom(f,r))
 		- sum(g,  vom(g,r)*rto(g,r))
-		- sum(g,  sum(i, vdfm(i,g,r)*rtfd(i,g,r) + 
+		- sum(g,  sum(i, vdfm(i,g,r)*rtfd(i,g,r) +
 				 vifm(i,g,r)*rtfi(i,g,r)))
 		- sum((f,g),     vfm(f,g,r)*rtf(f,g,r))
-		- sum((i,s), rtms(i,s,r) *  
+		- sum((i,s), rtms(i,s,r) *
 		    (vxmd(i,s,r) * (1-rtxs(i,s,r)) + sum(j,vtwr(j,i,s,r))))
 		+ sum((i,s), rtxs(i,r,s) * vxmd(i,r,s));
 
-*	Generate a numeric index to determine whether the 
+*	Generate a numeric index to determine whether the
 *	scaling procedure has stabilized:
 	trace("vst") = card(vst) + sum((j,r),abs(vst(j,r)));
 	trace("vxm") = card(vxm) + sum((i,r),abs(vxm(i,r)));
@@ -229,12 +229,14 @@ $include %gams.scrdir%cinch
 
 *	2. Round taxes and recinch:
 
-rto(g,r)    = round(rto(g,r),2);
-rtfd(i,g,r) = round(rtfd(i,g,r),2);
-rtfi(i,g,r) = round(rtfi(i,g,r),2);
-rtf(f,g,r)  = round(rtf(f,g,r),2);
-rtxs(i,r,s) = round(rtxs(i,r,s),2);
-rtms(i,r,s) = round(rtms(i,r,s),2);
+*	This was rounded to 2 digits in GTAP9inGAMS, but this caused mayhem in some
+*	heavily subsidized cases. (It set rates to -1 for GTAP10.)
+rto(g,r)    = round(rto(g,r),3);
+rtfd(i,g,r) = round(rtfd(i,g,r),3);
+rtfi(i,g,r) = round(rtfi(i,g,r),3);
+rtf(f,g,r)  = round(rtf(f,g,r),3);
+rtxs(i,r,s) = round(rtxs(i,r,s),3);
+rtms(i,r,s) = round(rtms(i,r,s),3);
 
 pvxmd(i,s,r) = (1+rtms(i,s,r)) * (1-rtxs(i,s,r));
 pvtwr(i,s,r) = 1+rtms(i,s,r);
@@ -266,58 +268,58 @@ dropvxmd(i,r,s)$vxmd(i,r,s)     = yes$(not round(vxmd(i,r,s),  nd));
 dropvtwr(j,i,r,s)$vtwr(j,i,r,s) = yes$(not round(vtwr(j,i,r,s),nd));
 
 density("commodity","vtwr",j,"after")  = sum((i,r,s)$vtwr(j,i,r,s),1$(not dropvtwr(j,i,r,s)));
-density("commodity","vtwr",j,"%reduction")$density("commodity","vtwr",j,"before")  = 
+density("commodity","vtwr",j,"%reduction")$density("commodity","vtwr",j,"before")  =
 	100 * (1 - density("commodity","vtwr",j,"after") /
 		   density("commodity","vtwr",j,"before"));
 
 density("commodity","vxmd",i,"after")  = sum((r,s)$vxmd(i,r,s),1$(not dropvxmd(i,r,s)));
-density("commodity","vxmd",i,"%reduction")$density("commodity","vxmd",i,"before")  = 
+density("commodity","vxmd",i,"%reduction")$density("commodity","vxmd",i,"before")  =
 	100 * (1 - density("commodity","vxmd",i,"after") /
 		   density("commodity","vxmd",i,"before"));
 
 density("exporter","vxmd",r,"after")  = sum((i,s)$vxmd(i,r,s),1$(not dropvxmd(i,r,s)));
-density("exporter","vxmd",r,"%reduction")$density("exporter","vxmd",r,"before")  = 
+density("exporter","vxmd",r,"%reduction")$density("exporter","vxmd",r,"before")  =
 	100 * (1 - density("exporter","vxmd",r,"after") /
 		   density("exporter","vxmd",r,"before"));
 
 density("importer","vxmd",s,"after")  = sum((i,r)$vxmd(i,r,s),1$(not dropvxmd(i,r,s)));
-density("importer","vxmd",s,"%reduction")$density("importer","vxmd",s,"before")  = 
+density("importer","vxmd",s,"%reduction")$density("importer","vxmd",s,"before")  =
 	100 * (1 - density("importer","vxmd",s,"after") /
 		   density("importer","vxmd",s,"before"));
 
 density("region","vfm",r,"after")  = sum((f,g)$vfm(f,g,r),1$(not dropvfm(f,g,r)));
-density("region","vfm",r,"%reduction")$density("region","vfm",r,"before")  = 
+density("region","vfm",r,"%reduction")$density("region","vfm",r,"before")  =
 	100 * (1 - density("region","vfm",r,"after") /
 		   density("region","vfm",r,"before"));
 
 density("factor","vfm",f,"after")  = sum((r,g)$vfm(f,g,r),1$(not dropvfm(f,g,r)));
-density("factor","vfm",f,"%reduction")$density("factor","vfm",f,"before")  = 
+density("factor","vfm",f,"%reduction")$density("factor","vfm",f,"before")  =
 	100 * (1 - density("factor","vfm",f,"after") /
 		   density("factor","vfm",f,"before"));
 
 density("region","vdfm",r,"after")  = sum((i,g)$vdfm(i,g,r),1$(not dropvdfm(i,g,r)));
-density("region","vdfm",r,"%reduction")$density("region","vdfm",r,"before")  = 
+density("region","vdfm",r,"%reduction")$density("region","vdfm",r,"before")  =
 	100 * (1 - density("region","vdfm",r,"after") /
 		   density("region","vdfm",r,"before"));
 
 density("region","vifm",r,"after")  = sum((i,g)$vifm(i,g,r),1$(not dropvifm(i,g,r)));
-density("region","vifm",r,"%reduction")$density("region","vifm",r,"before")  = 
+density("region","vifm",r,"%reduction")$density("region","vifm",r,"before")  =
 	100 * (1 - density("region","vifm",r,"after") /
 		   density("region","vifm",r,"before"));
 
 density("commodity","vdfm",i,"after")  = sum((r,g)$vdfm(i,g,r),1$(not dropvdfm(i,g,r)));
-density("commodity","vdfm",i,"%reduction")$density("commodity","vdfm",i,"before")  = 
+density("commodity","vdfm",i,"%reduction")$density("commodity","vdfm",i,"before")  =
 	100 * (1 - density("commodity","vdfm",i,"after") /
 		   density("commodity","vdfm",i,"before"));
 
 density("commodity","vifm",i,"after")  = sum((r,g)$vifm(i,g,r),1$(not dropvifm(i,g,r)));
-density("commodity","vifm",i,"%reduction")$density("commodity","vifm",i,"before")  = 
+density("commodity","vifm",i,"%reduction")$density("commodity","vifm",i,"before")  =
 	100 * (1 - density("commodity","vifm",i,"after") /
 		   density("commodity","vifm",i,"before"));
 
-density("total","total",array,"after") = 
+density("total","total",array,"after") =
 	sum(i,density("commodity",array,i,"after"));
-density("total","total",array,"%reduction")$density("total","total",array,"before") = 
+density("total","total",array,"%reduction")$density("total","total",array,"before") =
 	100 * (1 -	density("total","total",array,"after") /
 			density("total","total",array,"before"));
 
@@ -367,11 +369,11 @@ aues(i,j,r)$(not (thetac(i,r) and thetac(j,r))) = 0;
 parameter	auessum(i,r)	Row sum;
 auessum(i,r) = sum(j$(not sameas(i,j)),thetac(j,r)*aues(i,j,r));
 
-aues(i,j,r)$(aues(i,j,r) and (not sameas(i,j))) = 
+aues(i,j,r)$(aues(i,j,r) and (not sameas(i,j))) =
 	aues(i,j,r) * (-thetac(i,r)*aues(i,i,r))/auessum(i,r);
 
-execute_unload '%datadir%%ds%_%nd%.gdx', 
+execute_unload '%datadir%%ds%_%nd%.gdx',
 		r, f, g, i,  vfm, vdfm, vifm, vxmd, vst, vtwr, vtrev,
-		rto, rtf, rtfd, rtfi, rtxs, rtms, esubt, esubd, esubva, esubm, etrae, 
+		rto, rtf, rtfd, rtfi, rtxs, rtms, esubt, esubd, esubva, esubm, etrae,
 		eta, aues, incpar, subpar,
-		pop, evd, evi, evt, eco2d, eco2i, forecast;
+		pop, evd, evi, evt, eco2d, eco2i;

@@ -4,9 +4,9 @@ $if not set threads $set threads 1
 option threadsAsync=%threads%;
 $if not %threads%==1 option limrow=0, limcol=0, solprint=off;
 
-$if not set yr $set yr 11
+$if not set yr $set yr 14
 $if not set ds $set ds gtapingams
-$include "%system.fp%gtap9data"
+$include "%system.fp%gtap10data"
 
 alias (r,rr), (i,k);
 
@@ -32,7 +32,7 @@ variables
 	OBJ		Objective function (necessary share minimization),
 
 	INCPARV(i,r)	Expansion coefficient,
-	SUBPARV(i,r)	Share coefficient, 
+	SUBPARV(i,r)	Share coefficient,
 
 	EPSILONV(i,r)	Calibrated own-price elasticity of demand,
 	ETAV(i,r)	Calibrated income elasticity of demand;
@@ -40,8 +40,8 @@ variables
 equations	objcde, epsilondef, etadef;
 
 objcde..
-	OBJ =e= sum((i,rb(r))$thetac(i,r), thetac(i,r) * 
-			(sqr(EPSILONV(i,r) - epsilon(i,r))) + 
+	OBJ =e= sum((i,rb(r))$thetac(i,r), thetac(i,r) *
+			(sqr(EPSILONV(i,r) - epsilon(i,r))) +
 			 sqr(ETAV(i,r)     - eta(i,r)) +
 			 sqr(INCPARV(i,r) - incpar(i,r)));
 
@@ -52,10 +52,10 @@ epsilondef(i,rb(r))$thetac(i,r)..
 
 
 etadef(i,rb(r))$thetac(i,r)..
-	ETAV(i,r) =e= 
-		(INCPARV(i,r)*(1-SUBPARV(i,r)) + 
-		 sum(k,thetac(k,r)*INCPARV(k,r)*SUBPARV(k,r))) / 
-			sum(k,thetac(k,r)*INCPARV(k,r)) 
+	ETAV(i,r) =e=
+		(INCPARV(i,r)*(1-SUBPARV(i,r)) +
+		 sum(k,thetac(k,r)*INCPARV(k,r)*SUBPARV(k,r))) /
+			sum(k,thetac(k,r)*INCPARV(k,r))
 		+ (SUBPARV(i,r) - sum(k,thetac(k,r)*SUBPARV(k,r)));
 
 model cdecalib /objcde, epsilondef, etadef/;
@@ -88,9 +88,9 @@ $ifthen.cde_threads %threads%==1
 	cdelog(rr,"modelstat") = cdecalib.modelstat;
 	cdelog(rr,"solvestat") = cdecalib.solvestat;
 	cdelog(rr,"OBJ.L") = OBJ.L;
-	cdelog(rr,"ndev(epsilon)") = 
+	cdelog(rr,"ndev(epsilon)") =
 		sum(i$thetac(i,rr),1$round(EPSILONV.L(i,rr)-epsilon(i,rr),2));
-	cdelog(rr,"ndev(eta)") = 
+	cdelog(rr,"ndev(eta)") =
 		sum(i$thetac(i,rr),1$round(ETAV.L(i,rr)-eta(i,rr),2));
 
 	loop((i,rb(r))$thetac(i,r),
@@ -142,7 +142,7 @@ $else.cde_threads
 	    handle(rr) = 0;
 	    done(rr) = yes;);
 
-	until (card(done)=card(r)) or timeelapsed > 300;  
+	until (card(done)=card(r)) or timeelapsed > 300;
 	abort$(card(done)<>card(r)) 'CDECALIB jobs did not return:', handle;
 $endif.cde_threads
 
@@ -155,19 +155,19 @@ thetac(i,r) = (vdfm(i,"c",r)*(1+rtfd(i,"c",r)) + vifm(i,"c",r)*(1+rtfi(i,"c",r))
 	 sum(j,vdfm(j,"c",r)*(1+rtfd(j,"c",r)) + vifm(j,"c",r)*(1+rtfi(j,"c",r)));
 
 eta(i,r)$(not thetac(i,r)) = 0;
-eta(i,r)$thetac(i,r) = subpar(i,r) - sum(k,thetac(k,r)*subpar(k,r)) + 
-	(incpar(i,r)*(1-subpar(i,r)) + sum(k,thetac(k,r)*incpar(k,r)*subpar(k,r))) / 
+eta(i,r)$thetac(i,r) = subpar(i,r) - sum(k,thetac(k,r)*subpar(k,r)) +
+	(incpar(i,r)*(1-subpar(i,r)) + sum(k,thetac(k,r)*incpar(k,r)*subpar(k,r))) /
 	sum(k,thetac(k,r)*incpar(k,r));
 
 aues(i,j,r)$(not (thetac(i,r) and thetac(j,r))) = 0;
-aues(i,j,r)$(thetac(i,r) and thetac(j,r)) = subpar(i,r) + subpar(j,r) 
+aues(i,j,r)$(thetac(i,r) and thetac(j,r)) = subpar(i,r) + subpar(j,r)
 		- sum(k,thetac(k,r)*subpar(k,r))
 		- (subpar(i,r)/thetac(i,r))$sameas(i,j);
 $endif.respecify
 
-execute_unload '%datadir%%ds%.gdx',      
+execute_unload '%datadir%%ds%.gdx',
 	r, f, g, i, vfm, vdfm, vifm, vxmd, vst, vtwr, vtrev,
-	rto, rtf, rtfd, rtfi, rtxs, rtms, esubt, esubd, esubva, esubm, etrae, 
+	rto, rtf, rtfd, rtfi, rtxs, rtms, esubt, esubd, esubva, esubm, etrae,
 	eta, aues,  incpar, subpar,
 	pop, evd, evi, evt, eco2d, eco2i, forecast;
 

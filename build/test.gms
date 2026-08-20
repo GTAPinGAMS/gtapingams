@@ -2,7 +2,7 @@ $title	Run some consistency tests for aggregate datasets.
 
 *	File separator: "\" for Windows --  "/" for Unix/OSX
 
-$set fs %system.dirsep% 
+$set fs %system.dirsep%
 
 *	NB: Benchmark consistency is a necessary, but not a
 *	sufficient condition that the model is properly specified.
@@ -20,7 +20,7 @@ $call start "bmkchk_mge" gams bmkchk --mdl=mge --ds=%ds% o=listings%fs%bmkchk_mg
 $if not %sys.filesys%==UNIX $call pause
 $call pause
 
-*	Next we perform a check of consistency for the MCP and 
+*	Next we perform a check of consistency for the MCP and
 *	MGE models at a counterfactual point.
 
 $label mcpmge
@@ -30,7 +30,7 @@ $log	valid for the MCP model:
 
 $set ds g20
 $label mcpmge
-$if exist gtap9_p.gdx $call del gtap9_p.gdx
+$if exist gtap10_p.gdx $call del gtap10_p.gdx
 $call gams mcpmge --mdl=mge --ds=%ds% o=listings%fs%mge1_%ds%.lst ps=0
 $call gams mcpmge --mdl=mcp --ds=%ds% o=listings%fs%mcp1_%ds%.lst ps=0
 
@@ -38,7 +38,7 @@ $call gams mcpmge --mdl=mcp --ds=%ds% o=listings%fs%mcp1_%ds%.lst ps=0
 $log	Then solve the MCP model and verify that the solution is
 $log	valid for the MGE model:
 
-$if exist gtap9_p.gdx $call del gtap9_p.gdx
+$if exist gtap10_p.gdx $call del gtap10_p.gdx
 $call gams mcpmge --mdl=mcp --ds=%ds% o=listings%fs%mcp2_%ds%.lst ps=0
 $call gams mcpmge --mdl=mge --ds=%ds% o=listings%fs%mge2_%ds%.lst ps=0
 $call pause

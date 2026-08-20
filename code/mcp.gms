@@ -1,8 +1,8 @@
-$title	 GTAP9inGAMS -- GAMS/MCP Formulation
+$title	 GTAP10inGAMS -- GAMS/MCP Formulation
 
-$if not set yr $set yr 11
+$if not set yr $set yr 14
 $if not set ds $set ds g20_macro
-$include "%system.fp%gtap9data"
+$include "%system.fp%gtap10data"
 
 nonnegative
 variables
@@ -94,7 +94,7 @@ vxmd0(i,r,s) = vxmd(i,r,s);
 vtwr0(j,i,r,s) = vtwr(j,i,r,s);
 
 $setlocal datetime %system.date%%system.time%
-$echo   *       Calibration code for mcp.gms (%datetime%)    >gtap9.gen
+$echo   *       Calibration code for mcp.gms (%datetime%)    >gtap10.gen
 
 *	Save copy of the benchmark trade flows so that we can turn off
 *	demand as needed in the SOE model:
@@ -124,7 +124,7 @@ alias (f,f_);
 
 *	Factor cost index:
 
-$macro C_F(g,r) ( \ 
+$macro C_F(g,r) ( \
         ( (sum(f_$theta_vfm(f_,g,r),  theta_vfm(f_,g,r)*P_PF(f_,g,r)))$Leontief(esubva(g)) + \
           (prod(f_$theta_vfm(f_,g,r), P_PF(f_,g,r)**theta_vfm(f_,g,r)))$CobbDouglas(esubva(g)) + \
           (sum(f_$theta_vfm(f_,g,r),  theta_vfm(f_,g,r)*P_PF(f_,g,r)**(1-esubva(g)))**(1/(1-esubva(g))))$CES(esubva(g)))$cf0(g,r) )
@@ -223,7 +223,7 @@ prf_x(i,r)$vem(i,r)..
 
 $macro PYT(j,r)	(PX(j,r)$rm(r) + (PFX)$rx(r))
 
-prf_yt(j)$vtw(j).. sum(r,vst(j,r)) * 
+prf_yt(j)$vtw(j).. sum(r,vst(j,r)) *
 	prod(r, PYT(j,r)**theta_vst(j,r)) =e= vtw(j)*PT(j);
 
 *	Demand Function:
@@ -235,13 +235,13 @@ $macro DST(j,r)    ((vst(j,r)*YT(j)*PT(j)/PYT(j,r))$vst(j,r))
 
 * $prod:M(i,r)$(rm(r)*vim(i,r))	s:esubm(i)  s.tl:0
 *	o:PM(i,r)	q:vim(i,r)
-*	i:PE(i,s)$(rm(s)*vxm(i,s))	q:vxmd(i,s,r)	p:pvxmd(i,s,r) s.tl: 
+*	i:PE(i,s)$(rm(s)*vxm(i,s))	q:vxmd(i,s,r)	p:pvxmd(i,s,r) s.tl:
 * +		a:RA(s) t:(-rtxs(i,s,r)) a:RA(r) t:(rtms(i,s,r)*(1-rtxs(i,s,r)))
 *	i:P(i,s)$(rm(s)*(not vxm(i,s)))	q:vxmd(i,s,r)	p:pvxmd(i,s,r) s.tl:
 * +		a:RA(s) t:(-rtxs(i,s,r)) a:RA(r) t:(rtms(i,s,r)*(1-rtxs(i,s,r)))
-*	i:PT(j)#(s)			q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl: 
+*	i:PT(j)#(s)			q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl:
 * +		a:RA(r) t:rtms(i,s,r)
-*	i:PE(i,rx)$vem(i,rx)		q:vxmd(i,rx,r)	p:pvxmd(i,rx,r) rx.tl: 
+*	i:PE(i,rx)$vem(i,rx)		q:vxmd(i,rx,r)	p:pvxmd(i,rx,r) rx.tl:
 * +		a:ROW t:(-rtxs(i,rx,r))    a:RA(r) t:(rtms(i,rx,r)*(1-rtxs(i,rx,r)))
 
 *	User cost indices:
@@ -301,7 +301,7 @@ $macro PVFM(sf,r) (sum(j3,theta_evom(sf,j3,r)*PS(sf,j3,r)**(1+etrae(sf)))**(1/(1
 prf_ft(sf,rm(r))$evom(sf,r)..	evom(sf,r)*PF(sf,r) =e= evom(sf,r)*PVFM(sf,r);
 
 *	-----------------------------------------------------------------------------
-* $prod:A(i,r)$(cde(r)*rm(r)*vcm(i,r))  s:esubdm(i)  
+* $prod:A(i,r)$(cde(r)*rm(r)*vcm(i,r))  s:esubdm(i)
 *	o:PA(i,r)	q:vcm(i,r)
 *	i:P(i,r)	q:vdfm(i,"c",r)	p:(1+rtfd0(i,"c",r)) a:RA(r) t:rtfd(i,"c",r)
 *	i:PM(i,r)	q:vifm(i,"c",r)	p:(1+rtfi0(i,"c",r)) a:RA(r) t:rtfi(i,"c",r)
@@ -322,11 +322,11 @@ prf_a(i,r)$(cde(r)*rm(r)*vcm(i,r))..	C_A(i,"c",r) =g= PA(i,r);
 *	e:PF(f,r)$cde(r)	q:evom(f,r)
 *	e:PA(i,r)		q:(-vcm(i,r))	R:D(i,r)
 
-inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..	
+inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..
 	RA(r) =e=	( sum(f$evom(f,r), PF(f,r)*evom(f,r))
 			- sum(i$vcm(i,r), PA(i,r)*vcm(i,r)*D(i,r)) )$cde(r)
 			- (P("sd",r)*vom("sd",r))$les(r)
-			+ vb(r)*((PFX)$rx(rnum)+P("i",rnum)$rm(rnum)) 
+			+ vb(r)*((PFX)$rx(rnum)+P("i",rnum)$rm(rnum))
 			- P("g",r)*vom("g",r)
 			- P("i",r)*vom("i",r)
 			+ sum(f$evom(f,r), PF(f,r)*evom(f,r))
@@ -334,13 +334,13 @@ inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..
 			+ sum((i,g),REV_TFD(i,g,r))
 			+ sum((i,g),REV_TFI(i,g,r))
 			+ sum((f,g),REV_TF(f,g,r))
-			- sum((i,s),REV_TXS(i,r,s)) 
+			- sum((i,s),REV_TXS(i,r,s))
 			+ sum((i,s),REV_TMS(i,s,r));
 
 constraint_D(i,r)$(cde(r)*rm(r)*vcm(i,r))..
-	D(i,r) * sum(j$thetac(j,r), thetac(j,r) * 
-	  U(r)**((1-incpar(j,r))*subpar(j,r)) * 
-		(PA(j,r)/CC(r))**(1-incpar(j,r))) 
+	D(i,r) * sum(j$thetac(j,r), thetac(j,r) *
+	  U(r)**((1-incpar(j,r))*subpar(j,r)) *
+		(PA(j,r)/CC(r))**(1-incpar(j,r)))
 		   =e= U(r)**((1-incpar(i,r))*subpar(i,r)) *
 			(PA(i,r)/CC(r))**(-incpar(i,r));
 
@@ -348,11 +348,11 @@ constraint_U(r)$(cde(r)*rm(r))..
 	sum(f, PF(f,r)*evom(f,r)) =e= RA(r);
 
 constraint_CC(r)$(cde(r)*rm(r))..
-	sum(i, thetac(i,r) * U(r)**((1-incpar(i,r))*subpar(i,r)) * 
+	sum(i, thetac(i,r) * U(r)**((1-incpar(i,r))*subpar(i,r)) *
 		(PA(i,r)/CC(r))**(1-incpar(i,r))) =e= 1;
 
 constraint_W(r)$(cde(r)*rm(r))..
-	sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+	sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) *
 			 (1/W(r))**(1-subpar(i,r))) =e= 1;
 
 *	$demand:ROW$card(rx)
@@ -372,10 +372,10 @@ inc_row$card(rx)..
 alias (g,gg);
 
 mkt_p(g,rm(r))$(rm(r)*(vom(g,r)-vxm(g,r)))..
-	S_D(g,r) =e= (RA(r)/P(g,r))$((sameas(g,"c") and cd(r)) or (sameas(g,"dd") and les(r))) + 
+	S_D(g,r) =e= (RA(r)/P(g,r))$((sameas(g,"c") and cd(r)) or (sameas(g,"dd") and les(r))) +
 		vom(g,r)$(sameas(g,"G") or sameas(g,"I") or sameas(g,"sd")) +
-		sum(i$sameas(i,g),  
-		  sum(gg,DDFM(i,gg,r)) + 
+		sum(i$sameas(i,g),
+		  sum(gg,DDFM(i,gg,r)) +
 			(X(i,r)*vem(i,r)+sum(sm(s),DXMD(i,r,s)) + DST(i,r))$(not vxm(i,r)));
 
 mkt_pe(i,r)$(rm(r)*vxm(i,r) or rx(r)*vem(i,r))..
@@ -394,14 +394,14 @@ mkt_pt(j)$vtw(j)..	YT(j) * vtw(j) =e= sum((i,s,r)$vtwr(j,i,s,r), DTWR(j,i,s,r)$r
 *	-----------------------------------------------------------------------------
 *	Market clearance associated with primary factors:
 
-mkt_pf(f,rm(r))$evom(f,r)..	
+mkt_pf(f,rm(r))$evom(f,r)..
 	evom(f,r) =e= sum(j, DFM(f,j,r))$mf(f) + (evom(f,r)*FT(f,r))$sf(f);
 
 *	-----------------------------------------------------------------------------
 *	Market clearance associated with specific factors:
 
-mkt_ps(sf,j,rm(r))$vfm(sf,j,r)..	
-	vfm(sf,j,r) * (PS(sf,j,r)/PF(sf,r))**etrae(sf) * FT(sf,r) =e= DFM(sf,j,r);	
+mkt_ps(sf,j,rm(r))$vfm(sf,j,r)..
+	vfm(sf,j,r) * (PS(sf,j,r)/PF(sf,r))**etrae(sf) * FT(sf,r) =e= DFM(sf,j,r);
 
 *	-----------------------------------------------------------------------------
 *	Market clearance associated with Armington demand (CDE):
@@ -411,17 +411,17 @@ mkt_pa(i,rm(r))$(cde(r)*vcm(i,r))..  A(i,r)*vcm(i,r) =e= D(i,r)*vcm(i,r);
 *	-----------------------------------------------------------------------------
 *	Market clearance foreign exchange:
 
-mkt_pfx$card(rx)..	
+mkt_pfx$card(rx)..
 	sum(rm(r), vb(r))$rx(rnum) + sum((i,rm)$vem(i,rm), X(i,rm)*pem0(i,rm)*vem(i,rm)) + rowpfx
 		=e= sum(j$vtw(j),sum(rx,vst(j,rx))*YT(j)*PT(j)/PFX) + sum((i,rx)$vem(i,rx),X(i,rx)*vem(i,rx)) + ROW/PFX;
 
-model gtap9 /
+model gtap10 /
 	prf_y.Y,prf_x.X,prf_a.A,prf_m.M,prf_yt.YT,prf_ft.FT,
 	mkt_p.P,mkt_pe.PE,mkt_pa.PA,mkt_pm.PM,mkt_pt.PT,mkt_pf.PF,mkt_ps.PS,mkt_pfx.PFX,
 	constraint_D.D, constraint_U.U, constraint_CC.CC, constraint_W.W,
 	inc_ra.RA, inc_row.ROW/;
 
-model gtap9cns /
+model gtap10cns /
 	prf_y,prf_x,prf_a,prf_m,prf_yt,prf_ft,
 	mkt_p,mkt_pe,mkt_pa,mkt_pm,mkt_pt,mkt_pf,mkt_ps,mkt_pfx,
 	constraint_D, constraint_U, constraint_CC, constraint_W,
@@ -460,7 +460,7 @@ PS.LO(sf,g,r)$vfm(sf,g,r) = 0.001;
 
 *	Calibration algebra:
 
-$onechov >>gtap9.gen
+$onechov >>gtap10.gen
 
 cf0(g,r) = sum(f, vfm(f,g,r)*(1+rtf0(f,g,r)));
 cm0(g,r) = sum(i, vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r)));
@@ -468,9 +468,9 @@ cy0(g,r) = cf0(g,r) + cm0(g,r);
 theta_cf0(g,r)$vom(g,r)  = cf0(g,r) / cy0(g,r);
 
 theta_vfm(f,g,r)$cf0(g,r) = vfm(f,g,r)*(1+rtf0(f,g,r)) / cf0(g,r);
-theta_cm0(i,g,r)$cm0(g,r) = 
+theta_cm0(i,g,r)$cm0(g,r) =
 	(vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r))) / cm0(g,r);
-theta_vdfm(i,g,r)$vdfm(i,g,r) = vdfm(i,g,r)*(1+rtfd0(i,g,r)) / 
+theta_vdfm(i,g,r)$vdfm(i,g,r) = vdfm(i,g,r)*(1+rtfd0(i,g,r)) /
 	(vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r)));
 theta_vxm(g,r)$vom(g,r)  = vxm(g,r)/vom(g,r);
 theta_vst(j,r)$vtw(j) = vst(j,r)/sum(r.local,vst(j,r));
@@ -483,9 +483,9 @@ theta_vtwr(j,i,s,r) = (vtwr(j,i,s,r)*pvtwr(i,s,r) / vxmt(i,s,r))$vxmt(i,s,r);
 theta_vim(i,s,r)$vxmt(i,s,r)	= vxmt(i,s,r)/vim(i,r);
 theta_evom(sf,j,r)$evom(sf,r) = vfm(sf,j,r)/evom(sf,r);
 
-RA.L(r) = vom("c",r)$cd(r) + vom("dd",r)$les(r) + sum(f,evom(f,r))$cde(r); 
+RA.L(r) = vom("c",r)$cd(r) + vom("dd",r)$les(r) + sum(f,evom(f,r))$cde(r);
 
-ROW.L = rowpfx 	- sum(rm,vb(rm))$rm(rnum) - sum((j,i,s,rx), vtwr(j,i,s,rx)) 
+ROW.L = rowpfx 	- sum(rm,vb(rm))$rm(rnum) - sum((j,i,s,rx), vtwr(j,i,s,rx))
 	- sum((i,rx,rm), rtxs(i,rx,rm)*vxmd(i,rx,rm));
 RA.LO(r) = 0; RA.UP(r) = +INF; RA.FX(rnum) = RA.L(rnum);
 $offecho
@@ -494,9 +494,8 @@ $macro pnum(r) (sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))/sum(
 
 parameter	maxdev /1e-3/;
 
-gtap9.workspace = 1024;
-gtap9.iterlim = 0;
-$include gtap9.gen
-solve gtap9 using mcp;
-abort$(gtap9.objval > maxdev) "GTAP9 replication fails.", gtap9.objval;
-
+gtap10.workspace = 1024;
+gtap10.iterlim = 0;
+$include gtap10.gen
+solve gtap10 using mcp;
+abort$(gtap10.objval > maxdev) "GTAP10 replication fails.", gtap10.objval;

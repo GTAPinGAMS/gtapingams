@@ -1,18 +1,18 @@
-$title	Aggregation Program for the GTAP9 Database
+$title	Aggregation Program for the GTAP10 Database
 
 *$if not set source $abort	Need to specify a source on command line: --source=xxx
 *$if not set target $abort	Need to specify a target on command line: --target=yyy
 
 $if not set source $set source gsd_5
 $if not set target $set target gtapingams
-$if not set yr $set yr 11
+$if not set yr $set yr 14
 
 $if not set output $set output %target%
 
-$set fs %system.dirsep% 
+$set fs %system.dirsep%
 
 $set ds %source%
-$include "%system.fp%gtap9data"
+$include "%system.fp%gtap10data"
 $include "..%fs%defines%fs%%target%.map"
 
 alias (ii,jj,kk), (rr,ss);
@@ -45,14 +45,14 @@ parameters
 	eco2i_(ii,*,rr)	CO2 emissions in foreign fuels - Mt CO2",
 
 	rto_(*,rr)	Output (or income) subsidy rates
-	rtf_(ff,*,rr)	Primary factor and commodity rates taxes 
+	rtf_(ff,*,rr)	Primary factor and commodity rates taxes
 	rtfd_(ii,*,rr)	Firms domestic tax rates
 	rtfi_(ii,*,rr)	Firms' import tax rates
 	rtxs_(ii,rr,ss)	Export subsidy rates
 	rtms_(ii,rr,ss)	Import taxes rates,
 
 	esubd_(ii)	Elasticity of substitution (M versus D),
-	esubt_(ii)	Top level elasticity of substitution 
+	esubt_(ii)	Top level elasticity of substitution
 	esubva_(jj)	Elasticity of substitution between factors
 	esubm_(ii)	Intra-import elasticity of substitution,
 	etrae_(ff)	Elasticity of transformation,
@@ -106,7 +106,7 @@ put_utility 'title' /"Aggregating vtcomp.";
 $batinclude "%system.fp%aggr"  vtrev v i r s vtrev_
 
 parameter	vcm(i,r)	Value of consumption expenditure;
-vcm(j,r) = vdfm(j,"c",r)*(1+rtfd0(j,"c",r)) + 
+vcm(j,r) = vdfm(j,"c",r)*(1+rtfd0(j,"c",r)) +
 	   vifm(j,"c",r)*(1+rtfi0(j,"c",r));
 
 parameter	theta(i,r)	Value shares in final demand;
@@ -117,13 +117,13 @@ alias (i,k);
 parameter	vcm_(ii,rr)	Value of consumption expenditure (aggregated);
 vcm_(ii,rr) = sum((mapi(i,ii),mapr(r,rr)), vcm(i,r));
 
-parameter	thetac_(ii,rr)	Aggregate value shares in final demand; 
+parameter	thetac_(ii,rr)	Aggregate value shares in final demand;
 thetac_(ii,rr) = vcm_(ii,rr)/sum(jj,vcm_(jj,rr));
 
-subpar_(ii,rr)$vcm_(ii,rr) = 
+subpar_(ii,rr)$vcm_(ii,rr) =
 	sum((mapi(i,ii),mapr(r,rr)), vcm(i,r)*subpar(i,r))/vcm_(ii,rr);
 
-eta_(ii,rr)$vcm_(ii,rr) = 
+eta_(ii,rr)$vcm_(ii,rr) =
 	sum((mapi(i,ii),mapr(r,rr)), vcm(i,r)*eta(i,r))/vcm_(ii,rr);
 
 *	For the time being, introduce an expenditure average:
@@ -176,10 +176,10 @@ regshare(ii,jj,mapr(r,rr))$(sum(mapi(i,ii),vcm(i,r))*sum(mapj(j,jj),vcm(j,r)))
 
 *	Form the region-weighted price elasticities to impute the new AUES:
 
-aues_(ii,jj,rr)$(thetac_(ii,rr)*thetac_(jj,rr)) = 
+aues_(ii,jj,rr)$(thetac_(ii,rr)*thetac_(jj,rr)) =
 	sum(mapr(r,rr), epsilon_reg(ii,jj,r) * regshare(ii,jj,r,rr)) / thetac_(jj,rr);
 
-*	The calculated AUES matrix may not satisfy the adding-up condition, so we scale the 
+*	The calculated AUES matrix may not satisfy the adding-up condition, so we scale the
 *	off-diagonal:
 
 parameter	offdiagscale	Off diagonal scale factor;
@@ -207,7 +207,7 @@ rtxs_(ii,rr,ss)$ vxmd_(ii,rr,ss) = rtxs_(ii,rr,ss) / vxmd_(ii,rr,ss);
 rtms_(ii,rr,ss)$((1-rtxs_(ii,rr,ss)) * vxmd_(ii,rr,ss) + sum(jj,vtwr_(jj,ii,rr,ss)))
 	 = rtms_(ii,rr,ss)/((1-rtxs_(ii,rr,ss)) * vxmd_(ii,rr,ss) + sum(jj,vtwr_(jj,ii,rr,ss)));
 
-esubt_(ii)$sum((r,mapi(i,ii)), vom(i,r)*esubt(i)) 
+esubt_(ii)$sum((r,mapi(i,ii)), vom(i,r)*esubt(i))
 	= sum((r,mapi(i,ii)), vom(i,r)*esubt(i)) / sum((r,mapi(i,ii)), vom(i,r)*esubt(i));
 
 esubd_(ii)$sum(mapi(i,ii), sum((g,r), vdfm(i,g,r)+vifm(i,g,r)))
@@ -217,11 +217,11 @@ esubva_(jj)$sum(mapi(j,jj), sum((f,r), vfm(f,j,r)))
 	= sum(mapi(j,jj), sum((f,r), vfm(f,j,r)*esubva(j))) /
 	      sum(mapi(j,jj), sum((f,r), vfm(f,j,r)));
 
-esubm_(ii)$sum((r,mapi(i,ii)), vim(i,r)) 
+esubm_(ii)$sum((r,mapi(i,ii)), vim(i,r))
 	= sum((r,mapi(i,ii)), vim(i,r)*esubm(i)) / sum((r,mapi(i,ii)), vim(i,r));
 
 etrae_(ff)$(smax(mapf(f,ff),etrae(f))=inf) = inf;
-etrae_(ff)$((smax(mapf(f,ff),etrae(f))<inf) and sum((jj,rr),vfm_(ff,jj,rr))) = 
+etrae_(ff)$((smax(mapf(f,ff),etrae(f))<inf) and sum((jj,rr),vfm_(ff,jj,rr))) =
 	sum(mapf(f,ff), sum((j,r), vfm(f,j,r)*etrae(f))) / sum(mapf(f,ff), sum((j,r), vfm(f,j,r)));
 
 parameter	beta(ii,r)	Share of commodity ii demand in constituent region r;
@@ -230,17 +230,17 @@ loop((ii,rr)$thetac_(ii,rr),
 
 parameter	epsiloneta	Alternative demand elasticity estimates;
 epsiloneta(ii,rr,"epsilon","aues") = aues_(ii,ii,rr) * thetac_(ii,rr);
-epsiloneta(ii,rr,"epsilon","ces") = 
-	sum(mapr(r,rr), beta(ii,r) * 
-	sum(mapi(i,ii), (1 - 1/thetac_(ii,rr))/(1 - 1/theta(i,r)) * 
+epsiloneta(ii,rr,"epsilon","ces") =
+	sum(mapr(r,rr), beta(ii,r) *
+	sum(mapi(i,ii), (1 - 1/thetac_(ii,rr))/(1 - 1/theta(i,r)) *
 		theta(i,r)/thetac_(ii,rr) * epsilon(i,r)));
 epsiloneta(ii,rr,"epsilon","cde") = -subpar_(ii,rr) * sqr(1-thetac_(ii,rr))
 		- thetac_(ii,rr)*sum(kk,thetac_(kk,rr)*subpar_(kk,rr))
 		+ sqr(thetac_(ii,rr))*subpar_(ii,rr);
 epsiloneta(ii,rr,"eta","eta") = eta_(ii,rr);
-epsiloneta(ii,rr,"eta","cde") = (INCPAR_(ii,rr)*(1-SUBPAR_(ii,rr)) + 
-		 sum(kk,thetac_(kk,rr)*INCPAR_(kk,rr)*SUBPAR_(kk,rr))) / 
-			sum(kk,thetac_(kk,rr)*INCPAR_(kk,rr)) 
+epsiloneta(ii,rr,"eta","cde") = (INCPAR_(ii,rr)*(1-SUBPAR_(ii,rr)) +
+		 sum(kk,thetac_(kk,rr)*INCPAR_(kk,rr)*SUBPAR_(kk,rr))) /
+			sum(kk,thetac_(kk,rr)*INCPAR_(kk,rr))
 		+ (SUBPAR_(ii,rr) - sum(kk,thetac_(kk,rr)*SUBPAR_(kk,rr)));
 option epsiloneta:3:2:2;
 display epsiloneta;
@@ -257,14 +257,13 @@ option demandelast:3:4:1;
 display demandelast;
 
 put_utility 'title' /"Unloading dataset.";
-execute_unload '%datadir%%output%.gdx', 
-	gg=g, rr=r, ff=f, ii=i, 
+execute_unload '%datadir%%output%.gdx',
+	gg=g, rr=r, ff=f, ii=i,
 	vfm_=vfm, vdfm_=vdfm, vifm_=vifm,vxmd_=vxmd, vst_=vst, vtwr_=vtwr, vtrev_=vtrev,
-	rto_=rto, rtf_=rtf, rtfd_=rtfd, rtfi_=rtfi, rtxs_=rtxs, rtms_=rtms, 
-	pop_=pop,evd_=evd, evi_=evi, evt_=evt, eco2d_=eco2d, eco2i_=eco2i, 
-	esubt_=esubt, esubd_=esubd, esubva_=esubva, esubm_=esubm, 
+	rto_=rto, rtf_=rtf, rtfd_=rtfd, rtfi_=rtfi, rtxs_=rtxs, rtms_=rtms,
+	pop_=pop,evd_=evd, evi_=evi, evt_=evt, eco2d_=eco2d, eco2i_=eco2i,
+	esubt_=esubt, esubd_=esubd, esubva_=esubva, esubm_=esubm,
 	etrae_=etrae, eta_=eta, aues_=aues,
 	incpar_=incpar, subpar_=subpar, forecast_=forecast;
 
 put_utility 'title' /"All done with aggregation";
-

@@ -1,11 +1,11 @@
 $title	Generate a Grid over Tariff Rates for a Single Region
 
-*	Point to the GTAP9inGAMS code directory:
+*	Point to the GTAP10inGAMS code directory:
 
-$set fs %system.dirsep% 
+$set fs %system.dirsep%
 $set code ..%fs%code%fs%
 
-$if not set yr $set yr 11
+$if not set yr $set yr 14
 $if not set ds $set ds g20_macro
 $if not set rcalc $set rcalc chn
 $if not set mdl $set mdl gmr
@@ -15,12 +15,12 @@ set	tlvl /0*10/;
 *	Read the model here:
 
 $include %code%mge
-$call 'mv gtap9.gen %gams.scrdir%gtap9.gen'
+$call 'mv gtap10.gen %gams.scrdir%gtap10.gen'
 
 parameter	vc(r)	Value of benchmark expenditure;
 vc(r) = vom("c",r);
 
-*	Preliminary invocation outside a loop permits 
+*	Preliminary invocation outside a loop permits
 *	parameter declarations:
 
 $include %code%loadmdl
@@ -41,13 +41,13 @@ $if %mdl%==soe loadrm("%rcalc%");
 rtms(i,s,rcalc)$(rtms0(i,s,rcalc)>0) = 0;
 rtxs(i,rcalc,s)$(rtxs0(i,rcalc,s)<0) = 0;
 
-gtap9.iterlim = 10000;
-gtap9.savepoint = 1;
-$include %gams.scrdir%gtap9.gen
-solve gtap9 using mcp;
-abort$(gtap9.objval>1e-3) "Benchmark replication fails (%mdl%).";
-execute 'mv gtap9_p.gdx %gams.scrdir%gtap9_p.gdx';
-gtap9.savepoint = 0;
+gtap10.iterlim = 10000;
+gtap10.savepoint = 1;
+$include %gams.scrdir%gtap10.gen
+solve gtap10 using mcp;
+abort$(gtap10.objval>1e-3) "Benchmark replication fails (%mdl%).";
+execute 'mv gtap10_p.gdx %gams.scrdir%gtap10_p.gdx';
+gtap10.savepoint = 0;
 
 alias (r,rr);
 
@@ -62,7 +62,7 @@ averate = 100 *
 		max(rtms0(i,s,rcalc),0)  * ((1-rtxs0(i,s,rcalc))*
 			vxmd(i,s,rcalc)+sum(j,vtwr(j,i,s,rcalc)))) /
 
-   sum((i,s),    vxmd(i,rcalc,s)$max(-rtxs0(i,rcalc,s),0) + 
+   sum((i,s),    vxmd(i,rcalc,s)$max(-rtxs0(i,rcalc,s),0) +
                 ((1-rtxs0(i,s,rcalc))*vxmd(i,s,rcalc)
 			+sum(j,vtwr(j,i,s,rcalc)))$max(rtms0(i,s,rcalc),0));
 display averate;
@@ -73,12 +73,12 @@ parameter	results		Counterfactural simulation summary
 
 set		dsys	Final demand system /cd, les, cde/;
 
-gtap9.solvelink = 2;
+gtap10.solvelink = 2;
 loop(dsys,
 
   loaddsys(dsys,r);
 
-  execute_loadpoint '%gams.scrdir%gtap9_p.gdx';
+  execute_loadpoint '%gams.scrdir%gtap10_p.gdx';
 
   rtms(i,s,r) = rtms0(i,s,r);
   rtxs(i,s,r) = rtxs0(i,s,r);
@@ -91,19 +91,19 @@ loop(dsys,
 	sum((i,s),	max(-rtxs(i,rcalc,s),0) * vxmd(i,rcalc,s) +
 			max(rtms(i,s,rcalc),0)*((1-rtxs(i,s,rcalc))*
 			vxmd(i,s,rcalc)+sum(j,vtwr(j,i,s,rcalc)))) /
-	sum((i,s), vxmd(i,rcalc,s)$max(-rtxs0(i,rcalc,s),0) + 
+	sum((i,s), vxmd(i,rcalc,s)$max(-rtxs0(i,rcalc,s),0) +
 		        ((1-rtxs0(i,s,rcalc))*vxmd(i,s,rcalc)+
 			sum(j,vtwr(j,i,s,rcalc)))$max(rtms0(i,s,rcalc),0));
 
-    gtap9.iterlim = 100000;
-$include %gams.scrdir%gtap9.gen
-    solve gtap9 using mcp;
-    abort$(gtap9.objval>1e-3) "Simulation fails: gtap9.";
+    gtap10.iterlim = 100000;
+$include %gams.scrdir%gtap10.gen
+    solve gtap10 using mcp;
+    abort$(gtap10.objval>1e-3) "Simulation fails: gtap10.";
 
     results(dsys,tlvl,"W") = 100 * (UTIL(rcalc) -1);
     results(dsys,tlvl,"globalW") = 100 * sum(r,vc(r)*(UTIL(r)-1))/vc(rcalc);
-    results(dsys,tlvl,"modelstat") = gtap9.modelstat;
-    results(dsys,tlvl,"solvestat") = gtap9.solvestat;
+    results(dsys,tlvl,"modelstat") = gtap10.modelstat;
+    results(dsys,tlvl,"solvestat") = gtap10.solvestat;
 
 *	Do the GDP calculations:
 

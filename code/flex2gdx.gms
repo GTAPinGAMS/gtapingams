@@ -1,8 +1,8 @@
 $title	Translate GTAP Distribution Data into GDX
 
-$set fs %system.dirsep% 
+$set fs %system.dirsep%
 
-$if not set yr $set yr 11
+$if not set yr $set yr 14
 $if not set datadir $set datadir "..%fs%gamsdata%fs%20%yr%%fs%"
 $if not dexist "%datadir%" $call mkdir "%datadir%"
 
@@ -13,13 +13,14 @@ $if not dexist "%gtapdatadir%" $abort Cannot find GTAP data directory: "%gtapdat
 
 *	GTAP release version:
 
-$set	gtapver flexagg9aY
+$set	gtapver flexagg10AY
 
 $set gtapdatafile %gtapdatadir%%gtapver%%yr%.zip
 $if not exist "%gtapdatafile%" $abort Cannot find GTAP data fie: "%gtapdatafile%".
 
 *	Use the GAMS scratch directory to hold temporary files:
 
+* $set tmpdir %gams.scrdir%..%fs%mytemp%fs%
 $set tmpdir %gams.scrdir%
 
 $if exist %tmpdir%gsdset.gdx $goto load
@@ -84,7 +85,7 @@ set		ttype(vtcomp)	Tariff type /
 			spe	Specific /;
 
 parameters
-	adrev(i,r,s)	"Anti-dumping duty",
+	adrv(i,r,s)	"Anti-dumping duty",
 	dpsm(r)		"Sum of distribution parameters in household demand system",
 	evfa(f,i,r)	"Primary factor purchases, at agents' prices",
 	evoa(f,r)	"Primary factor sales, at agents' prices",
@@ -116,34 +117,34 @@ parameters
 	vkb(r)		"Capital stock",
 	vst(i,r)	"Margin exports",
 
-	mfarev(i,r,s)	"Export tax equivalent of MFA quota premia",
-	purev(i,r,s)	"Export tax equivalent of price undertakings",
-	verrev(i,r,s)	"Export tax equivalent of voluntary export restraints",
-	xtrev(i,r,s)	"Ordinary export tax"
+	mfrv(i,r,s)	"Export tax equivalent of MFA quota premia",
+	purv(i,r,s)	"Export tax equivalent of price undertakings",
+	vrrv(i,r,s)	"Export tax equivalent of voluntary export restraints",
+	xtrv(i,r,s)	"Ordinary export tax"
 
-	tarifrev(i,r,s)	"Ordinary import duty",
-	tfrvsa(ttype,i,r,s) "Import tariff rev by type of tariffs paid",
+	tfrv(i,r,s)	"Ordinary import duty",
+	vtss(ttype,i,r,s) "Import tariff rev by type of tariffs paid",
 
 	vtwr(i,j,r,s)	"Margins by margin commodity",
 	vxmd(i,r,s)	"Non-margin exports, at market prices",
 	vxwd(i,r,s)	"Non-margin exports, at world prices";
 
 $gdxin '%tmpdir%gsddat.gdx'
-$loaddc adrev dpsm evfa evoa fbep ftrv isep mfarev osep pop purev save tarifrev
+$loaddc adrv dpsm evfa evoa fbep ftrv isep mfrv osep pop purv save tfrv
 $loaddc tvom vdep vdfa vdfm vdga vdgm vdpa vdpm vfm vifa vifm viga vigm vims vipa
-$loaddc vipm viws vkb verrev vst tfrvsa vtwr=vtwrini vxmd vxwd xtrev
+$loaddc vipm viws vkb vrrv vst vtss vtwr vxmd vxwd xtrv
 
 
 parameter	vtrev(vtcomp,i,r,s)	All components of import and export taxes;
-vtrev("ad",i,r,s)    = adrev(i,r,s);
-vtrev("mfa",i,r,s)   = mfarev(i,r,s);
-vtrev("pu",i,r,s)   = purev(i,r,s);
-vtrev("ver",i,r,s)   = verrev(i,r,s);
-vtrev("xt",i,r,s)    = xtrev(i,r,s);
-vtrev("tarif",i,r,s) = tarifrev(i,r,s);
-vtrev(ttype,i,r,s)   = tfrvsa(ttype,i,r,s);
+vtrev("ad",i,r,s)    = adrv(i,r,s);
+vtrev("mfa",i,r,s)   = mfrv(i,r,s);
+vtrev("pu",i,r,s)   = purv(i,r,s);
+vtrev("ver",i,r,s)   = vrrv(i,r,s);
+vtrev("xt",i,r,s)    = xtrv(i,r,s);
+vtrev("tarif",i,r,s) = tfrv(i,r,s);
+vtrev(ttype,i,r,s)   = vtss(ttype,i,r,s);
 
-parameter	
+parameter
 	esubd(i)	"Elasticity of domestic-import substitution",
 	esubm(i)	"Elasticity of import source substitution",
 	esubt(i)	"Elasticity of top-level input substitution",
@@ -159,19 +160,47 @@ $loaddc esubd esubm esubt esubva etrae incpar rorflex subpar
 set	fg(*) /set.f, set.g/;
 
 parameter
-	rtf(f,i,r)	"Taxes on primary factors - % ad valorem rate,",
-	rtfd(i,g,r)	"Taxes on firms' domestic purchases - % ad valorem rate,"
-	rtfi(i,g,r)	"Taxes on firms' imports purchases -- % ad valorem rate",
-	rtgd(i,r)	"Government domestic purchases taxes -- % ad valorem rate",
-	rtgi(i,r)	"Government import purchases taxes -- % ad valorem rate",
-	rtms(i,r,s)	"Import taxes, by source -- % ad valorem rate",
-	rto(fg,r)	"Output (or income) subsidies in region r -- % ad valorem rate",
-	rtpd(i,r)	"Private domestic consumption taxes -- % ad valorem rate",
-	rtpi(i,r)	"Private import consumption taxes -- % ad valorem rate",
-	rtxs(i,r,s)	"Export subsidies, by destination -- % ad valorem rate";
+	rtf(f,i,r)	"Taxes on primary factors - ad valorem rate,",
+	rtfd(i,g,r)	"Taxes on firms' domestic purchases - ad valorem rate,"
+	rtfi(i,g,r)	"Taxes on firms' imports purchases -- ad valorem rate",
+*	Not used or unloaded:
+	rtgd(i,r)	"Government domestic purchases taxes -- ad valorem rate",
+	rtgi(i,r)	"Government import purchases taxes -- ad valorem rate",
+*	Overwritten below:
+	rtms(i,r,s)	"Import taxes, by source -- ad valorem rate",
+	rto(fg,r)	"Output (or income) subsidies in region r -- ad valorem rate",
+*	Not used or unloaded:
+	rtpd(i,r)	"Private domestic consumption taxes -- ad valorem rate",
+	rtpi(i,r)	"Private import consumption taxes -- ad valorem rate",
+*	Overwritten below:
+	rtxs(i,r,s)	"Export subsidies, by destination -- ad valorem rate",
+*	Original parameters in %
+	rtf_(f,i,r)	"Taxes on primary factors - % ad valorem rate,",
+	rtfd_(i,g,r)	"Taxes on firms' domestic purchases - % ad valorem rate,"
+	rtfi_(i,g,r)	"Taxes on firms' imports purchases -- % ad valorem rate",
+	rtgd_(i,r)	"Government domestic purchases taxes -- % ad valorem rate",
+	rtgi_(i,r)	"Government import purchases taxes -- % ad valorem rate",
+	rtms_(i,r,s)	"Import taxes, by source -- % ad valorem rate",
+	rto_(fg,r)	"Output (or income) subsidies in region r -- % ad valorem rate",
+	rtpd_(i,r)	"Private domestic consumption taxes -- % ad valorem rate",
+	rtpi_(i,r)	"Private import consumption taxes -- % ad valorem rate",
+	rtxs_(i,r,s)	"Export subsidies, by destination -- % ad valorem rate";
 
 $gdxin "%tmpdir%gsdtax.gdx"
-$loaddc rtf rtfd rtfi rtgd rtgi rtms rto rtpd rtpi rtxs
+$loaddc rtf_=rtf rtfd_=rtfd rtfi_=rtfi rtgd_=rtgd rtgi_=rtgi rtms_=rtms rto_=rto
+$loaddc rtpd_=rtpd rtpi_=rtpi rtxs_=rtxs
+
+*	Not all elements are always overwritten, so make extra sure they're not % anymore
+rtf(f,i,r) = rtf_(f,i,r)/100;
+rtfd(i,g,r) = rtfd_(i,g,r)/100;
+rtfi(i,g,r) = rtfi_(i,g,r)/100;
+rtgd(i,r) = rtgd_(i,r)/100;
+rtgi(i,r) = rtgi_(i,r)/100;
+rtms(i,r,s) = rtms_(i,r,s)/100;
+rto(fg,r) = rto_(fg,r)/100;
+rtpd(i,r) = rtpd_(i,r)/100;
+rtpi(i,r) = rtpi_(i,r)/100;
+rtxs(i,r,s) = rtxs_(i,r,s)/100;
 
 parameter
 	edf(i,j,r)	"Usage of domestic product by firms, Mtoe",
@@ -180,16 +209,16 @@ parameter
 	eif(i,j,r)	"Usage of imports by firms, Mtoe",
 	eig(i,r)	"Government consumption of imports, Mtoe",
 	eip(i,r)	"Private consumption of imports, Mtoe",
-	exidag(i,r,s)	"Volume of trade, Mtoe";
+	exi(i,r,s)	"Volume of trade, Mtoe";
 
 $gdxin "%tmpdir%gsdvole.gdx"
-$loaddc edf edg edp eif eig eip exidag
+$loaddc edf edg edp eif eig eip exi
 
 parameters
 	echop_f		Check on factor markets,
 	echop_m		Check on import markets,
 	echop_b(*,*)	Regional budget balance,
-	echop_t		Check on market for bilateral trade 
+	echop_t		Check on market for bilateral trade
 	echop_tm	Check on market for transport margins
 	echop_y		Check on market for produced goods and services
 	echop_tax	Regional tax revenue
@@ -205,7 +234,7 @@ parameters
 	echop_f		Check on factor markets,
 	echop_m		Check on import markets,
 	echop_b(*,*)	Regional budget balance,
-	echop_t		Check on market for bilateral trade 
+	echop_t		Check on market for bilateral trade
 	echop_tm	Check on market for transport margins
 	echop_y		Check on market for produced goods and services
 	echop_tax	Regional tax revenue
@@ -232,7 +261,7 @@ vom("cgds",r) = voa("cgds",r);
 vpa(i,s) = vdpa(i,s) + vipa(i,s);
 vga(i,s) = vdga(i,s) + viga(i,s);
 
-evt(i,r,s) = exidag(i,r,s);
+evt(i,r,s) = exi(i,r,s);
 
 *	Compute tax rates from gross and net transactions:
 
@@ -269,17 +298,17 @@ rtms(i,r,s)$vims(i,r,s) = vims(i,r,s)/viws(i,r,s)-1;
 
 echop_m(i,s,"supply") = sum(r, vims(i,r,s));
 echop_m(i,s,"demand") = sum(j, vifm(i,j,s)) + vifm(i,"c",s) + vifm(i,"g",s);
-echop_m(i,s,"diff") = round(sum(r, vims(i,r,s)) - 
+echop_m(i,s,"diff") = round(sum(r, vims(i,r,s)) -
 	(sum(j, vifm(i,j,s)) + vifm(i,"c",s) + vifm(i,"g",s)),3);
 echop_m(i,s,u)$(not round(echop_m(i,s,"diff"),3)) = 0;
 option echop_m:3:2:1;
 display echop_m;
 
-*	Generate an echo print of regional 
+*	Generate an echo print of regional
 *	budget constraints:
 
 echop_b(r,"voa") = sum(fg(f), voa(fg,r));
-echop_b(r,"taxrev") = 
+echop_b(r,"taxrev") =
 	+ sum(fg(f), vom(fg,r)-voa(fg,r))
         + sum(fg(i), rto(fg,r)*vom(fg,r))
         + sum(j, sum(f, rtf(f,j,r)*vfm(f,j,r)))
@@ -294,14 +323,14 @@ echop_b(r,"expend") = sum(i, (1+rtfd(i,"c",r))*vdfm(i,"c",r) +
 					(1+rtfi(i,"c",r))*vifm(i,"c",r) +
 					(1+rtfd(i,"g",r))*vdfm(i,"g",r) +
 					(1+rtfi(i,"g",r))*vifm(i,"g",r) );
-echop_b(r,"diff") = round(echop_b(r,"voa") + echop_b(r,"taxrev") 
+echop_b(r,"diff") = round(echop_b(r,"voa") + echop_b(r,"taxrev")
 	- echop_b(r,"saving") - echop_b(r,"expend"),3);
 echop_b(r,u)$(not round(echop_b(r,"diff"),3)) = 0;
 
 option echop_b:3:1:1;
 display echop_b;
 
-*	Generate an echo print of regional 
+*	Generate an echo print of regional
 *	tax revenue:
 
 echop_tax(r,"1") = sum(fg(f), vom(fg,r)-voa(fg,r)) + sum(fg(i), rto(fg,r)*vom(fg,r));
@@ -321,7 +350,7 @@ display echop_tax;
 *	Generate an echo print of bilateral trade:
 
 echop_t(i,r,s,"demand") = vims(i,r,s);
-echop_t(i,r,s,"supply") = (1+rtms(i,r,s))*((1+rtxs(i,r,s))*vxmd(i,r,s) + 
+echop_t(i,r,s,"supply") = (1+rtms(i,r,s))*((1+rtxs(i,r,s))*vxmd(i,r,s) +
 						sum(j, vtwr(j,i,r,s)));
 echop_t(i,r,s,"diff") = echop_t(i,r,s,"demand") - echop_t(i,r,s,"supply");
 
@@ -330,7 +359,7 @@ echop_t(i,r,s,u)$(not round(echop_t(i,r,s,"diff"),3)) = 0;
 option echop_t:3:3:1;
 display echop_t;
 
-*	Generate an echo print of the market for 
+*	Generate an echo print of the market for
 *	transportation margins:
 
 echop_tm(j,"supply") = sum(r, vst(j,r));
@@ -343,9 +372,9 @@ display echop_tm;
 *	Generate an echo print of the market for output:
 
 echop_y(fg(i),r,"supply")$(not sameas(i,"cgds")) = vom(fg,r);
-echop_y(i,r,"demand")$(not sameas(i,"cgds")) = 
+echop_y(i,r,"demand")$(not sameas(i,"cgds")) =
 	sum(s, vxmd(i,r,s)) + vst(i,r) + sum(g,vdfm(i,g,r));
-echop_y(i,r,"diff")$(not sameas(i,"cgds")) = 
+echop_y(i,r,"diff")$(not sameas(i,"cgds")) =
 	round(echop_y(i,r,"supply") - echop_y(i,r,"demand"),3);
 echop_y(i,r,u)$(not echop_y(i,r,"diff")) = 0;
 option echop_y:3:2:1;
@@ -384,7 +413,7 @@ set	ghg		Greenhouse gases /
 	ch4		Methane (Gg - 11%)
 	fg		Florinated gases (Gg - 3%) /
 
-$call 'har2gdx "%gtapdatadir%consld_2011.har"   "%tmpdir%consld_2011.gdx"'
+$call 'har2gdx "%gtapdatadir%consld_2014.har"   "%tmpdir%consld_2014.gdx"'
 
 set	nco2		Non-co2 /n2o,ch4,fg/;
 $offtext
@@ -394,7 +423,7 @@ parameter
 	evi(i,*,r)	Imported energy use (mtoe),
 	eco2d(i,*,r)	CO2 emissions in domestic fuels - Mt CO2",
 	eco2i(i,*,r)	CO2 emissions in foreign fuels - Mt CO2";
-	
+
 evd(i,j,r) = edf(i,j,r);
 evd(i,"c",r) = edp(i,r);
 evd(i,"g",r) = edg(i,r);
@@ -465,43 +494,33 @@ incpar(i,r)$(not thetac(i,r)) = 0;
 *	Income elasticity of demand:
 
 eta(i,r)$(not thetac(i,r)) = 0;
-eta(i,r)$thetac(i,r) = subpar(i,r) - sum(k,thetac(k,r)*subpar(k,r)) + 
-	(incpar(i,r)*(1-subpar(i,r)) + sum(k,thetac(k,r)*incpar(k,r)*subpar(k,r))) / 
+eta(i,r)$thetac(i,r) = subpar(i,r) - sum(k,thetac(k,r)*subpar(k,r)) +
+	(incpar(i,r)*(1-subpar(i,r)) + sum(k,thetac(k,r)*incpar(k,r)*subpar(k,r))) /
 	sum(k,thetac(k,r)*incpar(k,r));
 
 *	The Allen-Uzawa matrix of own- and cross-price elasticities
 *	of substitution:
 
 aues(i,j,r)$(not (thetac(i,r) and thetac(j,r))) = 0;
-aues(i,j,r)$(thetac(i,r) and thetac(j,r)) = subpar(i,r) + subpar(j,r) 
+aues(i,j,r)$(thetac(i,r) and thetac(j,r)) = subpar(i,r) + subpar(j,r)
 		- sum(k,thetac(k,r)*subpar(k,r))
 		- (subpar(i,r)/thetac(i,r))$sameas(i,j);
 
 
-*	Include GDP and population forecast data:
-
-set		fyr	Years in the GDP and population forecast /2010*2030/
-		fitem	Forecast items /gdp, pop/;
-
-parameter	forecast(r,fitem,fyr)	GTAP regional population and GDP forecast;
-
-$gdxin ..%fs%usdaforecast%fs%forecast.gdx
-$loaddc forecast
-
 execute_unload '%datadir%gsd.gdx',
-		r, f, gg=g, ii=i,  vfm, 
+		r, f, gg=g, ii=i,  vfm,
 		vdfm, vifm, vxmd, vst, vtwr, vtrev,
-		rto, rtf, rtfd, rtfi, rtxs, rtms, 
+		rto, rtf, rtfd, rtfi, rtxs, rtms,
 		esubd, esubva, esubm, etrae, esubt,
 		eta, aues, incpar, subpar, vtrev,
-		pop, evd, evi, evt, eco2d, eco2i, forecast;
+		pop, evd, evi, evt, eco2d, eco2i;
 
 $exit
 
 $label missinggdxfiles
-$log	
+$log
 $log	*** Error *** Missing GDX files.
-$log	
+$log
 $log	Reading from FLEXAGG archive %gtapdatafile%.
 $log
 $log	One of the following translations seems to have failed
@@ -511,5 +530,5 @@ $log		har2gdx "%gams.scrdir%gsdpar.har" "%gams.scrdir%gsdpar.gdx"
 $log		har2gdx "%gams.scrdir%gsdvole.har" "%gams.scrdir%gsdvole.gdx"
 $log		har2gdx "%gams.scrdir%gsdemiss.har" "%gams.scrdir%gsdemiss.gdx"
 $log		har2gdx "%gams.scrdir%gsdtax.har" "%gams.scrdir%gsdtax.gdx"
-$log	
+$log
 $exit

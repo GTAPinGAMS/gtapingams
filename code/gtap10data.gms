@@ -1,7 +1,7 @@
-$title	GAMS Code to Read a GTAP 9 Dataset
+$title	GAMS Code to Read a GTAP 10 Dataset
 
 $if not set ds $set ds gsd
-$if not set yr $set yr 11
+$if not set yr $set yr 14
 $if not set datadir $set datadir "%system.fp%\..\gamsdata\20%yr%\"
 
 $setglobal ds %ds%
@@ -15,7 +15,7 @@ $load g
 
 set	i(g)	Goods
 	f(*)	Factors;
-$load f i 
+$load f i
 $if not defined r	set r(*)	Regions;
 $if not defined r	$load r
 
@@ -61,13 +61,13 @@ $loaddc pop evd evi evt eco2d eco2i
 
 parameter
 	rto(g,r)	Output (or income) subsidy rates
-	rtf(f,g,r)	Primary factor and commodity rates taxes 
+	rtf(f,g,r)	Primary factor and commodity rates taxes
 	rtfd(i,g,r)	Firms domestic tax rates
 	rtfi(i,g,r)	Firms' import tax rates
 	rtxs(i,r,s)	Export subsidy rates
 	rtms(i,r,s)	Import taxes rates;
 
-$load rto rtf rtfd rtfi rtxs rtms 
+$load rto rtf rtfd rtfi rtxs rtms
 
 *	Apply common rates on LES demand:
 
@@ -82,7 +82,7 @@ parameter
 	esubm(i)	Intra-import elasticity of substitution,
 	etrae(f)	Elasticity of transformation;
 
-$load esubt esubd esubva esubm etrae 
+$load esubt esubd esubva esubm etrae
 
 *	Avoid numerical problems with high elasticities:
 
@@ -103,15 +103,9 @@ thetac(i,r) = (vdfm(i,"c",r)*(1+rtfd(i,"c",r)) + vifm(i,"c",r)*(1+rtfi(i,"c",r))
 
 epsilon(i,r) = aues(i,i,r)*thetac(i,r);
 
-set	fyr	Years in the GDP and population forecast /2010*2030/,
-	fitem	Forecast items /gdp, pop/;
-
-parameter	forecast(r,fitem,fyr)	GTAP regional population and GDP forecast;
-
-$loaddc forecast
 $gdxin
 
-*	Declare some intermediate arrays which are required to 
+*	Declare some intermediate arrays which are required to
 *	evaluate tax rates:
 
 parameter	vdm(g,r)	Aggregate demand for domestic output,
@@ -127,7 +121,7 @@ parameter
 $if %nnsd%==yes betales(r) = max(betales(r), smin(i,1/eta(i,r)));
 
 betales(r) = sum(i, thetac(i,r)*epsilon(i,r))/sum(i,eta(i,r)*thetac(i,r)*(eta(i,r)*thetac(i,r)-1));
-sigmales(r) = (1/betales(r)) * sum(i, thetac(i,r)*epsilon(i,r))/sum(i,eta(i,r)*thetac(i,r)*(eta(i,r)*thetac(i,r)-1)); 
+sigmales(r) = (1/betales(r)) * sum(i, thetac(i,r)*epsilon(i,r))/sum(i,eta(i,r)*thetac(i,r)*(eta(i,r)*thetac(i,r)-1));
 
 *	Elasticity of substitution in final demand:
 
@@ -136,12 +130,12 @@ parameter	esub(g,r)	Top-level elasticity;
 esub(i,r) = esubt(i);
 
 esub("c",r) = 1;
-esub("sd",r) = 0; 
-esub("dd",r) = sigmales(r); 
+esub("sd",r) = 0;
+esub("dd",r) = sigmales(r);
 
 *	CDE demand system:
 
-vcm(i,r) = vdfm(i,"c",r)*(1+rtfd(i,"c",r)) + vifm(i,"c",r)*(1+rtfi(i,"c",r)); 
+vcm(i,r) = vdfm(i,"c",r)*(1+rtfd(i,"c",r)) + vifm(i,"c",r)*(1+rtfi(i,"c",r));
 
 vom("c",r) = sum(i, vdfm(i,"c",r)*(1+rtfd(i,"c",r)) + vifm(i,"c",r)*(1+rtfi(i,"c",r)))/(1-rto("c",r));
 vom("g",r) = sum(i, vdfm(i,"g",r)*(1+rtfd(i,"g",r)) + vifm(i,"g",r)*(1+rtfi(i,"g",r)))/(1-rto("g",r));
@@ -151,7 +145,7 @@ vdm(i,r) = sum(g,vdfm(i,g,r));
 vom(i,r) = vdm(i,r) + sum(s, vxmd(i,r,s)) + vst(i,r);
 
 parameter
-	rtf0(f,g,r)	Primary factor and commodity rates taxes 
+	rtf0(f,g,r)	Primary factor and commodity rates taxes
 	rtfd0(i,g,r)	Firms domestic tax rates
 	rtfi0(i,g,r)	Firms' import tax rates
 	rtxs0(i,r,s)	Export subsidy rates
@@ -174,7 +168,7 @@ parameter	pvxmd(i,s,r)	Import price (power of benchmark tariff)
 pvxmd(i,s,r) = (1+rtms0(i,s,r)) * (1-rtxs0(i,s,r));
 pvtwr(i,s,r) = 1+rtms0(i,s,r);
 
-parameter	
+parameter
 	vtw(j)		Aggregate international transportation services,
 	vpm(r)		Aggregate private demand,
 	vgm(r)		Aggregate public demand,
@@ -193,7 +187,7 @@ vdm("g",r) = vom("g",r);
 vdm("i",r) = vom("i",r);
 vim(i,r) =  sum(g, vifm(i,g,r));
 evom(f,r) = sum(g, vfm(f,g,r));
-vb(r) = vom("c",r) + vom("g",r) + vom("i",r) 
+vb(r) = vom("c",r) + vom("g",r) + vom("i",r)
 	- sum(f, evom(f,r))
 	- sum(g,  vom(g,r)*rto(g,r))
 	- sum(g,  sum(i, vdfm(i,g,r)*rtfd(i,g,r) + vifm(i,g,r)*rtfi(i,g,r)))
@@ -203,7 +197,7 @@ vb(r) = vom("c",r) + vom("g",r) + vom("i",r)
 vbchksum = sum(r, vb(r));
 display vbchksum;
 
-*	Determine which factors are sector-specific 
+*	Determine which factors are sector-specific
 
 mf(f) = yes$(1/etrae(f)=0);
 sf(f) = yes$(1/etrae(f)>0);
@@ -217,7 +211,7 @@ display mprofit;
 
 yprofit(g,r) = 0;
 yprofit(g,r)$vom(g,r) = round(vom(g,r)*(1-rto(g,r))
-	- sum(i, vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r))) 
+	- sum(i, vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r)))
         - sum(f, vfm(f,g,r)*(1+rtf0(f,g,r))),3);
 display yprofit;
 
@@ -261,9 +255,9 @@ set	rm(r)		Regions include in the model
 *	Default model is GMR, not SOE:
 
 rm(r) = yes;
-rx(r) = (not rm(r)); 
-rowpfx = sum(rx(r), vom("c",r)); 
-vem(i,rm(r)) = sum(rx(s),vxmd(i,r,s)); 
+rx(r) = (not rm(r));
+rowpfx = sum(rx(r), vom("c",r));
+vem(i,rm(r)) = sum(rx(s),vxmd(i,r,s));
 rtxs_row(i,r) = (sum(rx(s),vxmd(i,r,s)*rtxs(i,r,s))/vem(i,r))$vem(i,r);
 pem0(i,r) = (1-rtxs_row(i,r));
 

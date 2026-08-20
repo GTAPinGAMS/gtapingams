@@ -1,8 +1,8 @@
-$title	GAMS Command Script to Build GTAP 9
+$title	GAMS Command Script to Build GTAP 10
 
 *	File separator: "\" for Windows --  "/" for Unix/OSX
 
-$set fs %system.dirsep% 
+$set fs %system.dirsep%
 
 *	Point to the code directory:
 
@@ -14,7 +14,7 @@ $set nd 5
 
 *	Set the base year:
 
-$set yr 11
+$set yr 14
 
 *	Translate the .HAR file into a GTAPinGAMS GDX file:
 
@@ -61,4 +61,3 @@ $set ds g20
 $call gams %code%gtapaggr --yr=%yr% --source=gtapingams  --target=%ds%  o=listings%fs%%ds%_%yr%.lst
 $call gams %code%cdecalib --yr=%yr% --ds=%ds%  o=listings%fs%cde_%ds%_%yr%.lst
 $log	Finished with g20
-

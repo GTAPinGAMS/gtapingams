@@ -52,9 +52,9 @@ $eolcom !
 	( 	! China including Hong Kong
 		CHN	!	China
 		HKG	!	Hong Kong
-	).CHN	
+	).CHN
 
-	(	! Other oil exporters 
+	(	! Other oil exporters
 		VEN		!	Venezuela
 		BHR		!	Bahrain
 		KWT		!	Kuwait
@@ -115,6 +115,7 @@ $eolcom !
 	BGD.LIC		!	Bangladesh
 	XSA.LIC		!	Rest of South Asia
 	KGZ.LIC		!	Kyrgyzstan
+	TJK.LIC		!	Tajikistan
 	XWF.LIC		!	Rest of Western Africa
 	XCF.LIC		!	Rest of Central Africa
 	XAC.LIC		!	Rest of South Central Africa
@@ -174,7 +175,7 @@ $eolcom !
 	SEN.MIC		!	Senegal
 	MUS.MIC		!	Mauritius
 	BWA.MIC		!	Botswana
-	XSC.MIC		!	Rest of South African Customs Union 
+	XSC.MIC		!	Rest of South African Customs Union
 
 	OMN.MIC		!	Oman
 	ISR.MIC		!	Israel
@@ -188,7 +189,7 @@ $eolcom !
 	GHA.MIC		!	Ghana
 	NAM.MIC		!	Namibia
 
-	XTW.MIC		!	Rest of the World 
+	XTW.MIC		!	Rest of the World
 
 	BRN.MIC		!	Brunei Darussalam
 	DOM.MIC		!	Dominican Republic
@@ -223,7 +224,7 @@ set ii /
 	COL	"Coal",
 	CRU	"Crude Oil",
 	GAS	"Gas",
-	OMN	"Minerals nec",
+	OXT	"Other extraction",
 	CMT	"Bovine meat products",
 	OMT	"Meat products nec",
 	VOL	"Vegetable oils and fats",
@@ -238,7 +239,9 @@ set ii /
 	LUM	"Wood products",
 	PPP	"Paper products, publishing",
 	OIL	"Petroleum, coal products",
-	CRP	"Chemical, rubber, plastic products",
+	CHM 	"Chemical products",
+	BPH  	"Basic pharmaceutical products",
+	RPP  	"Rubber and plastic products",
 	NMM	"Mineral products nec",
 	I_S	"Ferrous metals",
 	NFM	"Metals nec",
@@ -246,6 +249,7 @@ set ii /
 	MVH	"Motor vehicles and parts",
 	OTN	"Transport equipment nec",
 	EEQ	"Electronic equipment",
+	CEO	"Computer, electronic and optical products",
 	OME	"Machinery and equipment nec",
 	OMF	"Manufactures nec",
 	ELE	"Electricity",
@@ -253,15 +257,20 @@ set ii /
 	WTR	"Water",
 	CNS	"Construction",
 	TRD	"Trade",
+        AFS	"Accommodation, Food and service activities",
 	OTP	"Transport nec",
 	WTP	"Water transport",
 	ATP	"Air transport",
+	WHS	"Warehousing and support activities",
 	CMN	"Communication",
 	OFI	"Financial services nec",
-	ISR	"Insurance",
+	INS	"Insurance",
+	RSA	"Real estate activities",
 	OBS	"Business services nec",
 	ROS	"Recreational and other services",
-	OSG	"Public Administration, Defense, Education, Health",
+	OSG	"Public Administration and defense",
+	EDU	"Education",
+	HHT	"Human health and social work activities",
 	DWE	"Dwellings" /;
 
 SET mapi(i,ii)  Mapping for sectors and goods;
@@ -270,13 +279,13 @@ abort$(card(i)<>card(ii))	"Error: card(i)<>card(ii).";
 abort$(card(mapi)<>card(i))	"Error: card(mapi)<>card(i).";
 
 set ff  /
-	mgr	Officials and Mangers legislators (ISCO-88 Major Groups 1-2), 
+	mgr	Officials and Mangers legislators (ISCO-88 Major Groups 1-2),
 	tec	Technicians technicians and associate professionals
 	clk	Clerks
 	srv	Service and market sales workers
 	lab	Agricultural and unskilled workers (Major Groups 6-9)
-	lnd     Land,    
-	cap     Capital,    
+	lnd     Land,
+	cap     Capital,
 	res     Natural resources /;
 
 set mapf(*,*); mapf(f,ff)$sameas(f,ff) = yes;

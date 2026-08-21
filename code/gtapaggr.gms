@@ -4,7 +4,7 @@ $title	Aggregation Program for the GTAP10 Database
 *$if not set target $abort	Need to specify a target on command line: --target=yyy
 
 $if not set source $set source gsd_5
-$if not set target $set target gtapingams
+$if not set target $set target gtap10ingams
 $if not set yr $set yr 14
 
 $if not set output $set output %target%
@@ -60,9 +60,7 @@ parameters
 	aues_(ii,jj,rr)	Allen-Uzawa elasticity substitution matrix,
 
 	subpar_(ii,rr)	Substitution parameter in CDE expenditure function,
-	incpar_(ii,rr)	Income parameter,
-
-	forecast_(rr,fitem,fyr)	GTAP regional population and GDP forecast;
+	incpar_(ii,rr)	Income parameter;
 
 alias (i,j), (ii,jj);;
 alias (r,s), (rr,ss);
@@ -156,9 +154,6 @@ put_utility 'title' /"Aggregating rtms.";
 $batinclude "%system.fp%aggr" rtms i r s rtms_
 put_utility 'title' /"Aggregating vcm.";
 $batinclude "%system.fp%aggr"  vcm i r vcm_
-
-put_utility 'title' /"Aggregating forecast.";
-forecast_(rr,fitem,fyr) = sum(mapr(r,rr), forecast(r,fitem,fyr));
 
 *	First aggregate commodities at the disaggregate regional level:
 
@@ -264,6 +259,6 @@ execute_unload '%datadir%%output%.gdx',
 	pop_=pop,evd_=evd, evi_=evi, evt_=evt, eco2d_=eco2d, eco2i_=eco2i,
 	esubt_=esubt, esubd_=esubd, esubva_=esubva, esubm_=esubm,
 	etrae_=etrae, eta_=eta, aues_=aues,
-	incpar_=incpar, subpar_=subpar, forecast_=forecast;
+	incpar_=incpar, subpar_=subpar;
 
 put_utility 'title' /"All done with aggregation";

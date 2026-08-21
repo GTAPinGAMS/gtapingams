@@ -169,7 +169,7 @@ execute_unload '%datadir%%ds%.gdx',
 	r, f, g, i, vfm, vdfm, vifm, vxmd, vst, vtwr, vtrev,
 	rto, rtf, rtfd, rtfi, rtxs, rtms, esubt, esubd, esubva, esubm, etrae,
 	eta, aues,  incpar, subpar,
-	pop, evd, evi, evt, eco2d, eco2i, forecast;
+	pop, evd, evi, evt, eco2d, eco2i;
 
 option cdelog:0:1:1;
 option cdecompare:3:2:2;

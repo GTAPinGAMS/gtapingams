@@ -54,9 +54,9 @@ $eolcom !
 	( 	! China including Hong Kong
 		CHN	!	China
 		HKG	!	Hong Kong
-	).CHN	
+	).CHN
 
-	(	! Other oil exporters 
+	(	! Other oil exporters
 		VEN		!	Venezuela
 		BHR		!	Bahrain
 		KWT		!	Kuwait
@@ -117,6 +117,7 @@ $eolcom !
 	BGD.LIC		!	Bangladesh
 	XSA.LIC		!	Rest of South Asia
 	KGZ.LIC		!	Kyrgyzstan
+	TJK.LIC		!	Tajikistan
 	XWF.LIC		!	Rest of Western Africa
 	XCF.LIC		!	Rest of Central Africa
 	XAC.LIC		!	Rest of South Central Africa
@@ -176,7 +177,7 @@ $eolcom !
 	SEN.MIC		!	Senegal
 	MUS.MIC		!	Mauritius
 	BWA.MIC		!	Botswana
-	XSC.MIC		!	Rest of South African Customs Union 
+	XSC.MIC		!	Rest of South African Customs Union
 
 	OMN.MIC		!	Oman
 	ISR.MIC		!	Israel
@@ -190,7 +191,7 @@ $eolcom !
 	GHA.MIC		!	Ghana
 	NAM.MIC		!	Namibia
 
-	XTW.MIC		!	Rest of the World 
+	XTW.MIC		!	Rest of the World
 
 	BRN.MIC		!	Brunei Darussalam
 	DOM.MIC		!	Dominican Republic
@@ -208,18 +209,18 @@ $eolcom !
 
 set ff /
 	lab	Labor,
-	lnd     Land,    
-	cap     Capital,    
+	lnd     Land,
+	cap     Capital,
 	res     Natural resources /;
 
 set mapf(f,ff) /
-	mgr.lab	Officials and Mangers legislators (ISCO-88 Major Groups 1-2), 
+	mgr.lab	Officials and Mangers legislators (ISCO-88 Major Groups 1-2),
 	tec.lab	Technicians technicians and associate professionals
 	clk.lab	Clerks
 	srv.lab	Service and market sales workers
 	lab.lab	Agricultural and unskilled workers (Major Groups 6-9)
-	lnd.lnd Land,    
-	cap.cap Capital,    
+	lnd.lnd Land,
+	cap.cap Capital,
 	res.res Natural resources /;
 
 abort$(card(mapf)<>card(f))	"Error: card(mapf)<>card(f).";
@@ -263,7 +264,7 @@ set mapi(i,ii)  Mapping for sectors and goods /
 
 *	Manufactures:
 
-	OMN.mfr		Minerals nec
+	OXT.mfr		Minerals nec
 	CMT.mfr		Bo meat products
 	OMT.mfr		Meat products
 	VOL.mfr		Vegetable oils and fats
@@ -277,7 +278,9 @@ set mapi(i,ii)  Mapping for sectors and goods /
 	LEA.mfr		Leather products
 	LUM.mfr		Wood products
 	PPP.mfr		Paper products - publishing
-	CRP.mfr		Chemical - rubber - plastic products
+	CHM.mfr		Chemical products
+	BPH.mfr		Basic pharmaceutical products
+	RPP.mfr		Rubber and plastic products
 	NMM.mfr		Mineral products nec
 	I_S.mfr		Ferrous metals
 	NFM.mfr		Metals nec
@@ -285,6 +288,7 @@ set mapi(i,ii)  Mapping for sectors and goods /
 	MVH.mfr		Motor vehicles and parts
 	OTN.mfr		Transport equipment nec
 	EEQ.mfr		Electronic equipment
+	CEO.mfr		Electronic equipment
 	OME.mfr		Machinery and equipment nec
 	OMF.mfr		Manufactures nec
 
@@ -292,15 +296,20 @@ set mapi(i,ii)  Mapping for sectors and goods /
 *	Services:
 
 	CNS.ser		Construction
-	OSG.ser		Public admin - and defence - education - health
+	OSG.ser		Public Administration and defense
+	EDU.ser		Education
+	HHT.ser		Human health and social work activities
 	WTR.ser		Water
 	TRD.ser		Trade
+        AFS.ser		Accommodation Food and service activities
 	OTP.ser		Transport nec
 	WTP.ser		Water transport
 	ATP.ser		Air transport
+	WHS.ser		Warehousing and support activities
 	CMN.ser		Communication
 	OFI.ser		Financial services nec
-	ISR.ser		Insurance
+	INS.ser		Insurance
+	RSA.ser		Real estate activities
 	OBS.ser		Business services nec
 	ROS.ser		Recreational and other services
 	DWE.ser		Ownership of dwellings
@@ -308,4 +317,3 @@ set mapi(i,ii)  Mapping for sectors and goods /
 
 
 abort$(card(mapi)<>card(i))	"Error: card(mapi)<>card(i).";
-

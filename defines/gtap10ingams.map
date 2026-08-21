@@ -4,23 +4,23 @@ $TITLE   GTAP Mapping which Relabels to Match GAMS Identifiers
 *	labor categories.
 
 set ff  /
-	mgr	Officials and Mangers legislators (ISCO-88 Major Groups 1-2), 
+	mgr	Officials and Mangers legislators (ISCO-88 Major Groups 1-2),
 	tec	Technicians technicians and associate professionals
 	clk	Clerks
 	srv	Service and market sales workers
 	lab	Agricultural and unskilled workers (Major Groups 6-9)
-	cap     Capital,    
-	lnd     Land,    
+	cap     Capital,
+	lnd     Land,
 	res     Natural resources /;
 
 set mapf(*,*) /
-	off_mgr_pros.mgr	Officials and Mangers legislators (ISCO-88 Major Groups 1-2), 
+	off_mgr_pros.mgr	Officials and Mangers legislators (ISCO-88 Major Groups 1-2),
 	tech_aspros.tec		Technicians technicians and associate professionals
 	clerks.clk		Clerks
 	service_shop.srv	Service and market sales workers,
 	ag_othlowsk.lab		Agricultural and unskilled workers (Major Groups 6-9)
-	Land.lnd		Land,    
-	Capital.cap		Capital,    
+	Land.lnd		Land,
+	Capital.cap		Capital,
 	NatlRes.res		Natural resources/;
 
 set	ii	Commodites in the aggregation /
@@ -41,7 +41,7 @@ set	ii	Commodites in the aggregation /
 	COL	"Coal",
 	CRU	"Crude Oil",
 	GAS	"Gas",
-	OMN	"Minerals nec",
+	OXT	"Other extraction",
 	CMT	"Bovine meat products",
 	OMT	"Meat products nec",
 	VOL	"Vegetable oils and fats",
@@ -56,14 +56,17 @@ set	ii	Commodites in the aggregation /
 	LUM	"Wood products",
 	PPP	"Paper products, publishing",
 	OIL	"Petroleum, coal products",
-	CRP	"Chemical, rubber, plastic products",
+	CHM     "Chemical products",
+	BPH	"Basic pharmaceutical products",
+	RPP	"Rubber and plastic products",
 	NMM	"Mineral products nec",
 	I_S	"Ferrous metals",
 	NFM	"Metals nec",
 	FMP	"Metal products",
+	CEO	"Computer, electronic and optical products",
+	EEQ	"Electrical equipment",
 	MVH	"Motor vehicles and parts",
 	OTN	"Transport equipment nec",
-	EEQ	"Electronic equipment",
 	OME	"Machinery and equipment nec",
 	OMF	"Manufactures nec",
 	ELE	"Electricity",
@@ -71,15 +74,20 @@ set	ii	Commodites in the aggregation /
 	WTR	"Water",
 	CNS	"Construction",
 	TRD	"Trade",
+        AFS	"Accommodation, Food and service activities",
 	OTP	"Transport nec",
 	WTP	"Water transport",
 	ATP	"Air transport",
+	WHS	"Warehousing and support activities",
 	CMN	"Communication",
 	OFI	"Financial services nec",
-	ISR	"Insurance",
+	INS 	"Insurance",
+	RSA	"Real estate activities",
 	OBS	"Business services nec",
 	ROS	"Recreational and other services",
-	OSG	"Public Administration, Defense, Education, Health",
+	OSG	"Public Administration and defense",
+	EDU	"Education",
+	HHT	"Human health and social work activities",
 	DWE	"Dwellings" /;
 
 $eolcom !
@@ -91,7 +99,7 @@ $eolcom !
 *	COA.COL	! "Coal",
 *	P_C.OIL	! "Petroleum, coal products",
 *	ELY.ELE	! "Electricity",
-*	ELE.EEQ	! "Electronic equipment",
+*	ELE.CEO	! "Computer, electronic and optical products",
 
 SET mapi(i,ii) Mapping of Sectors and Goods (from-to) /
 	PDR.PDR	! "Paddy rice",
@@ -111,7 +119,7 @@ SET mapi(i,ii) Mapping of Sectors and Goods (from-to) /
 	COA.COL	! "Coal",
 	OIL.CRU	! "Crude Oil",
 	GAS.GAS	! "Gas",
-	OMN.OMN	! "Minerals nec",
+	OXT.OXT	! "Other extraction",
 	CMT.CMT	! "Bovine meat products",
 	OMT.OMT	! "Meat products nec",
 	VOL.VOL	! "Vegetable oils and fats",
@@ -126,14 +134,17 @@ SET mapi(i,ii) Mapping of Sectors and Goods (from-to) /
 	LUM.LUM	! "Wood products",
 	PPP.PPP	! "Paper products, publishing",
 	P_C.OIL	! "Petroleum, coal products",
-	CRP.CRP	! "Chemical, rubber, plastic products",
+	CHM.CHM ! "Chemical products",
+	BPH.BPH ! "Basic pharmaceutical products",
+	RPP.RPP ! "Rubber and plastic products",
 	NMM.NMM	! "Mineral products nec",
 	I_S.I_S	! "Ferrous metals",
 	NFM.NFM	! "Metals nec",
 	FMP.FMP	! "Metal products",
 	MVH.MVH	! "Motor vehicles and parts",
 	OTN.OTN	! "Transport equipment nec",
-	ELE.EEQ	! "Electronic equipment",
+	ELE.CEO ! "Computer, electronic and optical products",
+	EEQ.EEQ	! "Electronic equipment",
 	OME.OME	! "Machinery and equipment nec",
 	OMF.OMF	! "Manufactures nec",
 	ELY.ELE	! "Electricity",
@@ -141,15 +152,20 @@ SET mapi(i,ii) Mapping of Sectors and Goods (from-to) /
 	WTR.WTR	! "Water",
 	CNS.CNS	! "Construction",
 	TRD.TRD	! "Trade",
+        AFS.AFS ! "Accommodation, Food and service activities",
 	OTP.OTP	! "Transport nec",
 	WTP.WTP	! "Water transport",
 	ATP.ATP	! "Air transport",
+	WHS.WHS ! "Warehousing and support activities",
 	CMN.CMN	! "Communication",
 	OFI.OFI	! "Financial services nec",
-	ISR.ISR	! "Insurance",
+	INS.INS	! "Insurance",
+	RSA.RSA ! "Real estate activities",
 	OBS.OBS	! "Business services nec",
 	ROS.ROS	! "Recreational and other services",
-	OSG.OSG	! "Public Administration, Defense, Education, Health",
+	OSG.OSG ! "Public Administration and defense",
+	EDU.EDU ! "Education",
+	HHT.HHT ! "Human health and social work activities",
 	DWE.DWE	! "Dwellings"
 /;
 
@@ -267,7 +283,7 @@ XCB	Caribbean
 *	 Saint Lucia
 *	 Saint Vincent and the Grenadines
 *	 Turks and Caicos Islands
-*	 Virgin Islands British 
+*	 Virgin Islands British
 *	 Virgin Islands U.S.
 AUT	Austria
 BEL	Belgium
@@ -321,7 +337,7 @@ XER	Rest of Europe
 *	 Bosnia and Herzegovina
 *	 Faroe Islands
 *	 Gibraltar
-*	 Guernsey 
+*	 Guernsey
 *	 Holy See (Vatican City State)
 *	 Isle of Man
 *	 Jersey
@@ -332,8 +348,8 @@ XER	Rest of Europe
 *	 Serbia
 KAZ	Kazakhstan
 KGZ	Kyrgyzstan
+TJK	Tajikistan
 XSU	Rest of Former Soviet Union
-*	 Tajikistan
 *	 Turkmenistan
 *	 Uzbekistan
 ARM	Armenia
@@ -352,7 +368,7 @@ ARE	United Arab Emirates
 XWS	Rest of Western Asia
 *	 Iraq
 *	 Lebanon
-*	 Palestinian Territory Occupied 
+*	 Palestinian Territory Occupied
 *	 Syrian Arab Republic
 *	 Yemen
 EGY	Egypt

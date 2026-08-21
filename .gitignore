@@ -13,8 +13,14 @@
 /build/listings/g20_iea_14.lst
 /build/listings/g20_macro_14.lst
 /build/listings/gtapingams_14.lst
+/build/listings/cde_gtap10ingams_14.lst
+/build/listings/gtap10ingams_14.lst
 /gamsdata/2014/gsd.gdx
 /gamsdata/2014/gsd_5.gdx
+/gamsdata/2014/g20_iea.gdx
+/gamsdata/2014/g20_macro.gdx
+/gamsdata/2014/g20.gdx
+/gamsdata/2014/gtap10ingams.gdx
 /gtapdata/GDX10a_14.zip
 /gtapdata/flexagg10AY14.zip
 /build/225*

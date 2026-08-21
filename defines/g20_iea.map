@@ -54,9 +54,9 @@ $eolcom !
 	( 	! China including Hong Kong
 		CHN	!	China
 		HKG	!	Hong Kong
-	).CHN	
+	).CHN
 
-	(	! Other oil exporters 
+	(	! Other oil exporters
 		VEN		!	Venezuela
 		BHR		!	Bahrain
 		KWT		!	Kuwait
@@ -117,6 +117,7 @@ $eolcom !
 	BGD.LIC		!	Bangladesh
 	XSA.LIC		!	Rest of South Asia
 	KGZ.LIC		!	Kyrgyzstan
+	TJK.LIC		!	Tajikistan
 	XWF.LIC		!	Rest of Western Africa
 	XCF.LIC		!	Rest of Central Africa
 	XAC.LIC		!	Rest of South Central Africa
@@ -176,7 +177,7 @@ $eolcom !
 	SEN.MIC		!	Senegal
 	MUS.MIC		!	Mauritius
 	BWA.MIC		!	Botswana
-	XSC.MIC		!	Rest of South African Customs Union 
+	XSC.MIC		!	Rest of South African Customs Union
 
 	OMN.MIC		!	Oman
 	ISR.MIC		!	Israel
@@ -190,7 +191,7 @@ $eolcom !
 	GHA.MIC		!	Ghana
 	NAM.MIC		!	Namibia
 
-	XTW.MIC		!	Rest of the World 
+	XTW.MIC		!	Rest of the World
 
 	BRN.MIC		!	Brunei Darussalam
 	DOM.MIC		!	Dominican Republic
@@ -209,18 +210,18 @@ $eolcom !
 set ff /
 	skl	Skilled workers,
 	lab	Agricultural and unskilled workers,
-	lnd     Land,    
-	cap     Capital,    
+	lnd     Land,
+	cap     Capital,
 	res     Natural resources /;
 
 set mapf(f,ff) /
-	mgr.skl	Officials and Mangers legislators (ISCO-88 Major Groups 1-2), 
+	mgr.skl	Officials and Mangers legislators (ISCO-88 Major Groups 1-2),
 	tec.skl	Technicians technicians and associate professionals
 	clk.skl	Clerks
 	srv.lab	Service and market sales workers
 	lab.lab	Agricultural and unskilled workers (Major Groups 6-9)
-	lnd.lnd Land,    
-	cap.cap Capital,    
+	lnd.lnd Land,
+	cap.cap Capital,
 	res.res Natural resources /;
 
 abort$(card(mapf)<>card(f))	"Error: card(mapf)<>card(f).";
@@ -233,7 +234,7 @@ set	ii	Goods in the IEA classification /
 	COL	Coal transformation,
 	CRU	Crude oil,
 	I_S	Iron and steel industry (IRONSTL),
-	CRP	Chemical industry (CHEMICAL),
+	CHM	Chemical industry (CHEMICAL)
 	NFM	Non-ferrous metals (NONFERR),
 	NMM	Non-metallic minerals (NONMET),
 	TEQ	Transport equipment (TRANSEQ),
@@ -253,29 +254,28 @@ set	ii	Goods in the IEA classification /
 
 SET mapi(i,ii)  Mapping for sectors and goods /
 	(gas,gdt).GAS			Natural gas works
-	ele.ELE				Electricity and heat 
+	ele.ELE				Electricity and heat
 	oil.OIL				Refined oil products
 	col.COL				Coal transformation
 	cru.CRU				Crude oil
 
 	i_s.I_S				Iron and steel industry (IRONSTL)
-	crp.CRP				Chemical industry (CHEMICAL)
+	(CHM, BPH, RPP).CHM		Chemical industry (CHEMICAL)
 	nfm.NFM				Non-ferrous metals (NONFERR)
 	nmm.NMM				Non-metallic minerals (NONMET)
 	(mvh,OTN).TEQ			Transport equipment (TRANSEQ)
 	ome.OME				Other machinery (MACHINE)
-	omn.OMN				Mining (MINING)
+	oxt.OMN				Mining (MINING)
 	(omt,vol,mil,pcr,sgr,ofd,b_t,cmt).FPR	Food products (FOODPRO)
 	ppp.PPP				Paper-pulp-print (PAPERPRO)
 	lum.LUM				Wood and wood-products (WOODPRO)
 	cns.CNS				Construction (CONSTRUC)
 	(tex,WAP,LEA).TWL		Textiles-wearing apparel-leather (TEXTILES)
-	(eeq,FMP,OMF).OMF		Other manufacturing (INONSPEC)
+	(eeq,ceo,FMP,OMF).OMF		Other manufacturing (INONSPEC)
 	(pdr,wht,gro,v_f,osd,c_b,pfb,ocr,ctl,oap,rmk,wol,frs,fsh).AGR	Agricultural products
 	(otp,wtp).TRN			Transport
 	atp.ATP				Air transport
-	(trd,ofi,isr,obs,wtr,cmn,ros,osg).SER		Commercial and public services
+	(whs,trd,afs,ofi,ins,rsa,obs,wtr,cmn,ros,osg,edu,hht).SER		Commercial and public services
 	dwe.DWE				Dwellings/;
 
 abort$(card(mapi)<>card(i))	"Error: card(mapi)<>card(i).";
-

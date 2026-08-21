@@ -49,6 +49,19 @@ def task_build():
     return {
         'file_dep': [
             'build/build.gms',
+            'code/flex2gdx.gms',
+            'code/filter.gms',
+            'code/gtapaggr.gms',
+            'code/cdecalib.gms',
+            'code/gtap10data.gms',
+            'code/aggr.gms',
+            'code/checkset.gms',
+            'code/chktarget.gms',
+            'code/domain.gms',
+            'defines/g20_iea.map',
+            'defines/g20_macro.map',
+            'defines/g20.map',
+            'defines/gtap10ingams.map',
             'gtapdata/flexagg10AY14.zip',
         ],
         'targets': [
@@ -74,4 +87,35 @@ def task_build():
         ],
         'verbosity': 2,
         'actions': ["cd build & gams build & cd .."],
+    }
+
+
+def task_test():
+    """Run the testing script build/test.gms"""
+    return {
+        'file_dep': [
+            'build/test.gms',
+            'build/cdechk.gms',
+            'build/mcpmge.gms',
+            'code/mge.gms',
+            'code/mcp.gms',
+            'code/loadmdl.gms',
+            'code/gdpcalc.gms',
+            'gamsdata/2014/g20_macro.gdx',
+            'gamsdata/2014/g20.gdx',
+        ],
+        'targets': [
+            'build/GTAP10.GEN',
+            'build/GTAP10_p.gdx',
+            'build/listings/bmkchk_mcp.lst',
+            'build/listings/bmkchk_mge.lst',
+            'build/listings/cdechk.lst',
+            'build/listings/mcp1_g20.lst',
+            'build/listings/mcp2_g20.lst',
+            'build/listings/mge1_g20.lst',
+            'build/listings/mge2_g20.lst',
+            'build/test.lst',
+        ],
+        'verbosity': 2,
+        'actions': ["cd build & gams test & cd .."],
     }

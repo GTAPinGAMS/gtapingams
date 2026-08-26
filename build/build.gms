@@ -16,20 +16,7 @@ $set nd 5
 
 $set yr 14
 
-*	Translate the .HAR file into a GTAPinGAMS GDX file:
-
-$call gams %code%flex2gdx --yr=%yr% o=listings%fs%flex2gdx_%yr%.lst
-$log	Finished with flex2gdx.
-$if not %sys.filesys%==UNIX $call pause
-
-*	Filter small values:
-
-$call gams %code%filter --yr=%yr% --nd=%nd%  o=listings%fs%filter%yr%_%nd%.lst
-$log	Finished with filter.
-$if not %sys.filesys%==UNIX $call pause
-
-*	Aggregate (relabel) and calibrate CDE demand for the GTAPinGAMS dataset:
-
+$label gtap10ingams
 $set ds gtap10ingams
 $call gams %code%gtapaggr --yr=%yr% --source=gsd_%nd%  --target=%ds% o=listings%fs%%ds%_%yr%.lst
 $call gams %code%cdecalib --yr=%yr% --ds=%ds%  o=listings%fs%cde_%ds%_%yr%.lst

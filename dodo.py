@@ -44,13 +44,62 @@ def task_instruct():
     }
 
 
+# Set some command flags as strings
+code = "../code/"
+nd = "5"
+yr = "14"
+
+
+def task_readgdx():
+    """Run code/readgdx.gms"""
+    return {
+        'file_dep': [
+            'code/readgdx.gms',
+            f'gtapdata/GDX10a_{yr}.zip',
+        ],
+        'targets': [
+            f'build/listings/readgdx_{yr}.lst',
+            f'gamsdata/20{yr}/gsd.gdx',
+        ],
+        'verbosity': 2,
+        'actions': [
+            "cd build" +
+            f" & gams {code}readgdx --yr={yr} o=listings/readgdx_{yr}.lst" +
+            " & cd .."
+        ],
+    }
+
+
+def task_filter():
+    """Run code/filter.gms"""
+    return {
+        'file_dep': [
+            'code/filter.gms',
+            'code/gtap10data.gms',
+            f'gamsdata/20{yr}/gsd.gdx',
+        ],
+        'targets': [
+            f'build/listings/filter{yr}_{nd}.lst',
+            f'gamsdata/20{yr}/gsd_{nd}.gdx',
+        ],
+        'verbosity': 2,
+        'actions': [
+            "cd build" +
+            f" & gams {code}filter --yr={yr} --nd={nd}" +
+            f"   o=listings/filter{yr}_{nd}.lst" +
+            " & cd .."
+        ],
+    }
+
+
 def task_build():
-    """Run the build script build/build.gms"""
+    """Run the build script build/build.gms,
+    which creates different aggregations of gsd.gdx
+    """
+
     return {
         'file_dep': [
             'build/build.gms',
-            'code/flex2gdx.gms',
-            'code/filter.gms',
             'code/gtapaggr.gms',
             'code/cdecalib.gms',
             'code/gtap10data.gms',
@@ -62,7 +111,7 @@ def task_build():
             'defines/g20_macro.map',
             'defines/g20.map',
             'defines/gtap10ingams.map',
-            'gtapdata/flexagg10AY14.zip',
+            'gamsdata/2014/gsd_5.gdx',
         ],
         'targets': [
             'build/build.lst',
@@ -70,16 +119,12 @@ def task_build():
             'build/listings/cde_g20_iea_14.lst',
             'build/listings/cde_g20_macro_14.lst',
             'build/listings/cde_gtapingams_14.lst',
-            'build/listings/filter14_5.lst',
-            'build/listings/flex2gdx_14.lst',
             'build/listings/g20_14.lst',
             'build/listings/g20_iea_14.lst',
             'build/listings/g20_macro_14.lst',
             'build/listings/gtapingams_14.lst',
             'build/listings/cde_gtap10ingams_14.lst',
             'build/listings/gtap10ingams_14.lst',
-            'gamsdata/2014/gsd.gdx',
-            'gamsdata/2014/gsd_5.gdx',
             'gamsdata/2014/gtap10ingams.gdx',
             'gamsdata/2014/g20.gdx',
             'gamsdata/2014/g20_iea.gdx',

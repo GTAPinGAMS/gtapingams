@@ -2,7 +2,7 @@ $title	Translate GTAP Distribution Data into GDX
 
 $set fs %system.dirsep%
 
-$if not set yr $set yr 14
+$if not set yr $set yr 17
 $if not set datadir $set datadir "..%fs%gamsdata%fs%20%yr%%fs%"
 $if not dexist "%datadir%" $call mkdir "%datadir%"
 
@@ -11,25 +11,34 @@ $if not dexist "%datadir%" $call mkdir "%datadir%"
 $if not set gtapdatadir $set gtapdatadir "..%fs%gtapdata%fs%"
 $if not dexist "%gtapdatadir%" $abort Cannot find GTAP data directory: "%gtapdatadir%".
 
-*	GTAP release version:
-
-$set	gtapver GDX10a
-
-$set gtapdatafile %gtapdatadir%%gtapver%_%yr%.zip
-$if not exist "%gtapdatafile%" $abort Cannot find GTAP data fie: "%gtapdatafile%".
-
 *	Use the GAMS scratch directory to hold temporary files:
 
-$set tmpdir mytemp_gdx%fs%
+$set tmpdir mytemp_gtap11%fs%
 * $set tmpdir %gams.scrdir%
+
+*	GTAP release version:
+
+$set	gtapver GDX11c
+
+$set gtapallyearfile %gtapdatadir%%gtapver%AY16994.zip
+$set gtapdatafile %gtapver%%yr%.zip
+$set gtapdatafilepath %tmpdir%%gtapdatafile%
+
+*@ Do some unzipping
+
+$if not exist "%gtapallyearfile%" $abort Cannot find GTAP data fie: "%gtapallyearfile%".
+
+$call gmsunzip -j "%gtapallyearfile%" %gtapdatafile% -d %tmpdir%
+
+$if not exist "%gtapdatafilepath%" $abort Cannot find GTAP file: "%gtapdatafilepath%".
 
 $if exist %tmpdir%gsdfdat.gdx $goto load
 
-$call gmsunzip -j "%gtapdatafile%" GSDFDAT.GDX -d %tmpdir%
-$call gmsunzip -j "%gtapdatafile%" GSDFPAR.GDX -d %tmpdir%
-$call gmsunzip -j "%gtapdatafile%" GSDFVOLE.GDX -d %tmpdir%
-$call gmsunzip -j "%gtapdatafile%" GSDFEMISS.GDX -d %tmpdir%
-$call gmsunzip -j "%gtapdatafile%" GSDFNCO2.GDX -d %tmpdir%
+$call gmsunzip -j "%gtapdatafilepath%" GSDFDAT.GDX -d %tmpdir%
+$call gmsunzip -j "%gtapdatafilepath%" GSDFPAR.GDX -d %tmpdir%
+$call gmsunzip -j "%gtapdatafilepath%" GSDFVOLE.GDX -d %tmpdir%
+$call gmsunzip -j "%gtapdatafilepath%" GSDFEMISS.GDX -d %tmpdir%
+$call gmsunzip -j "%gtapdatafilepath%" GSDFNCO2.GDX -d %tmpdir%
 
 $if not exist %tmpdir%gsdfdat.gdx	$goto missinggdxfiles
 $if not exist %tmpdir%gsdfpar.gdx	$goto missinggdxfiles

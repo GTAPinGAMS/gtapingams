@@ -1,7 +1,7 @@
 $title	Generate a Sparse Version of the GTAP Dataset
 
 $if not set ds $set ds gsd
-$include "%system.fp%gtap10data"
+$include "%system.fp%gtap11data"
 
 *	Produce a report of the resulting change in nonzeros and dataset density:
 
@@ -230,7 +230,7 @@ $include %gams.scrdir%cinch
 *	2. Round taxes and recinch:
 
 *	This was rounded to 2 digits in GTAP9inGAMS, but this caused mayhem in some
-*	heavily subsidized cases. (It set rates to -1 for GTAP10.)
+*	heavily subsidized cases. (It set rates to -1 for GTAP11.)
 rto(g,r)    = round(rto(g,r),3);
 rtfd(i,g,r) = round(rtfd(i,g,r),3);
 rtfi(i,g,r) = round(rtfi(i,g,r),3);

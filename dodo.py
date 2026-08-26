@@ -4,12 +4,18 @@ from doit.tools import run_once
 # import shutil
 
 
+# Set some command flags as strings
+code = "../code/"
+nd = "5"
+yr = "17"
+
+
 def task_folders():
     """Make sure all necessary directories exist."""
     def make_some_dirs():
         dirlist = ['gtapdata',
                    'build/listings',
-                   'gamsdata/2014',
+                   f'gamsdata/20{yr}',
                    ]
         for dir in dirlist:
             if not os.access(dir, os.F_OK):
@@ -26,11 +32,9 @@ def task_folders():
 def task_instruct():
     """Provide some instructions for getting GTAP source data."""
     def ask_for_GTAP():
-        input("Please provide file gtapdata/flexagg10AY14.zip.\n" +
-              "It can be obtained from\n" +
-              "https://www.gtap.agecon.purdue.edu/databases/archives.asp\n" +
-              "(Look for FlexAgg (year 2014) for GTAP10a\n" +
-              "under the heading 'Satellite Data and Utilities').\n"
+        input("Please provide file gtapdata/GDX11cAY16994.zip.\n" +
+              "It can be purchased from\n" +
+              "https://www.gtap.agecon.purdue.edu\n" +
               "Then press ENTER.\n\n"
               )
 
@@ -38,16 +42,10 @@ def task_instruct():
     # Task is only uptodate if BOTH targets are there AND it has been ran once
     return {
         'actions': [ask_for_GTAP, ],
-        'targets': ['gtapdata/flexagg10AY14.zip'],
+        'targets': ['gtapdata/GDX11cAY16994.zip'],
         'verbosity': 2,
         'uptodate': [run_once],
     }
-
-
-# Set some command flags as strings
-code = "../code/"
-nd = "5"
-yr = "14"
 
 
 def task_readgdx():
@@ -55,7 +53,7 @@ def task_readgdx():
     return {
         'file_dep': [
             'code/readgdx.gms',
-            f'gtapdata/GDX10a_{yr}.zip',
+            'gtapdata/GDX11cAY16994.zip',
         ],
         'targets': [
             f'build/listings/readgdx_{yr}.lst',
@@ -75,7 +73,7 @@ def task_filter():
     return {
         'file_dep': [
             'code/filter.gms',
-            'code/gtap10data.gms',
+            'code/gtap11data.gms',
             f'gamsdata/20{yr}/gsd.gdx',
         ],
         'targets': [
@@ -102,7 +100,7 @@ def task_build():
             'build/build.gms',
             'code/gtapaggr.gms',
             'code/cdecalib.gms',
-            'code/gtap10data.gms',
+            'code/gtap11data.gms',
             'code/aggr.gms',
             'code/checkset.gms',
             'code/chktarget.gms',
@@ -110,25 +108,25 @@ def task_build():
             'defines/g20_iea.map',
             'defines/g20_macro.map',
             'defines/g20.map',
-            'defines/gtap10ingams.map',
-            'gamsdata/2014/gsd_5.gdx',
+            'defines/gtap11ingams.map',
+            f'gamsdata/20{yr}/gsd_{nd}.gdx',
         ],
         'targets': [
             'build/build.lst',
-            'build/listings/cde_g20_14.lst',
-            'build/listings/cde_g20_iea_14.lst',
-            'build/listings/cde_g20_macro_14.lst',
-            'build/listings/cde_gtapingams_14.lst',
-            'build/listings/g20_14.lst',
-            'build/listings/g20_iea_14.lst',
-            'build/listings/g20_macro_14.lst',
-            'build/listings/gtapingams_14.lst',
-            'build/listings/cde_gtap10ingams_14.lst',
-            'build/listings/gtap10ingams_14.lst',
-            'gamsdata/2014/gtap10ingams.gdx',
-            'gamsdata/2014/g20.gdx',
-            'gamsdata/2014/g20_iea.gdx',
-            'gamsdata/2014/g20_macro.gdx',
+            f'build/listings/cde_g20_{yr}.lst',
+            f'build/listings/cde_g20_iea_{yr}.lst',
+            f'build/listings/cde_g20_macro_{yr}.lst',
+            f'build/listings/cde_gtapingams_{yr}.lst',
+            f'build/listings/g20_{yr}.lst',
+            f'build/listings/g20_iea_{yr}.lst',
+            f'build/listings/g20_macro_{yr}.lst',
+            f'build/listings/gtapingams_{yr}.lst',
+            f'build/listings/cde_gtap11ingams_{yr}.lst',
+            f'build/listings/gtap11ingams_{yr}.lst',
+            f'gamsdata/20{yr}/gtap11ingams.gdx',
+            f'gamsdata/20{yr}/g20.gdx',
+            f'gamsdata/20{yr}/g20_iea.gdx',
+            f'gamsdata/20{yr}/g20_macro.gdx',
         ],
         'verbosity': 2,
         'actions': ["cd build & gams build & cd .."],
@@ -146,12 +144,12 @@ def task_test():
             'code/mcp.gms',
             'code/loadmdl.gms',
             'code/gdpcalc.gms',
-            'gamsdata/2014/g20_macro.gdx',
-            'gamsdata/2014/g20.gdx',
+            f'gamsdata/20{yr}/g20_macro.gdx',
+            f'gamsdata/20{yr}/g20.gdx',
         ],
         'targets': [
-            'build/GTAP10.GEN',
-            'build/GTAP10_p.gdx',
+            'build/GTAP11.GEN',
+            'build/GTAP11_p.gdx',
             'build/listings/bmkchk_mcp.lst',
             'build/listings/bmkchk_mge.lst',
             'build/listings/cdechk.lst',

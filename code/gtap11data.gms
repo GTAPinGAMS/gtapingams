@@ -1,7 +1,7 @@
 $title	GAMS Code to Read a GTAP 10 Dataset
 
 $if not set ds $set ds gsd
-$if not set yr $set yr 14
+$if not set yr $set yr 17
 $if not set datadir $set datadir "%system.fp%\..\gamsdata\20%yr%\"
 
 $setglobal ds %ds%

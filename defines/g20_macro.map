@@ -98,6 +98,7 @@ $eolcom !
 		CHE	!	Switzerland
 		NOR	!	Norway
 		XEF	!	Rest of EFTA
+		SRB	!	Serbia
 		XER	!	Rest of Europe
 *			- Andorra
 *			- Bosnia and Herzegovina
@@ -106,12 +107,31 @@ $eolcom !
 *			- Macedonia, the former Yugoslav Republic of
 *			- Monaco
 *			- San Marino
-*			- Serbia and Montenegro
+*			- Montenegro
 *			- Iceland
 *			- Liechtenstein
 
 	).REU,
 
+	AFG.LIC		!	Afghanistan
+	HTI.LIC		!	Haiti
+	UZB.LIC		!	Uzbekistan
+	IRQ.LIC		!	Iraq
+	LBN.LIC		!	Lebanon
+	PSE.LIC		!	Palestine
+	SYR.LIC		!	Syrian Arab Republic
+	DZA.LIC		!	Algeria
+	MLI.LIC		!	Mali
+	NER.LIC		!	Niger
+	CAF.LIC		!	Central African Republic
+	TCD.LIC		!	Chad
+	COG.LIC		!	Congo
+	COD.LIC		!	Democratic Republic of the Congo
+	GNQ.LIC		!	Equatorial Guinea
+	GAB.LIC		!	Gabon
+	COM.LIC		!	Comoros
+	SDN.LIC		!	Sudan
+	SWZ.LIC		!	Eswatini
 	KHM.LIC		!	Cambodia
 	LAO.LIC		!	Lao People's Democratic Republic
 	BGD.LIC		!	Bangladesh
@@ -119,7 +139,6 @@ $eolcom !
 	KGZ.LIC		!	Kyrgyzstan
 	TJK.LIC		!	Tajikistan
 	XWF.LIC		!	Rest of Western Africa
-	XCF.LIC		!	Rest of Central Africa
 	XAC.LIC		!	Rest of South Central Africa
 	KEN.LIC		!	Kenya
 	ETH.LIC		!	Ethiopia

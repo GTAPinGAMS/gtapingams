@@ -37,3 +37,8 @@
 /__pycache__/*
 .doit*
 /build/listings/readgdx_14.lst
+/build/listings/readgdx_17.lst
+/build/listings/filter17_5.lst
+/gamsdata/2017/gsd.gdx
+/gamsdata/2017/gsd_5.gdx
+/gtapdata/GDX11cAY16994.zip

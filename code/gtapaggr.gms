@@ -1,18 +1,18 @@
-$title	Aggregation Program for the GTAP10 Database
+$title	Aggregation Program for the GTAP11 Database
 
 *$if not set source $abort	Need to specify a source on command line: --source=xxx
 *$if not set target $abort	Need to specify a target on command line: --target=yyy
 
 $if not set source $set source gsd_5
-$if not set target $set target gtap10ingams
-$if not set yr $set yr 14
+$if not set target $set target gtap11ingams
+$if not set yr $set yr 17
 
 $if not set output $set output %target%
 
 $set fs %system.dirsep%
 
 $set ds %source%
-$include "%system.fp%gtap10data"
+$include "%system.fp%gtap11data"
 $include "..%fs%defines%fs%%target%.map"
 
 alias (ii,jj,kk), (rr,ss);

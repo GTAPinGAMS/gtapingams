@@ -1,8 +1,8 @@
-$title	 GTAP10inGAMS -- GAMS/MCP Formulation
+$title	 GTAP11inGAMS -- GAMS/MCP Formulation
 
-$if not set yr $set yr 14
+$if not set yr $set yr 17
 $if not set ds $set ds g20_macro
-$include "%system.fp%gtap10data"
+$include "%system.fp%gtap11data"
 
 nonnegative
 variables
@@ -94,7 +94,7 @@ vxmd0(i,r,s) = vxmd(i,r,s);
 vtwr0(j,i,r,s) = vtwr(j,i,r,s);
 
 $setlocal datetime %system.date%%system.time%
-$echo   *       Calibration code for mcp.gms (%datetime%)    >gtap10.gen
+$echo   *       Calibration code for mcp.gms (%datetime%)    >gtap11.gen
 
 *	Save copy of the benchmark trade flows so that we can turn off
 *	demand as needed in the SOE model:
@@ -415,13 +415,13 @@ mkt_pfx$card(rx)..
 	sum(rm(r), vb(r))$rx(rnum) + sum((i,rm)$vem(i,rm), X(i,rm)*pem0(i,rm)*vem(i,rm)) + rowpfx
 		=e= sum(j$vtw(j),sum(rx,vst(j,rx))*YT(j)*PT(j)/PFX) + sum((i,rx)$vem(i,rx),X(i,rx)*vem(i,rx)) + ROW/PFX;
 
-model gtap10 /
+model gtap11 /
 	prf_y.Y,prf_x.X,prf_a.A,prf_m.M,prf_yt.YT,prf_ft.FT,
 	mkt_p.P,mkt_pe.PE,mkt_pa.PA,mkt_pm.PM,mkt_pt.PT,mkt_pf.PF,mkt_ps.PS,mkt_pfx.PFX,
 	constraint_D.D, constraint_U.U, constraint_CC.CC, constraint_W.W,
 	inc_ra.RA, inc_row.ROW/;
 
-model gtap10cns /
+model gtap11cns /
 	prf_y,prf_x,prf_a,prf_m,prf_yt,prf_ft,
 	mkt_p,mkt_pe,mkt_pa,mkt_pm,mkt_pt,mkt_pf,mkt_ps,mkt_pfx,
 	constraint_D, constraint_U, constraint_CC, constraint_W,
@@ -460,7 +460,7 @@ PS.LO(sf,g,r)$vfm(sf,g,r) = 0.001;
 
 *	Calibration algebra:
 
-$onechov >>gtap10.gen
+$onechov >>gtap11.gen
 
 cf0(g,r) = sum(f, vfm(f,g,r)*(1+rtf0(f,g,r)));
 cm0(g,r) = sum(i, vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r)));
@@ -494,8 +494,8 @@ $macro pnum(r) (sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))/sum(
 
 parameter	maxdev /1e-3/;
 
-gtap10.workspace = 1024;
-gtap10.iterlim = 0;
-$include gtap10.gen
-solve gtap10 using mcp;
-abort$(gtap10.objval > maxdev) "GTAP10 replication fails.", gtap10.objval;
+gtap11.workspace = 1024;
+gtap11.iterlim = 0;
+$include gtap11.gen
+solve gtap11 using mcp;
+abort$(gtap11.objval > maxdev) "GTAP11 replication fails.", gtap11.objval;

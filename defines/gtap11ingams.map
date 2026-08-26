@@ -227,8 +227,8 @@ IND	India
 NPL	Nepal
 PAK	Pakistan
 LKA	Sri Lanka
+AFG	Afghanistan
 XSA	Rest of South Asia
-*	 Afghanistan
 *	 Bhutan
 *	 Maldives
 CAN	Canada
@@ -266,6 +266,7 @@ DOM	Dominican Republic
 JAM	Jamaica
 PRI	Puerto Rico
 TTO	Trinidad and Tobago
+HTI	Haiti
 XCB	Caribbean
 *	 Anguilla
 *	 Antigua & Barbuda
@@ -276,7 +277,6 @@ XCB	Caribbean
 *	 Cuba
 *	 Dominica
 *	 Grenada
-*	 Haiti
 *	 Montserrat
 *	 Netherlands Antilles
 *	 Saint Kitts and Nevis
@@ -332,6 +332,7 @@ RUS	Russian Federation
 UKR	Ukraine
 XEE	Rest of Eastern Europe
 *	 Moldova Republic of
+SRB	Serbia
 XER	Rest of Europe
 *	 Andorra
 *	 Bosnia and Herzegovina
@@ -345,10 +346,10 @@ XER	Rest of Europe
 *	 Monaco
 *	 Montenegro
 *	 San Marino
-*	 Serbia
 KAZ	Kazakhstan
 KGZ	Kyrgyzstan
 TJK	Tajikistan
+UZB	Uzbekistan
 XSU	Rest of Former Soviet Union
 *	 Turkmenistan
 *	 Uzbekistan
@@ -365,17 +366,17 @@ QAT	Qatar
 SAU	Saudi Arabia
 TUR	Turkey
 ARE	United Arab Emirates
+IRQ	Iraq
+LBN	Lebanon
+PSE	Palestine
+SYR	Syrian Arab Republic
 XWS	Rest of Western Asia
-*	 Iraq
-*	 Lebanon
-*	 Palestinian Territory Occupied
-*	 Syrian Arab Republic
 *	 Yemen
 EGY	Egypt
 MAR	Morocco
 TUN	Tunisia
+DZA	Algeria
 XNF	Rest of North Africa
-*	 Algeria
 *	 Libyan Arab Jamahiriya
 *	 Western Sahara
 BEN	Benin
@@ -387,26 +388,26 @@ GIN	Guinea
 NGA	Nigeria
 SEN	Senegal
 TGO	Togo
+MLI	Mali
+NER	Niger
 XWF	Rest of Western Africa
 *	 Cape Verde
 *	 Gambia
 *	 Guinea-Bissau
 *	 Liberia
-*	 Mali
 *	 Mauritania
-*	 Niger
 *	 Saint Helena, ASCENSION AND TRISTAN DA CUNHA
 *	 Sierra Leone
-XCF	Central Africa
-*	 Central African Republic
-*	 Chad
-*	 Congo
-*	 Equatorial Guinea
-*	 Gabon
+* XCF	Central Africa
 *	 Sao Tome and Principe
+CAF	Central African Republic
+TCD	Chad
+COG	Congo
+GNQ	Equatorial Guinea
+GAB	Gabon
+COD	Democratic Republic of the Congo
 XAC	South Central Africa
 *	 Angola
-*	 Congo the Democratic Republic of the
 ETH	Ethiopia
 KEN	Kenya
 MDG	Madagascar
@@ -418,21 +419,22 @@ TZA	Tanzania United Republic of
 UGA	Uganda
 ZMB	Zambia
 ZWE	Zimbabwe
+COM	Comoros
+SDN	Sudan
 XEC	Rest of Eastern Africa
 *	 Burundi
-*	 Comoros
 *	 Djibouti
 *	 Eritrea
 *	 Mayotte
 *	 Seychelles
 *	 Somalia
-*	 Sudan
 BWA	Botswana
 NAM	Namibia
 ZAF	South Africa
+*	Swaziland was a former official name of Eswatini
+SWZ	Eswatini
 XSC	Rest of South African Customs Union
 *	 Lesotho
-*	 Swaziland
 XTW	Rest of the World
 *	 Antarctica
 *	 Bouvet Island

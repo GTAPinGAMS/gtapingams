@@ -1,8 +1,12 @@
 $title	Run some consistency tests for aggregate datasets.
 
+$if not set run	$setglobal run	bmkchk
+
 *	File separator: "\" for Windows --  "/" for Unix/OSX
 
 $set fs %system.dirsep%
+
+$goto %run%
 
 *	NB: Benchmark consistency is a necessary, but not a
 *	sufficient condition that the model is properly specified.
@@ -13,38 +17,41 @@ $set fs %system.dirsep%
 *	for the GMR model and all the single region SOE  models:
 
 
+$label bmkchk
 $set ds g20_macro
 
-$call gams bmkchk --mdl=mcp --ds=%ds% o=listings%fs%bmkchk_mcp.lst
+$call start "bmkchk_mcp" gams bmkchk --mdl=mcp --ds=%ds% o=listings%fs%bmkchk_mcp.lst
 $call start "bmkchk_mge" gams bmkchk --mdl=mge --ds=%ds% o=listings%fs%bmkchk_mge.lst
-$if not %sys.filesys%==UNIX $call pause
-$call pause
+$exit
 
 *	Next we perform a check of consistency for the MCP and
 *	MGE models at a counterfactual point.
 
-$label mcpmge
-
+$label mge_mcp
 $log	Solve the MGE model then verify that the solution is
 $log	valid for the MCP model:
 
 $set ds g20
-$label mcpmge
 $if exist gtap11_p.gdx $call del gtap11_p.gdx
 $call gams mcpmge --mdl=mge --ds=%ds% o=listings%fs%mge1_%ds%.lst ps=0
 $call gams mcpmge --mdl=mcp --ds=%ds% o=listings%fs%mcp1_%ds%.lst ps=0
+$exit
 
 
+$label mcp_mge
 $log	Then solve the MCP model and verify that the solution is
 $log	valid for the MGE model:
 
+$set ds g20
 $if exist gtap11_p.gdx $call del gtap11_p.gdx
 $call gams mcpmge --mdl=mcp --ds=%ds% o=listings%fs%mcp2_%ds%.lst ps=0
 $call gams mcpmge --mdl=mge --ds=%ds% o=listings%fs%mge2_%ds%.lst ps=0
-$call pause
+$exit
 
 *	Finally, verify that the CDE demand system reproduces the
 *	exogenous own-price and income demand elasticities:
 
+$label cdechk
 $set ds g20
 $call gams cdechk --ds=%ds%  o=listings%fs%cdechk.lst ps=0
+$exit

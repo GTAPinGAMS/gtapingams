@@ -95,6 +95,17 @@ def task_build():
     which creates different aggregations of gsd.gdx
     """
 
+    agg_levels = [
+        'gtap11ingams',
+        'g20_macro',
+        'g20_iea',
+        'g20',
+    ]
+
+    def run_build():
+        for agg in agg_levels:
+            os.system(f"cd build & gams build --agg={agg} & cd ..")
+
     return {
         'file_dep': [
             'build/build.gms',
@@ -129,12 +140,23 @@ def task_build():
             f'gamsdata/20{yr}/g20_macro.gdx',
         ],
         'verbosity': 2,
-        'actions': ["cd build & gams build & cd .."],
+        'actions': [run_build],
     }
 
 
 def task_test():
     """Run the testing script build/test.gms"""
+    run_these = [
+        'bmkchk',
+        'mge_mcp',
+        'mcp_mge',
+        'cdechk',
+    ]
+
+    def run_tests():
+        for run in run_these:
+            os.system(f"cd build & gams test --run={run} & cd ..")
+
     return {
         'file_dep': [
             'build/test.gms',
@@ -160,5 +182,7 @@ def task_test():
             'build/test.lst',
         ],
         'verbosity': 2,
-        'actions': ["cd build & gams test & cd .."],
+        'actions': [
+            run_tests,
+        ],
     }

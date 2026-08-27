@@ -1,6 +1,6 @@
-$title	GAMS Command Script to Build GTAP 10
+$title	GAMS Command Script to Build GTAP 12
 
-$if not set aggr	$setglobal aggr	gtap11ingams
+$if not set aggr	$setglobal aggr	gtap12ingams
 
 *	File separator: "\" for Windows --  "/" for Unix/OSX
 
@@ -16,12 +16,12 @@ $set nd 5
 
 *	Set the base year:
 
-$set yr 17
+$set yr 23
 
 $goto %aggr%
 
-$label gtap11ingams
-$set ds gtap11ingams
+$label gtap12ingams
+$set ds gtap12ingams
 $call gams %code%gtapaggr --yr=%yr% --source=gsd_%nd%  --target=%ds% o=listings%fs%%ds%_%yr%.lst
 $call gams %code%cdecalib --yr=%yr% --ds=%ds%  o=listings%fs%cde_%ds%_%yr%.lst
 $log	Finished with gtapingams.
@@ -31,7 +31,7 @@ $exit
 
 $label g20_macro
 $set ds g20_macro
-$call gams %code%gtapaggr --yr=%yr% --source=gtap11ingams  --target=%ds%  o=listings%fs%%ds%_%yr%.lst
+$call gams %code%gtapaggr --yr=%yr% --source=gtap12ingams  --target=%ds%  o=listings%fs%%ds%_%yr%.lst
 $call gams %code%cdecalib --yr=%yr% --ds=%ds%  o=listings%fs%cde_%ds%_%yr%.lst
 $log	Finished with g20_macro.
 $exit
@@ -40,7 +40,7 @@ $exit
 
 $label g20_iea
 $set ds g20_iea
-$call gams %code%gtapaggr --yr=%yr% --source=gtap11ingams  --target=%ds%  o=listings%fs%%ds%_%yr%.lst
+$call gams %code%gtapaggr --yr=%yr% --source=gtap12ingams  --target=%ds%  o=listings%fs%%ds%_%yr%.lst
 $call gams %code%cdecalib --yr=%yr% --ds=%ds%  o=listings%fs%cde_%ds%_%yr%.lst
 $log	Finished with g20_iea
 $exit
@@ -49,7 +49,7 @@ $exit
 
 $label g20
 $set ds g20
-$call gams %code%gtapaggr --yr=%yr% --source=gtap11ingams  --target=%ds%  o=listings%fs%%ds%_%yr%.lst
+$call gams %code%gtapaggr --yr=%yr% --source=gtap12ingams  --target=%ds%  o=listings%fs%%ds%_%yr%.lst
 $call gams %code%cdecalib --yr=%yr% --ds=%ds%  o=listings%fs%cde_%ds%_%yr%.lst
 $log	Finished with g20
 $exit

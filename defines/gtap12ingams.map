@@ -267,7 +267,7 @@ JAM	Jamaica
 PRI	Puerto Rico
 TTO	Trinidad and Tobago
 HTI	Haiti
-XCB	Caribbean
+XCB	Rest of Caribbean
 *	 Anguilla
 *	 Antigua & Barbuda
 *	 Aruba
@@ -390,24 +390,22 @@ SEN	Senegal
 TGO	Togo
 MLI	Mali
 NER	Niger
+MRT	Mauritania
 XWF	Rest of Western Africa
 *	 Cape Verde
 *	 Gambia
 *	 Guinea-Bissau
 *	 Liberia
-*	 Mauritania
 *	 Saint Helena, ASCENSION AND TRISTAN DA CUNHA
 *	 Sierra Leone
-* XCF	Central Africa
-*	 Sao Tome and Principe
+STP	Sao Tome and Principe
 CAF	Central African Republic
 TCD	Chad
 COG	Congo
 GNQ	Equatorial Guinea
 GAB	Gabon
 COD	Democratic Republic of the Congo
-XAC	South Central Africa
-*	 Angola
+AGO	Angola
 ETH	Ethiopia
 KEN	Kenya
 MDG	Madagascar
@@ -421,8 +419,8 @@ ZMB	Zambia
 ZWE	Zimbabwe
 COM	Comoros
 SDN	Sudan
+BDI	Burundi
 XEC	Rest of Eastern Africa
-*	 Burundi
 *	 Djibouti
 *	 Eritrea
 *	 Mayotte

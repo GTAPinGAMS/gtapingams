@@ -32,7 +32,7 @@ $log	Solve the MGE model then verify that the solution is
 $log	valid for the MCP model:
 
 $set ds g20
-$if exist gtap11_p.gdx $call del gtap11_p.gdx
+$if exist gtap12_p.gdx $call del gtap12_p.gdx
 $call gams mcpmge --mdl=mge --ds=%ds% o=listings%fs%mge1_%ds%.lst ps=0
 $call gams mcpmge --mdl=mcp --ds=%ds% o=listings%fs%mcp1_%ds%.lst ps=0
 $exit
@@ -43,7 +43,7 @@ $log	Then solve the MCP model and verify that the solution is
 $log	valid for the MGE model:
 
 $set ds g20
-$if exist gtap11_p.gdx $call del gtap11_p.gdx
+$if exist gtap12_p.gdx $call del gtap12_p.gdx
 $call gams mcpmge --mdl=mcp --ds=%ds% o=listings%fs%mcp2_%ds%.lst ps=0
 $call gams mcpmge --mdl=mge --ds=%ds% o=listings%fs%mge2_%ds%.lst ps=0
 $exit

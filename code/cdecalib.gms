@@ -4,9 +4,9 @@ $if not set threads $set threads 1
 option threadsAsync=%threads%;
 $if not %threads%==1 option limrow=0, limcol=0, solprint=off;
 
-$if not set yr $set yr 17
+$if not set yr $set yr 23
 $if not set ds $set ds gtapingams
-$include "%system.fp%gtap11data"
+$include "%system.fp%gtap12data"
 
 alias (r,rr), (i,k);
 

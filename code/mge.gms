@@ -1,11 +1,11 @@
-$title	 GTAP11inGAMS -- GAMS/MPSGE Formulation
+$title	 GTAP12inGAMS -- GAMS/MPSGE Formulation
 
-$if not set yr $set yr 17
+$if not set yr $set yr 23
 $if not set ds $set ds g20_macro
-$include "%system.fp%gtap11data"
+$include "%system.fp%gtap12data"
 
 $ontext
-$model:gtap11
+$model:gtap12
 
 $sectors:
 	Y(g,r)$(rm(r)*vom(g,r))		! Supply
@@ -157,7 +157,7 @@ $report:
 	v:V_VIA(i,r)$(RM(R)*vcm(i,r)*vifm(i,"c",r))		i:PM(i,r)	PROD:A(i,r)
 
 $offtext
-$sysinclude mpsgeset gtap11
+$sysinclude mpsgeset gtap12
 alias (i,i_,j_), (f,f_);
 
 $macro pnum(r)		(sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))/sum(i_,vdfm(i_,"c",r)+vifm(i_,"c",r)))
@@ -174,10 +174,10 @@ $macro REV_TXS(i,s,r)	((XMD(i,s,r)*rtxs(i,s,r)*vxmd(i,s,r) * PX(i,s))$(rm(s)*vxm
 $macro REV_TMS(i,s,r)	((XMD(i,s,r)*rtms(i,s,r)*(PX(i,s)*(1-rtxs(i,s,r))*vxmd(i,s,r)  + \
 			 sum(j_$vtwr(j_,i,s,r), PT.L(j_)*vtwr(j_,i,s,r))))$(rm(r)*vxmd(i,s,r)*rtms(i,s,r)))
 
-gtap11.workspace = 1024;
-gtap11.iterlim = 0;
-$include gtap11.gen
-solve gtap11 using mcp;
+gtap12.workspace = 1024;
+gtap12.iterlim = 0;
+$include gtap12.gen
+solve gtap12 using mcp;
 
 parameter	maxdev /1e-3/;
-abort$(gtap11.objval > maxdev) "GTAP11 replication fails.", gtap11.objval;
+abort$(gtap12.objval > maxdev) "GTAP12 replication fails.", gtap12.objval;

@@ -2,7 +2,7 @@ $title	Translate GTAP Distribution Data into GDX
 
 $set fs %system.dirsep%
 
-$if not set yr $set yr 17
+$if not set yr $set yr 23
 $if not set datadir $set datadir "..%fs%gamsdata%fs%20%yr%%fs%"
 $if not dexist "%datadir%" $call mkdir "%datadir%"
 
@@ -13,15 +13,15 @@ $if not dexist "%gtapdatadir%" $abort Cannot find GTAP data directory: "%gtapdat
 
 *	Use the GAMS scratch directory to hold temporary files:
 
-$set tmpdir mytemp_gtap11%fs%
+$set tmpdir mytemp_gtap12%fs%
 * $set tmpdir %gams.scrdir%
 
 *	GTAP release version:
 
-$set	gtapver GDX11c
+$set	gtapver GDX12a
 
-$set gtapallyearfile %gtapdatadir%%gtapver%AY16994.zip
-$set gtapdatafile %gtapver%%yr%.zip
+$set gtapallyearfile %gtapdatadir%%gtapver%_AY16994.zip
+$set gtapdatafile %gtapver%_%yr%.zip
 $set gtapdatafilepath %tmpdir%%gtapdatafile%
 
 *@ Do some unzipping

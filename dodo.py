@@ -7,7 +7,7 @@ from doit.tools import run_once
 # Set some command flags as strings
 code = "../code/"
 nd = "5"
-yr = "17"
+yr = "23"
 
 
 def task_folders():
@@ -32,7 +32,7 @@ def task_folders():
 def task_instruct():
     """Provide some instructions for getting GTAP source data."""
     def ask_for_GTAP():
-        input("Please provide file gtapdata/GDX11cAY16994.zip.\n" +
+        input("Please provide file gtapdata/GDX12a_AY16994.zip.\n" +
               "It can be purchased from\n" +
               "https://www.gtap.agecon.purdue.edu\n" +
               "Then press ENTER.\n\n"
@@ -42,7 +42,7 @@ def task_instruct():
     # Task is only uptodate if BOTH targets are there AND it has been ran once
     return {
         'actions': [ask_for_GTAP, ],
-        'targets': ['gtapdata/GDX11cAY16994.zip'],
+        'targets': ['gtapdata/GDX12a_AY16994.zip'],
         'verbosity': 2,
         'uptodate': [run_once],
     }
@@ -53,7 +53,7 @@ def task_readgdx():
     return {
         'file_dep': [
             'code/readgdx.gms',
-            'gtapdata/GDX11cAY16994.zip',
+            'gtapdata/GDX12a_AY16994.zip',
         ],
         'targets': [
             f'build/listings/readgdx_{yr}.lst',
@@ -73,7 +73,7 @@ def task_filter():
     return {
         'file_dep': [
             'code/filter.gms',
-            'code/gtap11data.gms',
+            'code/gtap12data.gms',
             f'gamsdata/20{yr}/gsd.gdx',
         ],
         'targets': [
@@ -96,7 +96,7 @@ def task_build():
     """
 
     agg_levels = [
-        'gtap11ingams',
+        'gtap12ingams',
         'g20_macro',
         'g20_iea',
         'g20',
@@ -104,14 +104,14 @@ def task_build():
 
     def run_build():
         for agg in agg_levels:
-            os.system(f"cd build & gams build --agg={agg} & cd ..")
+            os.system(f"cd build & gams build --aggr={agg} & cd ..")
 
     return {
         'file_dep': [
             'build/build.gms',
             'code/gtapaggr.gms',
             'code/cdecalib.gms',
-            'code/gtap11data.gms',
+            'code/gtap12data.gms',
             'code/aggr.gms',
             'code/checkset.gms',
             'code/chktarget.gms',
@@ -119,7 +119,7 @@ def task_build():
             'defines/g20_iea.map',
             'defines/g20_macro.map',
             'defines/g20.map',
-            'defines/gtap11ingams.map',
+            'defines/gtap12ingams.map',
             f'gamsdata/20{yr}/gsd_{nd}.gdx',
         ],
         'targets': [
@@ -127,14 +127,12 @@ def task_build():
             f'build/listings/cde_g20_{yr}.lst',
             f'build/listings/cde_g20_iea_{yr}.lst',
             f'build/listings/cde_g20_macro_{yr}.lst',
-            f'build/listings/cde_gtapingams_{yr}.lst',
+            f'build/listings/cde_gtap12ingams_{yr}.lst',
             f'build/listings/g20_{yr}.lst',
             f'build/listings/g20_iea_{yr}.lst',
             f'build/listings/g20_macro_{yr}.lst',
-            f'build/listings/gtapingams_{yr}.lst',
-            f'build/listings/cde_gtap11ingams_{yr}.lst',
-            f'build/listings/gtap11ingams_{yr}.lst',
-            f'gamsdata/20{yr}/gtap11ingams.gdx',
+            f'build/listings/gtap12ingams_{yr}.lst',
+            f'gamsdata/20{yr}/gtap12ingams.gdx',
             f'gamsdata/20{yr}/g20.gdx',
             f'gamsdata/20{yr}/g20_iea.gdx',
             f'gamsdata/20{yr}/g20_macro.gdx',
@@ -160,6 +158,7 @@ def task_test():
     return {
         'file_dep': [
             'build/test.gms',
+            'build/bmkchk.gms',
             'build/cdechk.gms',
             'build/mcpmge.gms',
             'code/mge.gms',
@@ -170,8 +169,8 @@ def task_test():
             f'gamsdata/20{yr}/g20.gdx',
         ],
         'targets': [
-            'build/GTAP11.GEN',
-            'build/GTAP11_p.gdx',
+            'build/GTAP12.GEN',
+            'build/GTAP12_p.gdx',
             'build/listings/bmkchk_mcp.lst',
             'build/listings/bmkchk_mge.lst',
             'build/listings/cdechk.lst',

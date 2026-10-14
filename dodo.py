@@ -103,12 +103,36 @@ def task_build():
     ]
 
     def run_build():
-        for agg in agg_levels:
-            os.system(f"cd build & gams build --aggr={agg} & cd ..")
+        # Create the GTAP12 dataset from gsd_{nd}.gdx
+        os.system(
+            "cd build" +
+            f" & gams ../code/gtapaggr --yr={yr} --source=gsd_{nd}" +
+            f"  --target=gtap12ingams o=listings/gtap12ingams_{yr}.lst" +
+            " & cd .."
+        )
+        os.system(
+            "cd build" +
+            f" & gams ../code/cdecalib --yr={yr} --ds=gtap12ingams" +
+            f" o=listings/cde_gtap12ingams_{yr}.lst" +
+            " & cd .."
+        )
 
-    return {
-        'file_dep': [
-            'build/build.gms',
+        # Make aggregations from gtap12ingams.gdx
+        for agg in agg_levels:
+            os.system(
+                "cd build" +
+                f" & gams ../code/gtapaggr --yr={yr} --source=gtap12ingams" +
+                f" --target={agg} o=listings/{agg}_{yr}.lst" +
+                " & cd .."
+            )
+            os.system(
+                "cd build" +
+                f" & gams ../code/cdecalib --yr={yr} --ds={agg}" +
+                f" o=listings/cde_{agg}_{yr}.lst" +
+                " & cd .."
+            )
+
+    dependencies = [
             'code/gtapaggr.gms',
             'code/cdecalib.gms',
             'code/gtap12data.gms',
@@ -116,27 +140,16 @@ def task_build():
             'code/checkset.gms',
             'code/chktarget.gms',
             'code/domain.gms',
-            'defines/g20_iea.map',
-            'defines/g20_macro.map',
-            'defines/g20.map',
-            'defines/gtap12ingams.map',
             f'gamsdata/20{yr}/gsd_{nd}.gdx',
-        ],
-        'targets': [
-            'build/build.lst',
-            f'build/listings/cde_g20_{yr}.lst',
-            f'build/listings/cde_g20_iea_{yr}.lst',
-            f'build/listings/cde_g20_macro_{yr}.lst',
-            f'build/listings/cde_gtap12ingams_{yr}.lst',
-            f'build/listings/g20_{yr}.lst',
-            f'build/listings/g20_iea_{yr}.lst',
-            f'build/listings/g20_macro_{yr}.lst',
-            f'build/listings/gtap12ingams_{yr}.lst',
-            f'gamsdata/20{yr}/gtap12ingams.gdx',
-            f'gamsdata/20{yr}/g20.gdx',
-            f'gamsdata/20{yr}/g20_iea.gdx',
-            f'gamsdata/20{yr}/g20_macro.gdx',
-        ],
+    ]
+    dependencies += [f'defines/{agg}.map' for agg in agg_levels]
+    targets = [f'build/listings/{agg}_{yr}.lst' for agg in agg_levels]
+    targets += [f'build/listings/cde_{agg}_{yr}.lst' for agg in agg_levels]
+    targets += [f'gamsdata/20{yr}/{agg}.gdx' for agg in agg_levels]
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
         'verbosity': 2,
         'actions': [run_build],
     }

@@ -1,21 +1,44 @@
-$title	Generate a Grid over Tariff Rates for a Single Region
+$title	Generate a Grid over Tariff Rates for a Single Region (GTAP12inGAMS)
 
-*	Point to the GTAP10inGAMS code directory:
+*	GTAP12 version of tgrid.gms -- produces the data behind Figures 12
+*	(and 13) in Lanz & Rutherford (2016), JGEA 1(2), section 5.
+*
+*	Run from the forensics directory, e.g.
+*	   gams tgrid12 --ds=g20 --mdl=gmr --rcalc=USA
+*	   gams tgrid12 --ds=g20 --mdl=soe --rcalc=CHN
+*
+*	Options:
+*	   --ds      dataset in gamsdata/20%yr%  (paper: g20)        [g20]
+*	   --yr      reference year (GTAP12: 23)                      [23]
+*	   --mdl     gmr (all regions) or soe (rcalc only)            [gmr]
+*	   --rcalc   region whose trade taxes are scaled              [CHN]
+*	   --soextax yes: in the SOE closure also scale export taxes on
+*	             exports to the rest of the world (rtxs_row).  The
+*	             original code (and hence the paper) leaves rtxs_row at
+*	             its benchmark value, i.e. in the SOE runs only import
+*	             tariffs move.                                    [no]
 
 $set fs %system.dirsep%
 $set code ..%fs%code%fs%
 
-$if not set yr $set yr 14
-$if not set ds $set ds g20_macro
-$if not set rcalc $set rcalc chn
-$if not set mdl $set mdl gmr
+$if not set yr      $set yr 23
+$if not set ds      $set ds g20
+$if not set rcalc   $set rcalc CHN
+$if not set mdl     $set mdl gmr
+$if not set soextax $set soextax no
 
 set	tlvl /0*10/;
 
-*	Read the model here:
+*	Read the model here (this writes gtap12.gen in the working directory,
+*	which is moved to the scratch directory so that parallel runs do not
+*	overwrite each other):
 
 $include %code%mge
-$call 'mv gtap10.gen %gams.scrdir%gtap10.gen'
+$ifthen.os %system.filesys%==MSNT
+$call move /Y gtap12.gen "%gams.scrdir%gtap12.gen" > nul
+$else.os
+$call mv gtap12.gen "%gams.scrdir%gtap12.gen"
+$endif.os
 
 parameter	vc(r)	Value of benchmark expenditure;
 vc(r) = vom("c",r);
@@ -35,19 +58,29 @@ singleton set	rcalc(r) /%rcalc%/;
 $if %mdl%==gmr loadrm(r);
 $if %mdl%==soe loadrm("%rcalc%");
 
+*	Macro to update the average export subsidy rate on exports to the
+*	rest of the world (only relevant for the SOE closure):
+
+$macro updrow(rr)  rtxs_row(i,rr)$(rm(rr) and vem(i,rr)) = sum(rx, vxmd(i,rr,rx)*rtxs(i,rr,rx))/vem(i,rr);
+
 *	Unilateral free trade solution first with a savepoint
 *	so we can reload as starting point:
 
 rtms(i,s,rcalc)$(rtms0(i,s,rcalc)>0) = 0;
 rtxs(i,rcalc,s)$(rtxs0(i,rcalc,s)<0) = 0;
+$if %soextax%==yes updrow(rcalc);
 
-gtap10.iterlim = 10000;
-gtap10.savepoint = 1;
-$include %gams.scrdir%gtap10.gen
-solve gtap10 using mcp;
-abort$(gtap10.objval>1e-3) "Benchmark replication fails (%mdl%).";
-execute 'mv gtap10_p.gdx %gams.scrdir%gtap10_p.gdx';
-gtap10.savepoint = 0;
+gtap12.iterlim = 10000;
+gtap12.savepoint = 1;
+$include %gams.scrdir%gtap12.gen
+solve gtap12 using mcp;
+abort$(gtap12.objval>1e-3) "Free trade solution fails (%mdl%).";
+$ifthen.os %system.filesys%==MSNT
+execute 'move /Y gtap12_p.gdx "%gams.scrdir%gtap12_p.gdx" > nul';
+$else.os
+execute 'mv gtap12_p.gdx "%gams.scrdir%gtap12_p.gdx"';
+$endif.os
+gtap12.savepoint = 0;
 
 alias (r,rr);
 
@@ -71,14 +104,15 @@ parameter	results		Counterfactural simulation summary
 		gdpresults	Counterfactural simulation GDP results,
 		exitcode	Simulation exit codes;
 
-set		dsys	Final demand system /cd, les, cde/;
+set		dsys	Final demand system /cd, les, cde/,
+		runthese(dsys)	/cd/;
 
-gtap10.solvelink = 2;
-loop(dsys,
+gtap12.solvelink = 2;
+loop(dsys$runthese(dsys),
 
   loaddsys(dsys,r);
 
-  execute_loadpoint '%gams.scrdir%gtap10_p.gdx';
+  execute_loadpoint '%gams.scrdir%gtap12_p.gdx';
 
   rtms(i,s,r) = rtms0(i,s,r);
   rtxs(i,s,r) = rtxs0(i,s,r);
@@ -86,6 +120,7 @@ loop(dsys,
 
     rtms(i,s,rcalc)$max(rtms0(i,s,rcalc),0) = rtms0(i,s,rcalc) * tlvl.val/averate;
     rtxs(i,rcalc,s)$max(-rtxs0(i,rcalc,s),0) = rtxs0(i,rcalc,s) * tlvl.val/averate;
+$if %soextax%==yes updrow(rcalc);
 
     results(dsys,tlvl,"averate") =100 *
 	sum((i,s),	max(-rtxs(i,rcalc,s),0) * vxmd(i,rcalc,s) +
@@ -95,15 +130,15 @@ loop(dsys,
 		        ((1-rtxs0(i,s,rcalc))*vxmd(i,s,rcalc)+
 			sum(j,vtwr(j,i,s,rcalc)))$max(rtms0(i,s,rcalc),0));
 
-    gtap10.iterlim = 100000;
-$include %gams.scrdir%gtap10.gen
-    solve gtap10 using mcp;
-    abort$(gtap10.objval>1e-3) "Simulation fails: gtap10.";
+    gtap12.iterlim = 100000;
+$include %gams.scrdir%gtap12.gen
+    solve gtap12 using mcp;
+    abort$(gtap12.objval>1e-3) "Simulation fails: gtap12.";
 
     results(dsys,tlvl,"W") = 100 * (UTIL(rcalc) -1);
     results(dsys,tlvl,"globalW") = 100 * sum(r,vc(r)*(UTIL(r)-1))/vc(rcalc);
-    results(dsys,tlvl,"modelstat") = gtap10.modelstat;
-    results(dsys,tlvl,"solvestat") = gtap10.solvestat;
+    results(dsys,tlvl,"modelstat") = gtap12.modelstat;
+    results(dsys,tlvl,"solvestat") = gtap12.solvestat;
 
 *	Do the GDP calculations:
 
@@ -114,3 +149,12 @@ $include %code%gdpcalc
   );
 );
 display results;
+
+*	pgfplots table, one column per demand system (EV in % of benchmark).
+*	Figure 12 uses column cde from the gmr and soe runs; Figure 13 uses
+*	cde, cd and les from the gmr run:
+
+file kdat /%rcalc%_%mdl%_%ds%.data/; kdat.nd = 6; kdat.nw = 12;
+put kdat 'tariff' @13; loop(dsys, put dsys.tl:12;); put /;
+loop(tlvl, put tlvl.tl:12; loop(dsys, put results(dsys,tlvl,"W"):12:6;); put /;);
+putclose kdat;

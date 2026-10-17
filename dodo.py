@@ -1,7 +1,7 @@
 import os
 from doit.tools import run_once
 # This provides shutil.copy(source,destination):
-# import shutil
+import shutil
 
 
 # Set some command flags as strings
@@ -16,6 +16,7 @@ def task_folders():
         dirlist = ['gtapdata',
                    'build/listings',
                    f'gamsdata/20{yr}',
+                   'forensics/figures'
                    ]
         for dir in dirlist:
             if not os.access(dir, os.F_OK):
@@ -197,4 +198,88 @@ def task_test():
         'actions': [
             run_tests,
         ],
+    }
+
+
+ds = 'g20_macro'
+
+
+def task_grid():
+    """Run all model runs necessary for paper reconstruction"""
+    dependencies = [
+        'forensics/ssasolve.gms',
+        'forensics/tgrid.gms',
+        ]
+    targets = [
+        'forensics/USA_soe_g20.data',
+        'forensics/CHN_soe_g20.data',
+        'forensics/USA_gmr_g20.data',
+        'forensics/CHN_gmr_g20.data',
+        f'forensics/output/{ds}/gmr/CHN.gdx',
+        # lst files in output/g20/
+    ]
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [
+            f"cd forensics & gams ssasolve --ds={ds} & cd .."
+        ],
+
+    }
+
+
+def task_merge():
+    """Run all model runs necessary for paper reconstruction"""
+    dependencies = [
+        'forensics/ssamerge.gms',
+        'forensics/results_git.xlsx',
+        f'forensics/output/{ds}/gmr/CHN.gdx',
+        ]
+    targets = [
+        'forensics/results.gdx',
+        'forensics/results.xlsx'
+    ]
+
+    def copy_excel():
+        shutil.copy('forensics/results_git.xlsx', 'forensics/results.xlsx')
+
+    def merge():
+        os.system(f"cd forensics & gams ssamerge --ds={ds} & cd ..")
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [
+            copy_excel,
+            merge
+        ],
+
+    }
+
+
+def task_paperfigs():
+    dependencies = [
+        'forensics/tradetax.gms',
+        'forensics/texcoords.py',
+        f'gamsdata/20{yr}/{ds}.gdx',
+    ]
+    targets = [
+        'forensics/tradetax.gdx',
+    ]
+
+    def run_paperfigs():
+        # extract import tariffs and export taxes from
+        os.system(f'cd forensics & gams tradetax --ds={ds} & cd ..')
+        os.system(
+            "cd forensics & python texcoords.py" +
+            " --top 23 & cd ..")
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [run_paperfigs],
     }

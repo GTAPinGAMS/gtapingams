@@ -1,0 +1,70 @@
+\begin{subfigure}[b]{0.9\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+        ybar stacked,
+        ymin = 0,
+        ymax = 70,
+%        legend style={draw=none},
+        major x tick style= transparent,
+        symbolic x coords={WHT, SGR, GRO, WOL, PFB, MVH, CMT, RPP, NMM, B_T,
+                VOL, OIL, OMT, OCR, FMP, I_S, LEA, WAP, OFD, TEX,
+                EEQ, OME, CHM},
+        bar width = 0.15cm,
+        width=0.65\textwidth,
+	xticklabel style = {font=\footnotesize},
+        xticklabels={\texttt{wht}, \texttt{sgr}, \texttt{gro}, \texttt{wol}, \texttt{pfb}, \texttt{mvh},
+        \texttt{cmt}, \texttt{rpp}, \texttt{nmm}, \texttt{b\_t}, \texttt{vol}, \texttt{oil},
+        \texttt{omt}, \texttt{ocr}, \texttt{fmp}, \texttt{i\_s}, \texttt{lea}, \texttt{wap},
+        \texttt{ofd}, \texttt{tex}, \texttt{eeq}, \texttt{ome}, \texttt{chm}},
+        axis x line*= bottom,
+        ymajorgrids = true,
+        axis y line* = left,
+        xlabel shift = 0.05in,
+        ylabel shift = -0.05in,
+        xlabel={Commodity},
+        ylabel={Tax rate (\%)},
+        xtick=data,
+%        enlarge x limits=0.1,
+        x tick label style={anchor=east, rotate=90, font=\footnotesize},
+%        scale only axis, xmin=WHT, xmax=CHM, enlarge x limits=0.03, % set by texcoords.py
+        ]
+        \addplot+[ybar] table [x=good, y index=1] {../forensics/figures/CHN_commodity_m_top23.data};
+%       \label{plot_one}
+%       \addlegendentry{Import tariff rate}
+        \addplot+[ybar] table [x=good, y index=2] {../forensics/figures/CHN_commodity_m_top23.data};
+%       \label{plot_two}
+%       \addlegendentry{Export tax rate}
+\end{axis}
+\begin{axis}[ybar stacked,
+        width=0.65\textwidth,
+        ymin = 0,
+        ymax = 400,
+%       bar shift=0.10cm,
+        axis y line*=right,
+        axis x line=none,
+        bar width = 0.02cm,
+%        legend style={draw=none, anchor=south east},
+        ylabel={Tariff revenue (\$M)},
+        ylabel near ticks,
+        xtick=data,
+        symbolic x coords={WHT, SGR, GRO, WOL, PFB, MVH, CMT, RPP, NMM, B_T,
+                VOL, OIL, OMT, OCR, FMP, I_S, LEA, WAP, OFD, TEX,
+                EEQ, OME, CHM},
+%        scale only axis, xmin=WHT, xmax=CHM, enlarge x limits=0.03, % set by texcoords.py
+        ],
+	xticklabel style = {font=\footnotesize},
+        x tick label style={anchor=east, rotate=90, font=\footnotesize}]
+        xticklabels={\texttt{wht}, \texttt{sgr}, \texttt{gro}, \texttt{wol}, \texttt{pfb}, \texttt{mvh},
+        \texttt{cmt}, \texttt{rpp}, \texttt{nmm}, \texttt{b\_t}, \texttt{vol}, \texttt{oil},
+        \texttt{omt}, \texttt{ocr}, \texttt{fmp}, \texttt{i\_s}, \texttt{lea}, \texttt{wap},
+        \texttt{ofd}, \texttt{tex}, \texttt{eeq}, \texttt{ome}, \texttt{chm}},
+%        enlarge x limits=0.1
+%       \addlegendimage{/pgfplots/refstyle=plot_one}\addlegendentry{Import tariff rate}
+%       \addlegendimage{/pgfplots/refstyle=plot_two}\addlegendentry{Export tax rate}
+        \addplot+[black,mark=none] table [x=good, y index=3] {../forensics/figures/CHN_commodity_m_top23.data};
+%       \addlegendentry{Tariff revenue}
+\end{axis}
+\end{tikzpicture}
+\caption{China imports.}
+\end{subfigure}

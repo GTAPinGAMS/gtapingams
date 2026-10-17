@@ -40,3 +40,14 @@
 /gtapdata/GDX11cAY16994.zip
 /gtapdata/GDX12a_AY16994.zip
 /build/mytemp_gtap12/*
+/forensics/*.data
+/forensics/output/*gdx
+/forensics/output/g20/*.gdx
+/forensics/output/g20/gmr/*.gdx
+/forensics/output/g20/*
+/forensics/*.lst
+/forensics/figures/*.data
+/forensics/figures/*_by*.tex
+/forensics/results.*
+/forensics/output/g20_macro/*
+/forensics/tradetax.gdx

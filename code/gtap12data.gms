@@ -79,7 +79,7 @@ parameter
 	esubt(i)	Elasticity of top-level input substitution',
 	esubd(i)	Elasticity of substitution (M versus D),
 	esubva(g)	Elasticity of substitution between factors,
-	esubm(i)	Intra-import elasticity of substitution,
+	esubm(g)	Intra-import elasticity of substitution,
 	etrae(f)	Elasticity of transformation;
 
 $load esubt esubd esubva esubm etrae
@@ -247,7 +247,7 @@ parameter
 	rowpfx		Rest of world endowment of foreign exchange,
 	vem(g,r)	Bilateral exports outside model,
 	rtxs_row(i,r)	Subsidies on exports to ROW,
-	pem0(i,r)	Reference price of exports;
+	pem0(g,r)	Reference price of exports;
 
 set	rm(r)		Regions include in the model
 	rx(r)		Regions excluded from the model;
@@ -270,3 +270,6 @@ set	cde(r)		Regions with CDE demand,
 cde(r) = no;
 les(r) = no;
 cd(r) = yes;
+
+scalar
+    sop	Flag indicating improved SOE version /0/;

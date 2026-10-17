@@ -21,11 +21,12 @@ $title	Generate a Grid over Tariff Rates for a Single Region (GTAP12inGAMS)
 $set fs %system.dirsep%
 $set code ..%fs%code%fs%
 
-$if not set yr      $set yr 23
-$if not set ds      $set ds g20
-$if not set rcalc   $set rcalc CHN
-$if not set mdl     $set mdl gmr
-$if not set soextax $set soextax no
+$if not set yr		$set 	yr	23
+$if not set ds      	$set 	ds	g20_macro
+$if not set rcalc   	$set 	rcalc	CHN
+$if not set mdl     	$set 	mdl	gmr
+$if not set soextax 	$set	soextax yes
+$if not set thetadx 	$setglobal thetadx	1
 
 set	tlvl /0*10/;
 
@@ -57,6 +58,7 @@ singleton set	rcalc(r) /%rcalc%/;
 
 $if %mdl%==gmr loadrm(r);
 $if %mdl%==soe loadrm("%rcalc%");
+$if %mdl%==sop loadrm("%rcalc%"); sop = 1;
 
 *	Macro to update the average export subsidy rate on exports to the
 *	rest of the world (only relevant for the SOE closure):

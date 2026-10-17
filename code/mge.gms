@@ -1,7 +1,8 @@
 $title	 GTAP12inGAMS -- GAMS/MPSGE Formulation
 
-$if not set yr $set yr 23
-$if not set ds $set ds g20_macro
+$if not set yr		$set yr 23
+$if not set ds		$set ds g20_macro
+$if not set thetadx	$setglobal thetadx 0.5
 $include "%system.fp%gtap12data"
 
 $ontext
@@ -24,6 +25,7 @@ $commodities:
 	PS(f,g,r)$(rm(r)*sf(f)*vfm(f,g,r))		! Sector-specific primary factors
 	PFX$card(rx)					! Real exchange rate (SOE model)
 	PA(i,r)$(rm(r)*cde(r)*vcm(i,r))			! Armington final demand price
+	PPX(g,r)$(rm(r)*vem(g,r)*sop)			! Export foreign exchange price
 
 $consumers:
 	RA(r)$rm(r)		! Representative agent
@@ -34,6 +36,10 @@ $auxiliary:
 	U(r)$(rm(r)*cde(r))	! Utility (index)
 	CC(r)$(rm(r)*cde(r))	! Consumption cost index
 	W(r)$(rm(r)*cde(r))	! Per capita welfare (money metric index);
+* ---------------------------------------------------------------------------------------
+	EXPORTS(g,r)$(sop*rm(r)*vem(g,r))	! Endogenous level of exports
+	REVEXP(g,r)$(sop*rm(r)*vem(g,r))	! Revenues of FX from exports
+* ---------------------------------------------------------------------------------------
 
 $prod:Y(g,r)$(rm(r)*vom(g,r)) s:0 t:etadx(g) m:esub(g,r) va:esubva(g) i.tl(m):esubdm(i)
 	o:P(g,r)	q:(vom(g,r)-vxm(g,r))	a:RA(r)  t:rto(g,r)	p:(1-rto(g,r))
@@ -73,6 +79,11 @@ $demand:RA(r)$(rm(r) and cd(r))
 	e:P("i",rnum)$rm(rnum)	q:vb(r)
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
+* ---------------------------------------------------------------------------------------
+	e:PPX(g,r)$(sop)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:PFX#(g)$(sop)		q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
+* ---------------------------------------------------------------------------------------
+
 
 *	Linear expenditure system:
 
@@ -85,6 +96,10 @@ $demand:RA(r)$(rm(r) and les(r))  s:0
 	e:P("i",rnum)$rm(rnum)	q:vb(r)
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
+* ---------------------------------------------------------------------------------------
+	e:PPX(g,r)$(sop)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:PFX#(g)$(sop)		q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
+* ---------------------------------------------------------------------------------------
 
 *	CDE demand:
 
@@ -98,12 +113,21 @@ $demand:RA(r)$(rm(r) and cde(r))  s:0
 	e:P("i",rnum)$rm(rnum)	q:vb(r)
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
+* ---------------------------------------------------------------------------------------
+	e:PPX(g,r)$(sop)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:PFX#(g)$(sop)		q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
+* ---------------------------------------------------------------------------------------
 
 *	-------------------------------------------------------------------
 *	Additional code for the SOE closure:
 
-$prod:X(i,r)$(rm(r)*vem(i,r))
+$prod:X(i,r)$(rm(r)*vem(i,r) and not sop)
 	o:PFX				q:(pem0(i,r)*vem(i,r))
+	i:P(i,r)$(not vxm(i,r))		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
+	i:PE(i,r)$vxm(i,r)		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
+
+$prod:X(i,r)$(rm(r)*vem(i,r) and sop)
+	o:PPX(i,r)			q:(pem0(i,r)*vem(i,r))
 	i:P(i,r)$(not vxm(i,r))		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 	i:PE(i,r)$vxm(i,r)		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 
@@ -122,6 +146,14 @@ $prod:A(i,r)$(rm(r)*cde(r)*vcm(i,r))  s:esubdm(i)
 	i:P(i,r)	q:vdfm(i,"c",r)	p:(1+rtfd0(i,"c",r)) a:RA(r) t:rtfd(i,"c",r)
 	i:PM(i,r)	q:vifm(i,"c",r)	p:(1+rtfi0(i,"c",r)) a:RA(r) t:rtfi(i,"c",r)
 
+
+* ---------------------------------------------------------------------------------------
+$constraint:EXPORTS(g,r)$(rm(r)*sop*vem(g,r))
+     EXPORTS(g,r)*PPX(g,r)**esubm(g)	=n= ( PFX )**esubm(g);
+
+$constraint:REVEXP(g,r)$(rm(r)*sop*vem(g,r))
+     REVEXP(g,r)*PFX		=n= EXPORTS(g,r)*PPX(g,r);
+* ---------------------------------------------------------------------------------------
 
 $constraint:D(i,r)$(cde(r)*rm(r)*vcm(i,r))
 	D(i,r) * sum(j$thetac(j,r), thetac(j,r) *
@@ -159,6 +191,13 @@ $report:
 $offtext
 $sysinclude mpsgeset gtap12
 alias (i,i_,j_), (f,f_);
+
+*---------------------------------------------------------------------------------------
+* EXPORTS.l(g)	= 1;
+* EXPORTS.lo(g)	= 0;
+* REVEXP.l(g)	= 1;
+* REVEXP.lo(g)	= 0;
+*---------------------------------------------------------------------------------------
 
 $macro pnum(r)		(sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))/sum(i_,vdfm(i_,"c",r)+vifm(i_,"c",r)))
 $macro DFM(f,g,r)	(V_FM.L(f,g,r)$(rm(r)*vom(g,r)*vfm(f,g,r)))

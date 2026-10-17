@@ -201,7 +201,7 @@ def task_test():
     }
 
 
-ds = 'g20_macro'
+ds = 'g20'
 
 
 def task_grid():
@@ -215,7 +215,7 @@ def task_grid():
         'forensics/CHN_soe_g20.data',
         'forensics/USA_gmr_g20.data',
         'forensics/CHN_gmr_g20.data',
-        f'forensics/output/{ds}/gmr/CHN.gdx',
+        f'forensics/output/{ds}/gtap/gmr/CHN.gdx',
         # lst files in output/g20/
     ]
 
@@ -235,7 +235,7 @@ def task_merge():
     dependencies = [
         'forensics/ssamerge.gms',
         'forensics/results_git.xlsx',
-        f'forensics/output/{ds}/gmr/CHN.gdx',
+        f'forensics/output/{ds}/gtap/gmr/CHN.gdx',
         ]
     targets = [
         'forensics/results.gdx',

@@ -109,6 +109,7 @@ display averate;
 parameter	results		Counterfactural simulation summary
 		gdpresults	Counterfactural simulation GDP results,
 		yresults	Counterfactural simulation activity levels,
+		figresults	Counterfactural simulation activity levels,
 		exitcode	Simulation exit codes;
 
 set		dsys	Final demand system /cd, les, cde/,
@@ -153,6 +154,8 @@ $include %code%gdpcalc
 
     gdpresults(dsys,tlvl,gdpcat,r,gdpitem) = gdp(gdpcat,r,gdpitem);
     yresults(dsys,tlvl,i) = 100*(Y.l(i,rcalc)-1);
+    figresults(dsys,tlvl,i) = yresults(dsys,tlvl,i);
+    figresults(dsys,tlvl,"W") = results(dsys,tlvl,"W");
   );
 );
 display results;

@@ -1,15 +1,15 @@
 $if not set ds $set ds g20
 
-$call gdxmerge output\%ds%\gtapingams\soe\*.gdx o=output\%ds%\gtapingams\soe.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtapingams\sop\*.gdx o=output\%ds%\gtapingams\sop.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtapingams\sop2\*.gdx o=output\%ds%\gtapingams\sop2.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtapingams\gmr\*.gdx o=output\%ds%\gtapingams\gmr.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtapingams\gmr_ls\*.gdx o=output\%ds%\gtapingams\gmr_ls.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtap\soe\*.gdx o=output\%ds%\gtap\soe.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtap\sop\*.gdx o=output\%ds%\gtap\sop.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtap\sop2\*.gdx o=output\%ds%\gtap\sop2.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtap\gmr\*.gdx o=output\%ds%\gtap\gmr.gdx id=results,gdpresults,yresults
-$call gdxmerge output\%ds%\gtap\gmr_ls\*.gdx o=output\%ds%\gtap\gmr_ls.gdx id=results,gdpresults,yresults
+$call gdxmerge output\%ds%\gtapingams\soe\*.gdx o=output\%ds%\gtapingams\soe.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtapingams\sop\*.gdx o=output\%ds%\gtapingams\sop.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtapingams\sop2\*.gdx o=output\%ds%\gtapingams\sop2.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtapingams\gmr\*.gdx o=output\%ds%\gtapingams\gmr.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtapingams\gmr_ls\*.gdx o=output\%ds%\gtapingams\gmr_ls.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtap\soe\*.gdx o=output\%ds%\gtap\soe.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtap\sop\*.gdx o=output\%ds%\gtap\sop.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtap\sop2\*.gdx o=output\%ds%\gtap\sop2.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtap\gmr\*.gdx o=output\%ds%\gtap\gmr.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gtap\gmr_ls\*.gdx o=output\%ds%\gtap\gmr_ls.gdx id=results,gdpresults,yresults,figresults
 
 
 $call gdxmerge output\%ds%\gtapingams\*.gdx o=output\%ds%\gtapingams.gdx

@@ -268,7 +268,7 @@ def task_merge():
     }
 
 
-def task_paperfigs():
+def task_tarifffigs():
     dependencies = [
         'forensics/tradetax.gms',
         'forensics/texcoords.py',
@@ -290,4 +290,32 @@ def task_paperfigs():
         'targets': targets,
         'verbosity': 2,
         'actions': [run_paperfigs],
+    }
+
+
+def task_resultsfigs():
+    dependencies = [
+        'forensics/process_results.gms',
+        'forensics/copyfigs.py',
+        'forensics/figures/g20_macro_USA_W.tex',
+        'forensics/results.gdx',
+    ]
+    targets = [
+        'forensics/figures/g20_macro_CHN_W.tex',
+        'forensics/figures/g20_macro_USA_W.data',
+        'forensics/figures/g20_macro_CHN_W.data',
+    ]
+
+    def create_figs():
+        # extract import tariffs and export taxes from
+        os.system('cd forensics & gams process_results & cd ..')
+        os.system(
+            "cd forensics & python copyfigs.py & cd .."
+        )
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [create_figs],
     }

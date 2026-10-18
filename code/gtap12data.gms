@@ -2,6 +2,7 @@ $title	GAMS Code to Read a GTAP12 Dataset
 
 $if not set ds $set ds gsd
 $if not set yr $set yr 23
+$if not set fsubm	$setglobal fsubm	1
 $if not set datadir $set datadir "%system.fp%\..\gamsdata\20%yr%\"
 
 $setglobal ds %ds%
@@ -232,6 +233,7 @@ etadx(i)$(1-%thetadx%) = esubd(i)/(1-%thetadx%);
 etadx(i)$(not (1-%thetadx%)) = +inf;
 esubdm(i) = esubd(i)/%thetadx%;
 vxm(i,s) = (vst(i,s) + sum(r,vxmd(i,s,r)))$(1/etadx(i));
+esubm(i) = esubm(i)*%fsubm%;
 
 parameter	gtapelasticities	Database elasticities;
 gtapelasticities(i,"esubt") = esubt(i);
@@ -272,4 +274,13 @@ les(r) = no;
 cd(r) = yes;
 
 scalar
-    sop	Flag indicating improved SOE version /0/;
+    sop		Flag indicating improved SOE version /0/,
+    sop2	Flag indicating other improved SOE version /0/;
+
+parameter
+    theta_xi(i)	Fix factor share in export demand of sop2,
+    fix0(i,r)	Fix factor in export demand of sop2;
+
+theta_xi(i)	= 1/esubm(i);
+*	Dummy assignment: vem(i,r) can be 0 at this point. Re-assign after loadmdl
+fix0(i,r) = theta_xi(i)/(1-theta_xi(i))*vem(i,r);

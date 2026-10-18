@@ -24,9 +24,10 @@ $set code ..%fs%code%fs%
 $if not set yr		$set 	yr	23
 $if not set ds      	$set 	ds	g20_macro
 $if not set rcalc   	$set 	rcalc	CHN
-$if not set mdl     	$set 	mdl	gmr
+$if not set mdl     	$set 	mdl	sop2
 $if not set soextax 	$set	soextax yes
 $if not set thetadx 	$setglobal thetadx	1
+$if not set fsubm	$setglobal fsubm	1
 
 set	tlvl /0*10/;
 
@@ -58,7 +59,10 @@ singleton set	rcalc(r) /%rcalc%/;
 
 $if %mdl%==gmr loadrm(r);
 $if %mdl%==soe loadrm("%rcalc%");
-$if %mdl%==sop loadrm("%rcalc%"); sop = 1;
+$if %mdl%==sop loadrm("%rcalc%");	sop = 1;
+$if %mdl%==sop2 loadrm("%rcalc%");	sop2 = 1;
+$if %mdl%==sop2 fix0(i,r) = theta_xi(i)/(1-theta_xi(i))*vem(i,r)*pem0(i,r);
+
 
 *	Macro to update the average export subsidy rate on exports to the
 *	rest of the world (only relevant for the SOE closure):
@@ -104,6 +108,7 @@ display averate;
 
 parameter	results		Counterfactural simulation summary
 		gdpresults	Counterfactural simulation GDP results,
+		yresults	Counterfactural simulation activity levels,
 		exitcode	Simulation exit codes;
 
 set		dsys	Final demand system /cd, les, cde/,
@@ -147,7 +152,7 @@ $include %gams.scrdir%gtap12.gen
 $include %code%gdpcalc
 
     gdpresults(dsys,tlvl,gdpcat,r,gdpitem) = gdp(gdpcat,r,gdpitem);
-
+    yresults(dsys,tlvl,i) = 100*(Y.l(i,rcalc)-1);
   );
 );
 display results;

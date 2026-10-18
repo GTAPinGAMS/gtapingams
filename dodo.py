@@ -216,6 +216,10 @@ def task_grid():
         'forensics/USA_gmr_g20.data',
         'forensics/CHN_gmr_g20.data',
         f'forensics/output/{ds}/gtap/gmr/CHN.gdx',
+        f'forensics/output/{ds}/gtap/gmr_ls/CHN.gdx',
+        f'forensics/output/{ds}/gtap/soe/CHN.gdx',
+        f'forensics/output/{ds}/gtap/sop/CHN.gdx',
+        f'forensics/output/{ds}/gtap/sop2/CHN.gdx',
         # lst files in output/g20/
     ]
 
@@ -236,6 +240,10 @@ def task_merge():
         'forensics/ssamerge.gms',
         'forensics/results_git.xlsx',
         f'forensics/output/{ds}/gtap/gmr/CHN.gdx',
+        f'forensics/output/{ds}/gtap/gmr_ls/CHN.gdx',
+        f'forensics/output/{ds}/gtap/soe/CHN.gdx',
+        f'forensics/output/{ds}/gtap/sop/CHN.gdx',
+        f'forensics/output/{ds}/gtap/sop2/CHN.gdx',
         ]
     targets = [
         'forensics/results.gdx',

@@ -2,7 +2,8 @@ $title	 GTAP12inGAMS -- GAMS/MPSGE Formulation
 
 $if not set yr		$set yr 23
 $if not set ds		$set ds g20_macro
-$if not set thetadx	$setglobal thetadx 0.5
+$if not set thetadx	$setglobal thetadx	0.5
+$if not set fsubm	$setglobal fsubm	1
 $include "%system.fp%gtap12data"
 
 $ontext
@@ -26,6 +27,7 @@ $commodities:
 	PFX$card(rx)					! Real exchange rate (SOE model)
 	PA(i,r)$(rm(r)*cde(r)*vcm(i,r))			! Armington final demand price
 	PPX(g,r)$(rm(r)*vem(g,r)*sop)			! Export foreign exchange price
+	PFIX(i,r)$(rm(r)*vem(i,r)*sop2)			! Fixed factor for exports
 
 $consumers:
 	RA(r)$rm(r)		! Representative agent
@@ -121,10 +123,14 @@ $demand:RA(r)$(rm(r) and cde(r))  s:0
 *	-------------------------------------------------------------------
 *	Additional code for the SOE closure:
 
-$prod:X(i,r)$(rm(r)*vem(i,r) and not sop)
-	o:PFX				q:(pem0(i,r)*vem(i,r))
+$prod:X(i,r)$(rm(r)*vem(i,r) and not sop) s:1
+	o:PFX$(not sop2)		q:(pem0(i,r)*vem(i,r))
+	o:PFX$sop2			q:(pem0(i,r)*vem(i,r)+fix0(i,r))
 	i:P(i,r)$(not vxm(i,r))		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
++					p:pem0(i,r)
 	i:PE(i,r)$vxm(i,r)		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
++					p:pem0(i,r)
+	i:PFIX(i,r)$sop2		q:fix0(i,r)
 
 $prod:X(i,r)$(rm(r)*vem(i,r) and sop)
 	o:PPX(i,r)			q:(pem0(i,r)*vem(i,r))
@@ -136,6 +142,7 @@ $prod:X(i,r)$(rx(r)*vem(i,r))
 	i:PFX			q:vem(i,r)
 
 $demand:ROW$card(rx)
+	e:PFIX(i,rm)$(vem(i,rm) and sop2)	q:fix0(i,rm)
 	e:PFX			q:rowpfx
 	e:P("i",rnum)$rm(rnum)	q:(-sum(rm,vb(rm)))
 	e:PT(j)			q:(-sum((i,s,rx), vtwr(j,i,s,rx)))

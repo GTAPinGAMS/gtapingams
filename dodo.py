@@ -308,7 +308,7 @@ def task_resultsfigs():
 
     def create_figs():
         # extract import tariffs and export taxes from
-        os.system('cd forensics & gams process_results & cd ..')
+        os.system(f'cd forensics & gams process_results --ds={ds} & cd ..')
         os.system(
             "cd forensics & python copyfigs.py & cd .."
         )

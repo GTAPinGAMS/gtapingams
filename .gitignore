@@ -47,6 +47,7 @@
 /forensics/output/g20/*
 /forensics/*.lst
 /forensics/figures/*.data
+/forensics/figures/*.tex
 /forensics/figures/*_by*.tex
 /forensics/results.*
 /forensics/output/g20_macro/*

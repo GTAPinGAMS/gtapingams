@@ -279,8 +279,15 @@ scalar
 
 parameter
     theta_xi(i)	Fix factor share in export demand of sop2,
-    fix0(i,r)	Fix factor in export demand of sop2;
+    fix0(i,r)	Fix factor in export demand of sop2,
+    usei(i)	Only divide by esubm for i that are actually traded - avoid zeros;
 
-theta_xi(i)	= 1/esubm(i);
+usei(i)	= yes$(
+    sum((r,s),
+	abs(vxmd(i,r,s))
+    )
+);
+
+theta_xi(i)$usei(i)	= 1/esubm(i);
 *	Dummy assignment: vem(i,r) can be 0 at this point. Re-assign after loadmdl
 fix0(i,r) = theta_xi(i)/(1-theta_xi(i))*vem(i,r);

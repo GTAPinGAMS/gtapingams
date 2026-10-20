@@ -26,8 +26,8 @@ $commodities:
 	PS(f,g,r)$(rm(r)*sf(f)*vfm(f,g,r))		! Sector-specific primary factors
 	PFX$card(rx)					! Real exchange rate (SOE model)
 	PA(i,r)$(rm(r)*cde(r)*vcm(i,r))			! Armington final demand price
-	PPX(g,r)$(rm(r)*vem(g,r)*sop)			! Export foreign exchange price
-	PFIX(i,r)$(rm(r)*vem(i,r)*sop2)			! Fixed factor for exports
+	PPX(g,r)$(rm(r)*vem(g,r)*sate)			! Export foreign exchange price
+	PFIX(i,r)$(rm(r)*vem(i,r)*sate2)			! Fixed factor for exports
 
 $consumers:
 	RA(r)$rm(r)		! Representative agent
@@ -39,8 +39,8 @@ $auxiliary:
 	CC(r)$(rm(r)*cde(r))	! Consumption cost index
 	W(r)$(rm(r)*cde(r))	! Per capita welfare (money metric index);
 * ---------------------------------------------------------------------------------------
-	EXPORTS(g,r)$(sop*rm(r)*vem(g,r))	! Endogenous level of exports
-	REVEXP(g,r)$(sop*rm(r)*vem(g,r))	! Revenues of FX from exports
+	EXPORTS(g,r)$(sate*rm(r)*vem(g,r))	! Endogenous level of exports
+	REVEXP(g,r)$(sate*rm(r)*vem(g,r))	! Revenues of FX from exports
 * ---------------------------------------------------------------------------------------
 
 $prod:Y(g,r)$(rm(r)*vom(g,r)) s:0 t:etadx(g) m:esub(g,r) va:esubva(g) i.tl(m):esubdm(i)
@@ -82,8 +82,8 @@ $demand:RA(r)$(rm(r) and cd(r))
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
 * ---------------------------------------------------------------------------------------
-	e:PPX(g,r)$(sop)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
-	e:PFX#(g)$(sop)		q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
+	e:PPX(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:PFX#(g)$(sate)	q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
 * ---------------------------------------------------------------------------------------
 
 
@@ -99,8 +99,8 @@ $demand:RA(r)$(rm(r) and les(r))  s:0
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
 * ---------------------------------------------------------------------------------------
-	e:PPX(g,r)$(sop)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
-	e:PFX#(g)$(sop)		q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
+	e:PPX(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:PFX#(g)$(sate)	q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
 * ---------------------------------------------------------------------------------------
 
 *	CDE demand:
@@ -116,23 +116,23 @@ $demand:RA(r)$(rm(r) and cde(r))  s:0
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
 * ---------------------------------------------------------------------------------------
-	e:PPX(g,r)$(sop)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
-	e:PFX#(g)$(sop)		q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
+	e:PPX(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:PFX#(g)$(sate)	q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
 * ---------------------------------------------------------------------------------------
 
 *	-------------------------------------------------------------------
 *	Additional code for the SOE closure:
 
-$prod:X(i,r)$(rm(r)*vem(i,r) and not sop) s:1
-	o:PFX$(not sop2)		q:(pem0(i,r)*vem(i,r))
-	o:PFX$sop2			q:(pem0(i,r)*vem(i,r)+fix0(i,r))
+$prod:X(i,r)$(rm(r)*vem(i,r) and not sate) s:1
+	o:PFX$(not sate2)		q:(pem0(i,r)*vem(i,r))
+	o:PFX$sate2			q:(pem0(i,r)*vem(i,r)+fix0(i,r))
 	i:P(i,r)$(not vxm(i,r))		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 +					p:pem0(i,r)
 	i:PE(i,r)$vxm(i,r)		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 +					p:pem0(i,r)
-	i:PFIX(i,r)$sop2		q:fix0(i,r)
+	i:PFIX(i,r)$sate2		q:fix0(i,r)
 
-$prod:X(i,r)$(rm(r)*vem(i,r) and sop)
+$prod:X(i,r)$(rm(r)*vem(i,r) and sate)
 	o:PPX(i,r)			q:(pem0(i,r)*vem(i,r))
 	i:P(i,r)$(not vxm(i,r))		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 	i:PE(i,r)$vxm(i,r)		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
@@ -142,7 +142,7 @@ $prod:X(i,r)$(rx(r)*vem(i,r))
 	i:PFX			q:vem(i,r)
 
 $demand:ROW$card(rx)
-	e:PFIX(i,rm)$(vem(i,rm) and sop2)	q:fix0(i,rm)
+	e:PFIX(i,rm)$(vem(i,rm) and sate2)	q:fix0(i,rm)
 	e:PFX			q:rowpfx
 	e:P("i",rnum)$rm(rnum)	q:(-sum(rm,vb(rm)))
 	e:PT(j)			q:(-sum((i,s,rx), vtwr(j,i,s,rx)))
@@ -155,10 +155,10 @@ $prod:A(i,r)$(rm(r)*cde(r)*vcm(i,r))  s:esubdm(i)
 
 
 * ---------------------------------------------------------------------------------------
-$constraint:EXPORTS(g,r)$(rm(r)*sop*vem(g,r))
+$constraint:EXPORTS(g,r)$(rm(r)*sate*vem(g,r))
      EXPORTS(g,r)*PPX(g,r)**esubm(g)	=n= ( PFX )**esubm(g);
 
-$constraint:REVEXP(g,r)$(rm(r)*sop*vem(g,r))
+$constraint:REVEXP(g,r)$(rm(r)*sate*vem(g,r))
      REVEXP(g,r)*PFX		=n= EXPORTS(g,r)*PPX(g,r);
 * ---------------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@ $title	Write pgfplots .data Files from figresults in results.gdx
 *	figresults(d1,...,d7) is read from results.gdx, where
 *	   d1  dataset            (e.g. g20_macro)
 *	   d2  data/parameter variant (e.g. gtap, gtapingams)
-*	   d3  model closure      (gmr, soe, sop, ...)
+*	   d3  model closure      (gmr, soe, sate, ...)
 *	   d4  region             (ARG, CHN, ...)
 *	   d5  demand system      (cd, les, cde)
 *	   d6  tariff level       (0*10)

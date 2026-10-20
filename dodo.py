@@ -201,7 +201,7 @@ def task_test():
     }
 
 
-ds = 'g20'
+ds = 'g20_macro'
 
 
 def task_grid():
@@ -218,8 +218,8 @@ def task_grid():
         f'forensics/output/{ds}/gtap/gmr/CHN.gdx',
         f'forensics/output/{ds}/gtap/gmr_ls/CHN.gdx',
         f'forensics/output/{ds}/gtap/soe/CHN.gdx',
-        f'forensics/output/{ds}/gtap/sop/CHN.gdx',
-        f'forensics/output/{ds}/gtap/sop2/CHN.gdx',
+        f'forensics/output/{ds}/gtap/sate/CHN.gdx',
+        f'forensics/output/{ds}/gtap/sate2/CHN.gdx',
         # lst files in output/g20/
     ]
 
@@ -242,8 +242,8 @@ def task_merge():
         f'forensics/output/{ds}/gtap/gmr/CHN.gdx',
         f'forensics/output/{ds}/gtap/gmr_ls/CHN.gdx',
         f'forensics/output/{ds}/gtap/soe/CHN.gdx',
-        f'forensics/output/{ds}/gtap/sop/CHN.gdx',
-        f'forensics/output/{ds}/gtap/sop2/CHN.gdx',
+        f'forensics/output/{ds}/gtap/sate/CHN.gdx',
+        f'forensics/output/{ds}/gtap/sate2/CHN.gdx',
         ]
     targets = [
         'forensics/results.gdx',

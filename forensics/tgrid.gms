@@ -24,7 +24,7 @@ $set code ..%fs%code%fs%
 $if not set yr		$set 	yr	23
 $if not set ds      	$set 	ds	g20_macro
 $if not set rcalc   	$set 	rcalc	CHN
-$if not set mdl     	$set 	mdl	sop2
+$if not set mdl     	$set 	mdl	sate2
 $if not set soextax 	$set	soextax yes
 $if not set thetadx 	$setglobal thetadx	1
 $if not set fsubm	$setglobal fsubm	1
@@ -59,9 +59,9 @@ singleton set	rcalc(r) /%rcalc%/;
 
 $if %mdl%==gmr loadrm(r);
 $if %mdl%==soe loadrm("%rcalc%");
-$if %mdl%==sop loadrm("%rcalc%");	sop = 1;
-$if %mdl%==sop2 loadrm("%rcalc%");	sop2 = 1;
-$if %mdl%==sop2 fix0(i,r) = theta_xi(i)/(1-theta_xi(i))*vem(i,r)*pem0(i,r);
+$if %mdl%==sate loadrm("%rcalc%");	sate = 1;
+$if %mdl%==sate2 loadrm("%rcalc%");	sate2 = 1;
+$if %mdl%==sate2 fix0(i,r) = theta_xi(i)/(1-theta_xi(i))*vem(i,r)*pem0(i,r);
 
 
 *	Macro to update the average export subsidy rate on exports to the

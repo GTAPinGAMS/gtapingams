@@ -4,9 +4,9 @@
 %
 % Style follows Figures 12-13 of Lanz & Rutherford (2016):
 %   colour     = parameter source  (black: gtap, red: gtapingams)
-%   line style = model closure     (solid: gmr, dotted: soe, dashed: sop,
+%   line style = model closure     (solid: gmr, dotted: soe, dashed: sate,
 %                                   dash-dotted: gmr_ls)
-% Column sop2 is not plotted (identical to sop in the current results).
+% Column sate2 is not plotted (identical to sate in the current results).
 %
 % The legend is stored under the name g20_macro_USA_W_legend; place
 % \ref{g20_macro_USA_W_legend} in the master file where it should appear
@@ -42,10 +42,10 @@
 \addlegendentry{\textsc{gtap}, \textsc{soe}}
 \addplot[color=red,   dotted]       table [x=tlvl, y=gtapingams-soe]    {\datafile};
 \addlegendentry{\textsc{gtapingams}, \textsc{soe}}
-\addplot[color=black, dashed]       table [x=tlvl, y=gtap-sop]          {\datafile};
-\addlegendentry{\textsc{gtap}, \textsc{sop}}
-\addplot[color=red,   dashed]       table [x=tlvl, y=gtapingams-sop]    {\datafile};
-\addlegendentry{\textsc{gtapingams}, \textsc{sop}}
+\addplot[color=black, dashed]       table [x=tlvl, y=gtap-sate]          {\datafile};
+\addlegendentry{\textsc{gtap}, \textsc{sate}}
+\addplot[color=red,   dashed]       table [x=tlvl, y=gtapingams-sate]    {\datafile};
+\addlegendentry{\textsc{gtapingams}, \textsc{sate}}
 \addplot[color=black, dashdotted]   table [x=tlvl, y=gtap-gmr_ls]       {\datafile};
 \addlegendentry{\textsc{gtap}, \textsc{gmr\_ls}}
 \addplot[color=red,   dashdotted]   table [x=tlvl, y=gtapingams-gmr_ls] {\datafile};

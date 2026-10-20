@@ -274,12 +274,12 @@ les(r) = no;
 cd(r) = yes;
 
 scalar
-    sop		Flag indicating improved SOE version /0/,
-    sop2	Flag indicating other improved SOE version /0/;
+    sate		Flag indicating improved SOE version /0/,
+    sate2	Flag indicating other improved SOE version /0/;
 
 parameter
-    theta_xi(i)	Fix factor share in export demand of sop2,
-    fix0(i,r)	Fix factor in export demand of sop2,
+    theta_xi(i)	Fix factor share in export demand of sate2,
+    fix0(i,r)	Fix factor in export demand of sate2,
     usei(i)	Only divide by esubm for i that are actually traded - avoid zeros;
 
 usei(i)	= yes$(

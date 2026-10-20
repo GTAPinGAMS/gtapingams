@@ -1,0 +1,46 @@
+\section{Benchmark Trade Taxes}\label{app:tariffs}
+
+Figures \ref{fig:taxcom1} to \ref{fig:taxpar2} summarize the commodity and partner structure of the taxes on imports into the four countries in the \texttt{g20} aggregation, in the style of \citet{LanzRutherford2016}.
+They show import tariff rates of the importing country and export tax rates of the exporting regions, together with the value of imports including tariffs.
+Averaged over all imports, the United States levy import tariffs of 1.1\% and face export taxes of their trading partners of 0.5\%.
+For China, the corresponding figures are 1.9\% and 0.5\%, for South Africa 4.1\% and 1.4\%, and for Argentina 4.9\% and 1.3\%.
+Protection is far from uniform.
+In the United States, the highest rates apply to sugar, leather, dairy products, and wearing apparel; in China, to wheat, sugar, other cereals, and wool.
+South Africa and Argentina levy rates of 15--30\% on wearing apparel, leather, and textiles.
+Across partners, preferential agreements are visible: the United States levy almost no tariffs on imports from Mexico and Canada, Argentina none on imports from Brazil.
+
+\begin{figure}[p!]
+\centering
+\input{jgea_new/figures/tariff_commodity_USA}
+\vspace{0.1in}
+\input{jgea_new/figures/tariff_commodity_CHN}
+\pgfplotslegendfromname{tariffcom_legend}
+\caption{Trade taxes on imports by commodity, United States and China (\GTAP 12, 2023; 23 most highly taxed commodities).}\label{fig:taxcom1}
+\end{figure}
+
+\begin{figure}[p!]
+\centering
+\input{jgea_new/figures/tariff_commodity_ZAF}
+\vspace{0.1in}
+\input{jgea_new/figures/tariff_commodity_ARG}
+\pgfplotslegendfromname{tariffcom_legend}
+\caption{Trade taxes on imports by commodity, South Africa and Argentina (\GTAP 12, 2023; 23 most highly taxed commodities).}\label{fig:taxcom2}
+\end{figure}
+
+\begin{figure}[p!]
+\centering
+\input{jgea_new/figures/tariff_txtm_USA}
+\vspace{0.1in}
+\input{jgea_new/figures/tariff_txtm_CHN}
+\pgfplotslegendfromname{tariffpar_legend}
+\caption{Trade taxes on imports by trading partner, United States and China (\GTAP 12, 2023).}\label{fig:taxpar1}
+\end{figure}
+
+\begin{figure}[p!]
+\centering
+\input{jgea_new/figures/tariff_txtm_ZAF}
+\vspace{0.1in}
+\input{jgea_new/figures/tariff_txtm_ARG}
+\pgfplotslegendfromname{tariffpar_legend}
+\caption{Trade taxes on imports by trading partner, South Africa and Argentina (\GTAP 12, 2023).}\label{fig:taxpar2}
+\end{figure}

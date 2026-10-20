@@ -319,3 +319,67 @@ def task_resultsfigs():
         'verbosity': 2,
         'actions': [create_figs],
     }
+
+
+def task_paperfigs():
+    dependencies = [
+        'latex/jgea_new/make_dumbbells.py',
+        'latex/jgea_new/make_figs.py',
+        'forensics/figures/g20_macro_USA_W.data',
+        'forensics/figures/g20_macro_USA_gtap.data',
+        'forensics/figures/g20_macro_USA_gtapingams.data',
+    ]
+    targets = [
+        f'latex/jgea_new/figures/dumbbell_{ds}_USA_gtap.tex',
+        f'latex/jgea_new/figures/dumbbell_{ds}_USA_gtapingams.tex',
+        'latex/jgea_new/figures/res_USA_W_gtap.tex',
+        'latex/jgea_new/figures/res_USA_W_gtapingams.tex',
+    ]
+
+    def create_figs():
+        os.system('cd latex & cd jgea_new' +
+                  ' & python make_figs.py' +
+                  ' & python make_dumbbells.py' +
+                  ' & cd .. & cd ..')
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [create_figs],
+    }
+
+
+def task_compile_paper():
+    dependencies = [
+        'latex/jgea_new.tex',
+        'latex/jgea.cls',
+        'latex/jgea_new/jgea_new.bib',
+        'latex/jgea_new/appendices/appendix_model.tex',
+        'latex/jgea_new/appendices/appendix_tariffs.tex',
+        'latex/jgea_new/appendices/calibration_lr.tex',
+        'latex/jgea_new/appendices/model_lr.tex',
+        'latex/jgea_new/appendices/closures.tex',
+        'latex/jgea_new/appendices/programs.tex',
+        f'latex/jgea_new/figures/dumbbell_{ds}_USA_gtap.tex',
+        f'latex/jgea_new/figures/dumbbell_{ds}_USA_gtapingams.tex',
+        'latex/jgea_new/figures/res_USA_W_gtap.tex',
+        'latex/jgea_new/figures/res_USA_W_gtapingams.tex',
+        'latex/jgea_new/data/USA_commodity_m_top23.data',
+        'latex/jgea_new/data/USA_txtm_m.plot.data',
+    ]
+
+    targets = [
+        'latex/jgea_new.pdf'
+    ]
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': ['cd latex' +
+                    ' & pdflatex jgea_new.tex' +
+                    ' & bibtex jgea_new.aux' +
+                    ' & pdflatex jgea_new.tex & pdflatex jgea_new.tex' +
+                    ' & cd ..'],
+    }

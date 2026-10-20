@@ -1,0 +1,247 @@
+Please write an academic paper for Journal of Global Economic Analysis (JGEA).
+Its contribution:
+- Offer a simple improvement to the small open economy (SOE)
+  assumption that allows for modeling of trade issues that involve
+  terms-of-trade for one region models.  This is valuable for models
+  that are based on single-country input--output tables (IOTs) or
+  single-country Social Accounting Matrices (SAMs) rather than global
+  data bases like, e.g., GTAP. The context of GTAPinGAMS allows for
+  verifying that the improved SOE closure gives a reasonably good
+  approximation of a global model.
+- Evaluate how close the improved SOE closure stays to global versions of GTAP.
+- Present an update GTAP9inGAMS to GTAP12inGAMS.
+
+The modelling framework relies heavily on the paper by Lanz and
+Rutherford (2016). This should be made transparent. I think the model
+documentation of Lanz and Rutherford should be given in the Appendix
+for completeness, and the model section (Section 2) should give an
+overview of the important model features with an emphansis on the
+things that have been changed compared to the original from 2016. To
+get a precise overview of the differences, compare model files from git
+commit 41442b6c with the current version at 84de566e (where the main
+branch currently points to).
+
+./latex/jgea.tex gives the source of the Lanz and Rutherford paper,
+./latex/jgea_ladi.tex is a version thereof that illustrates how
+figures and data created in ./forensics/figures can be included in the
+paper's figures. Write the paper to ./latex/jgea_new.tex and put files
+that need to be included in ./latex/jgea_new.tex into a new folder
+./latex/jgea_new/ (copy [not move!] existing ones from ./latex/ as you
+see fit).
+
+Here's an outline with org-mode (emacs) markup. It mixes text outline
+with instructions to you (sometimes instructions are explicitly
+labelled "instructions:", but you cannot always rely on this):
+
+* 1 Introduction
+
+Restricted data availability or model dimensionality make it that some
+Computable General Equilibrium (CGE) models have to be written as
+single country models.  More often than not, the small open economy
+(SOE) assumption is chosen for formulating single country models which
+assume global market prices to be fixed. Without careful calibration,
+fix global market prices can make imported or exported quantities very
+sensitive to domestic price changes. The classical approach to such
+calibration was given by de Melo and Robinson (1989). It works around
+the issue of fix global market prices by calibrating finite price
+elasticities of both imports and exports in the SOE. This is achieved
+by making the provision of domestically produced goods on local and
+international markets subject to imperfect transformability (described
+by a finite elasticity of transformation EOT) and intermediate inputs
+subject to imperfect substitutability between imports and domestically
+supplied varieties (given by a finite EOS). While this yields
+reasonable quantity responses to price shocks, Lanz and Rutherford
+(2016) and Schreiber et al. (2024) (as well as sources cited therein)
+show that thusly calibrated SOE models cannot keep track of welfare
+impacts in a way consistent with global models due to missing
+terms-of-trade effects.
+
+A popular fix is to switch to a large open economy (LOE)
+model. Developed by James Markusen\footnote{%
+https://www.colorado.edu/faculty/markusen/computation-manuscript },
+this framework has found application in models such as the MIT's USREP
+model (Yuan et al., 2019). But the correct calibration of the price
+elasticities of the world's export demand and import supply is not
+self evident and the only guidance for this I could find is a recent
+paper by Schreiber et al. (2024). They use the GTAPinGAMS model for
+in-model estimation of the elasticities and calibrate a LOE version of
+the US economy. They show their calibrated LOE model to be very
+successful in reproducing the results of the global GTAPinGAMS model.
+
+In this paper, I go a similar yet easier route for calibrating an
+improved SOE model. I observe that the missing terms-of-trade effects
+in SOE models is a direct consequence of the assumption that both
+import and export prices are fixed at global market prices (the small
+modelled economy cannot affect these). But this is not the situation
+faced by small countries in a global CGE model such as the GTAP model
+(Corong et al. 2017): The Armington assumption makes it that country
+A's output of commodity $i$ is traded-off with imports from elsewhere
+by another country B's importers at a (constant) elasticity of
+substitution (EOS) of, say, $\sigma^{m}_i$. In the limit of the ratio
+of the size of A's economy over the size of the global economy going
+to 0, the activity levels and overall import demands of other
+countries' sectors will be indeed unaffected by price levels in the
+SOE. But the market power of the SOE's exports /within/ other
+countries' overall imports is unaffected by SOE being small compared
+to the world. Caliendo and Feenstra (2024) kindly showed that in the
+limit of the SOE being of size zero compared to the global economy,
+the global demand for its exports has a price elasticity that
+corresponds to $\sigma^{m}_i$ in above notation.
+
+I therefore propose an improved SOE (how about ``small armington trade
+economy'' or SATE for short?) model, where global demand for the
+SATE's export of commodity $i$ has a price elasticity informed by the
+sector's Armington elasticity $\sigma^{m}_i$ and import prices are
+fixed at exogenous global price levels.
+
+In this paper I show how well the SATE model compares to a global
+version of GTAPinGAMS. It becomes evident that Schreiber et al.'s
+careful calibration of the LOE model is superior to my approach but
+that the deviations of SATE's results is does not exceed the
+sensitivity of GTAPinGAMS results with respect to uncertain Armington
+elasticities. The straight forward calibration of the SATE model makes
+it an attractive choice for single-country CGE models.
+
+In the following, I desribe the model (section 2) and the
+
+
+* 2 Model description
+Description of main features of the model. Refer to the Appendix for
+more details. Write Appendix.
+
+Make sure that it is clear how gtap and gtapingams model version
+(Scenario design in Section 3) are implemented.
+
+Make sure that it is clear how SOE and GMR differ in Lanz and
+Rutherford's framework.
+
+Describe both sop and sop2 as versions of SATE formulations. Praise
+sop as the simpler to implement since it does not necessitate
+explicitly listing ROW's accounts. (Listing ROW's accounts comes
+natural in a single-country model derived from global GTAP data. But
+single-country models calibrated from national input--output tables
+(IOTs) or social accounting matrices (SAMs) make it an extra effort to
+list ROW as an extra agent.)  sop2 is the implementation of the price
+elasticity of ROW's export demand as given by Schreiber et al. (2024).
+Both versions are given in the code for verifying that the yield
+exactly the same results. Since they do agree perfectly, only results
+for sop are discussed below as the trade closure SATE.
+
+Give the regions that are available in the global model for the g20
+and g20_macro aggregations of the GTAP data: G20 plus large
+regions. (Taken from the original code by Lanz and Rutherford (2016).)
+
+List sectors as in the g20_macro aggregation of GTAP data.
+
+* 3 Comparison between SATE and the global GTAPinGAMS model
+** Scenario design
+model verions:
+gtap vs gtapingams: gtap views domestic output as a homogenous good
+that can be both sold domestically and exported. GTAPinGAMS assumes an
+finite EOT between exported and domestically marketed version of the
+output. It compensates the introduction of the finite EOT by
+increasing the substitutability between imports and domestic goods. In
+line with Lanz and Rutherford, I assume the same EOT and armington EOS
+for the global and the SOE version of the model.
+
+trade closures:
+- GMR: standard global CGE model
+- GMR_LS: the global CGE model with EOS between imports from different
+  source countries halved.  Ahmad et al. (2021) show that elasticities
+  of substitution in Armington trade aggregators are quite uncertain
+  and that GTAP estimates are at the upper end of the range of
+  estimates. This motivates GMR_LS as a sensitivity analysis.
+- SOE: SOE model with fix world prices. This is doomed to produce
+  bang-bang solutions win the gtap model verion
+- SATE: (called sop in the model code) This model assumes market power
+  of SATE sectors in their export markets. Price elasticities of
+  world's export demand is given by the respective Armington
+  elasticity.
+
+tariff scenarios:
+- I reuse the tariff scenarios of Lanz and Rutherford (2016). Average
+  tariff rates from 0 to 10 percent in steps of 1 percentage point.
+Show the figures of benchmark tariff rates to illustrate what tariffs
+are in place.  Do this for two large economies (USA and China) and the
+two smalles G20 economies (South Africa and Argentina)
+
+** Results
+Show the results for two large economies (USA and China) and the two
+smallest G20 economies (South Africa and Argentina).
+
+Discuss how well SATE predicts the optimal tariff level (based on
+countries' consumer welfare W given in Hicksian EV (% of baseline
+monetary utility)) that GMR would recommend (not super well, but much
+better than SOE). Put this in context by comparing GMR with GMR_ls
+results: This illustrates how uncertain W and its optimum across
+tariff levels is due to uncertainty in what the correct Armington
+elasticities are. The intuition seems ``clear'': lower Armington
+elasticities mean more market power of a sector's overall exports in
+importing markets, and thus higher import tariffs and export taxes can
+be implemented for increasing terms-of-trade without distorting
+quantities as much as with high elasticities.
+
+Instructions: I think it makes sense to show W across tariff levels
+for the four countries separately. Put different selections of (model
+verion--trade closure) pairs in the same graph as you see fit.
+
+Discuss results for activity level Y for sectors Agriculture (agr),
+Manufacturing (mfr), Energy (enr), and Service (ser) across model
+versions and countries. This is a mixed bag. Show examples for good
+fits and also show the bad ones.
+
+* 4 Conclusion
+
+Highlight that my SATE is easy to implement and that differences to
+full global model are not bigger in size than the uncertainty in
+results due to the uncertainty about the right Armington elasticities.
+
+While my 'gtap' version of the model is closer to the original GTAP
+model, 'gtapingams' is not without merit. There may be some ambiguity
+as to price responses of traded quantities being caused by imperfect
+transformation on the production (supply) side or by imperfect
+substitution on the demand side. (Instuction: check Ahmad et
+al. [2021] to see if there is not a nod to this in the paper. I think
+I remeber something.) Comparing results from gtapingams and gtap model
+versions can be interpreted as a sensitivity analysis with respect to
+this uncertainty.
+
+* References
+
+Lanz, B., & Rutherford, T. F. (2016). GTAPinGAMS: Multiregional and
+Small Open Economy Models. Journal of Global Economic Analysis, 1(2),
+1–77. https://doi.org/10.21642/JGEA.010201AF
+
+Schreiber, A., Marten, A., & Wolverton, A. (2024). Approximating Terms
+of Trade Effects in Single Country CGE Models. Journal of Global
+Economic Analysis, 9(2), 70–111.
+https://doi.org/10.21642/JGEA.090202AF
+
+Corong, E. L., Hertel, T. W., McDougall, R., Tsigas, M. E., &
+Mensbrugghe, D. van der. (2017). The Standard GTAP Model,
+Version 7. Journal of Global Economic Analysis, 2(1),
+1–119. https://doi.org/10.21642/JGEA.020101AF
+
+de Melo, J., & Robinson, S. (1989). Product differentiation and the
+treatment of foreign trade in computable general equilibrium models of
+small economies. Journal of International Economics, 27(1),
+47–67. https://doi.org/10.1016/0022-1996(89)90077-9
+
+Yuan, M., Rausch, S., Caron, J., Paltsev, S., & Reilly, J. (2019). The
+MIT US Regional Energy Policy (USREP) model: The base model and
+revisions. Joint Program Technical Note TN, 18.
+https://scholar.google.com/scholar?cluster=12603282695423835715&hl=en&oi=scholarr
+
+Caliendo, L., & Feenstra, R. C. (2024). Foundation of the small open
+economy model with product differentiation. Journal of International
+Economics, 150, 103820. https://doi.org/10.1016/j.jinteco.2023.103820
+
+Ahmad, S., Montgomery, C., & Schreiber, S. (2021). A COMPARISON OF
+ARMINGTON ELASTICITY ESTIMATES IN THE TRADE LITERATURE. Journal Of
+International Commerce And Economics.
+https://www.usitc.gov/staff_publications/jice/comparison_sectoral_armington_elasticity_estimates
+
+
+* Appendix
+* A Full Model documentation
+* B Additional model results

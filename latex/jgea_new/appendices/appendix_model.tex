@@ -1,0 +1,19 @@
+\section{Model Documentation}\label{app:model}
+
+This appendix documents the \GTAPtwelve model for completeness.
+Subsections \ref{sets_sec}--\ref{equil} and \ref{app:thetadx} reproduce, with minor edits, Sections 2, 3, and 4.3 of \citet{LanzRutherford2016}.
+The edits concern (i) the dimensions of the \GTAP 12 Data Base, (ii) the fact that a finite elasticity of transformation between domestic and export supply may now be used in the \GMR closure as well, and (iii) the valuation of the current account, which follows the \GAMS code.
+Subsections \ref{app:closures} and \ref{app:programs} are new: they document the closures with respect to the rest of the world, including the \SATE closure proposed in this paper, and the programs.
+The \MPSGE source code of the model is listed in Subsection \ref{app:code}.
+Readers interested in the \LES and \CDE demand systems, which are part of the code but not used in this paper, are referred to Appendices C and D of \citet{LanzRutherford2016}.
+
+\input{jgea_new/appendices/model_lr}
+\input{jgea_new/appendices/closures}
+\input{jgea_new/appendices/calibration_lr}
+\input{jgea_new/appendices/programs}
+
+\subsection[Code]{\MPSGE code of the model (\texttt{code/mge.gms})}\label{app:code}
+
+The listing below is read directly from the file \texttt{code/mge.gms} of the distribution when this document is compiled.
+
+\VerbatimInput[fontsize=\tiny,frame=single]{../code/mge.gms}

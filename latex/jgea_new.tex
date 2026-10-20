@@ -111,7 +111,12 @@ The provision of domestically produced goods to local and international markets 
 This yields reasonable quantity responses to price shocks, but \citet{LanzRutherford2016} and \citet{Schreiber2024}, as well as the sources cited therein, show that \SOE models calibrated in this way cannot keep track of the welfare effects of trade policy in a way that is consistent with global models, because they miss terms of trade effects.
 
 One known remedy is to switch to a large open economy (\LOE) model.
-Developed by James Markusen \citep{Markusen}, this framework has found application in models such as the MIT \textsc{usrep} model \citep{Yuan2019}.
+Developed by James Markusen \citep{Markusen}\footnote{%
+  The formulation of the \LOE is attributed to James Markusen and has been around since the 1990s \citep{Schreiber2024}.
+  Its availability online is not reliable everywhere.
+  I find \url{https://www.mpsge.org/tutorial.pdf} a good source.
+  (The formulation of the \LOE model is given in example ``Model 48'' on pages 31 ff.)
+}, this framework has found application in models such as the MIT \textsc{usrep} model \citep{Yuan2019}.
 But the correct calibration of the price elasticities of the world's demand for the country's exports and of the world's supply of its imports is not self-evident, and the only systematic attempt at this I am aware of is the recent paper by \citet{Schreiber2024}.
 They use the \GTAPINGAMS model for in-model estimation of these elasticities and calibrate an \LOE version of the US economy, which they show to be very successful in reproducing the results of the global \GTAPINGAMS model.
 
@@ -175,6 +180,7 @@ The price elasticity of this demand is
 -\frac{\partial \ln x_{irk}}{\partial \ln p_{irk}} = \sigma^m_i\,(1-s_{irk}) + s_{irk}\,\epsilon^M_{ik},
 \end{equation}
 where $s_{irk}$ is the share of $r$ in $k$'s imports of $i$ and $\epsilon^M_{ik}$ is the price elasticity of $k$'s aggregate import demand.
+See, e.g., \citet{AtkesonBurstein2008} and their equation (19) for a formal description of the mathematical framework that yields \eqref{elasticity}.
 As $r$ becomes small, $s_{irk}\to 0$ for all importers, and the elasticity of the world's demand for $r$'s exports approaches $\sigma^m_i$.
 \citet{CaliendoFeenstra2024} derive this limit rigorously for the Armington model (and analogous limits for Eaton--Kortum, Krugman, and Melitz models).
 The demand of the rest of the world for the exports of the small economy is therefore not perfectly elastic, while the small economy's imports do have fixed world prices in the limit.
@@ -382,7 +388,7 @@ I consider four trade closures:
 \begin{description}
 \item[\GMR] The standard global multiregional model, which serves as the reference.
 \item[\GMRLS] The global model with the elasticities of substitution between imports from different sources ($\sigma^m_i$) halved.
-\citet{Ahmad2021} show that different studies prodcue different estimates for Armington elasticities and that the \GTAP estimates are at the upper end of the range of estimates in the literature.
+\citet{Ahmad2021} show that different studies produce different estimates for Armington elasticities and that the \GTAP estimates are at the upper end of the range of estimates in the literature.
 \GMRLS serves as a sensitivity analysis of the global model with respect to this uncertainty.
 \item[\SOE] The small open economy model with fixed world prices of \citet{LanzRutherford2016}.
 Without a finite elasticity of transformation between domestic and export supply, this closure is bound to produce bang-bang solutions in the \texttt{gtap} model version.
@@ -395,8 +401,10 @@ For the region under consideration, all positive import tariff rates and all exp
 Trade taxes of all other regions remain at benchmark levels.
 In the small open economy closures, the average export tax on exports to the rest of the world is updated accordingly.
 Welfare is measured by the Hicksian equivalent variation of the region's representative agent, in percent of benchmark expenditure.
-The benchmark average trade tax rate of each region is marked by a dot in the figures below; it is 2.24\% for the United States, 2.33\% for China, 4.83\% for South Africa, and 7.21\% for Argentina in the \texttt{g20\_macro} aggregation.\footnote{The average is computed over the trade flows that carry positive taxes.
-It therefore depends on the aggregation: in the more detailed \texttt{g20} aggregation, more tax-free flows drop out of the denominator, and the averages are 3.00\% for the United States and 3.52\% for China.}
+The benchmark average trade tax rate of each region is marked by a dot in the figures below; it is 2.24\% for the United States, 2.33\% for China, 4.83\% for South Africa, and 7.21\% for Argentina in the \texttt{g20\_macro} aggregation. %\footnote{%
+  % The average is computed over the trade flows that carry positive taxes.
+  % It therefore depends on the aggregation: in the more detailed \texttt{g20} aggregation, more tax-free flows drop out of the denominator, and the averages are 3.00\% for the United States and 3.52\% for China.
+%}
 
 Benchmark import tariffs and export subsidies are updated to the \GTAP 12 Data Base and the 2023 reference year.
 The updated tariff rates are illustrated in Appendix \ref{app:tariffs}.
@@ -405,7 +413,8 @@ The updated tariff rates are illustrated in Appendix \ref{app:tariffs}.
 
 \paragraph{\bf Welfare.}
 Figures \ref{fig:W1} and \ref{fig:W2} show the welfare effects of the tariff scenarios for the four countries and both model versions.
-Table \ref{tab:optimum} reports the tariff levels which maximize welfare in each case, and Table \ref{tab:rmsdW} the root mean squared deviation (RMSD) of each closure from the \GMR results across the eleven tariff levels.
+Table \ref{tab:optimum} reports the tariff levels which maximize welfare in each case.
+%, and Table \ref{tab:rmsdW} the root mean squared deviation (RMSD) of each closure from the \GMR results across the eleven tariff levels.
 
 \begin{figure}[p!]
 \centering
@@ -449,17 +458,17 @@ The dot marks the benchmark.
 ``Benchmark'': benchmark average trade tax rate in the \texttt{g20\_macro} aggregation.}
 \end{table}
 
-\begin{table}[t!]
-\begin{center}
-\caption{Welfare: range of \GMR results and deviations of the other closures from \GMR (percentage points of Hicksian EV).}\label{tab:rmsdW}
-\small
-\input{jgea_new/figures/tab_rmsd_W}
-\end{center}
-\footnotesize{Notes: Range: maximum minus minimum of the \GMR results
-over the eleven tariff levels.
-RMSD: root mean squared deviation from the \GMR results over the eleven tariff levels.
-Bold: \SATE deviates less from \GMR than \GMRLS.}
-\end{table}
+% \begin{table}[t!]
+% \begin{center}
+% \caption{Welfare: range of \GMR results and deviations of the other closures from \GMR (percentage points of Hicksian EV).}\label{tab:rmsdW}
+% \small
+% \input{jgea_new/figures/tab_rmsd_W}
+% \end{center}
+% \footnotesize{Notes: Range: maximum minus minimum of the \GMR results
+% over the eleven tariff levels.
+% RMSD: root mean squared deviation from the \GMR results over the eleven tariff levels.
+% Bold: \SATE deviates less from \GMR than \GMRLS.}
+% \end{table}
 
 The \SOE closure recommends free trade in seven of the eight cases (and an average rate of 1.4\% for Argentina in the \texttt{gtapingams} version).
 This is the well-known consequence of fixed terms of trade: without market power, trade taxes only distort.
@@ -467,9 +476,9 @@ In the \texttt{gtap} version, where domestic and exported output are perfect sub
 The finite transformation elasticity of the \texttt{gtapingams} version tames these responses, but the \SOE welfare curves remain much steeper than the \GMR curves.
 
 The \SATE closure follows the \GMR welfare curve closely.
-Its RMSD from the \GMR results is at most 0.19 percentage points, and it is below 0.1 percentage points in five of the eight cases, whereas the RMSD of the \SOE closure ranges from 0.16 to 3.12 percentage points.
+%Its RMSD from the \GMR results is at most 0.19 percentage points, and it is below 0.1 percentage points in five of the eight cases, whereas the RMSD of the \SOE closure ranges from 0.16 to 3.12 percentage points.
 For the United States and Argentina in the \texttt{gtap} version, the \SATE and \GMR curves are almost indistinguishable.
-The welfare-maximizing tariff level, however, is not identified super well.
+The welfare-maximizing tariff level, however, is not identified as well.
 Welfare curves are flat around their maximum, the welfare gains relative to the benchmark are small (less than 0.1\% of expenditure in all \GMR and \SATE cases), and small differences in curvature shift the optimum considerably.
 In the \texttt{gtap} version, the \SATE optimum coincides with the \GMR optimum for the United States (free trade) and differs from it by about 0.3 percentage points for China and Argentina.
 In the \texttt{gtapingams} version, the differences are 0.7 percentage points for Argentina and 1.2 percentage points for the United States and China.
@@ -477,14 +486,16 @@ The largest deviations occur for South Africa, where the \SATE closure puts the 
 Still, the \SATE closure gets the order of magnitude of the optimal tariff right in all cases, which the \SOE closure does not.
 \SATE also reproduces a pattern of the \GMR results that the \SOE closure cannot produce: Argentina and South Africa, whose benchmark protection is relatively high, would lose from unilateral free trade, whereas China and the United States would gain from it in the \texttt{gtap} version.
 
-These deviations should be put into perspective.
-Halving the elasticities of substitution between import sources in the global model (\GMRLS) changes the results much more than switching from the \GMR to the \SATE closure: the RMSD of \GMRLS from \GMR ranges from 0.14 to 0.90 percentage points, and the welfare-maximizing tariff level lies beyond the upper end of the grid (10\%) in all cases.
-The intuition is straightforward: lower Armington elasticities mean more market power of a country's exports in its export markets (and of other countries' exports in the country's import markets), so that higher import tariffs and export taxes improve the terms of trade without distorting quantities as much as with high elasticities.
-Given that the \GTAP Armington elasticities are at the upper end of the range of estimates in the literature \citep{Ahmad2021}, the uncertainty about the correct elasticities is a larger source of uncertainty about the welfare effects of trade policy than the approximation error of the \SATE closure.
+The remaining deviations between \SATE and \GMR should be put into perspective.
+Halving the elasticities of substitution between import sources in the global model (\GMRLS) changes the results much more than switching from the \GMR to the \SATE closure.
+%: the RMSD of \GMRLS from \GMR ranges from 0.14 to 0.90 percentage points, and the welfare-maximizing tariff level lies beyond the upper end of the grid (10\%) in all cases.
+The intuition behind why substitution elasticities are so relevant to  locating the welfare optimum seems clear:
+Lower Armington elasticities mean more market power of a country's exports in its export markets (and of other countries' exports in the country's import markets), so that higher import tariffs and export taxes improve the terms of trade without distorting quantities as much as with high elasticities.
+Given that the the range of plausible values for  Armington elasticities is considerable \citep{Ahmad2021}, the uncertainty about the correct elasticities is a larger source of uncertainty about the welfare effects of trade policy than the approximation error of the \SATE closure.
 
 \paragraph{\bf Sectoral activity levels.}
-Figures \ref{fig:sec_large} and \ref{fig:sec_small} compare the changes of sectoral activity levels at the upper end of the grid, an average trade tax rate of 10\%, where the differences between the closures are largest.
-For each sector, the \GMR result is marked by a black dot on a vertical bar; the results of the \SATE, \GMRLS, and \SOE closures are connected to it by horizontal lines, so that the length of each line measures the deviation from the global model.
+Figures \ref{fig:sec_large} and \ref{fig:sec_small} compare the changes of sectoral activity levels at an average trade tax rate of 10\%, where the differences between the closures are largest.
+For each sector, the \GMR result is marked by a black dot on a vertical bar; the comparison to results of the \SATE, \GMRLS, and \SOE closures are illustrated by horizontal lines.
 The scale of the x-axis is set by the \GMR, \SATE, and \GMRLS results; \SOE results outside this range are indicated by an arrow and their value.
 
 \begin{figure}[p!]
@@ -541,12 +552,12 @@ It needs no data about the rest of the world beyond the country's own exports an
 The comparison with the global \GTAPINGAMS model, updated here to the \GTAP 12 Data Base, shows that the \SATE closure reproduces the welfare effects of unilateral changes of trade taxes far better than the \SOE closure, and that it gets the order of magnitude of the welfare-maximizing tariff level right, where the \SOE closure recommends free trade.
 Its deviations from the global model are not larger than the uncertainty in the global model's results that is due to the uncertainty about the right Armington elasticities.
 The fit of sectoral activity levels is mixed, and it is weakest for the largest economies, for which the small-economy limit is least appropriate.
-The more elaborate calibration of a large open economy model by \citet{Schreiber2024}, which estimates export demand and import supply elasticities from the global model, can be expected to do better for such economies, at the price of requiring a global model.
+The more elaborate calibration of a large open economy model by \citet{Schreiber2024}, which estimates export demand and import supply elasticities from the global model, can be expected to do better for such economies, at the price of requiring estimates of elasticities derived from an equivalent, global model.
 
 While the \texttt{gtap} version of the model is closer to the original \GTAP model, the \texttt{gtapingams} version of \citet{LanzRutherford2016} is not without merit.
-Observed price responses of traded quantities may be due to imperfect transformation on the supply side as well as to imperfect substitution on the demand side.
-The econometric literature on Armington elasticities is well aware of this identification problem: \citet{Ahmad2021} note that estimates based on import prices do not account for supply-side effects and suffer from simultaneity bias, and that the bounds approach of Leamer (1981) can inform about either the demand or the supply elasticity, but not both.
-Comparing results of the \texttt{gtap} and \texttt{gtapingams} model versions can therefore be interpreted as a sensitivity analysis with respect to this uncertainty.
+\citet{Soderbery2015} and \citet{Broda2008} estimate export supply elasticities, and the latter make them central to their argument for import tariffs based on the market power of importers.
+The \GTAP model does not explicitly calibrate price elasticities of export supply, but export supply functions to a specific country are implied by market interactions, first within the exporting country and then among the different countries importing the commodity in question.
+For a more explicit calibration of export supply functions, imperfect transformability between domestically provided and exported varieties can be of use.
 For the experiments of this paper, the \SATE closure performs similarly well in both versions, whereas the \SOE closure is only usable in the \texttt{gtapingams} version.
 
 \begin{acknowledgements}

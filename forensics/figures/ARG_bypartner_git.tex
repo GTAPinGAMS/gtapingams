@@ -1,0 +1,75 @@
+\begin{subfigure}[b]{0.9\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+        ybar stacked,
+        ymin=0,
+        ymax = 10,
+        legend to name = unnamed2,
+        major x tick style= transparent,
+        symbolic x coords={IDN, IND, CHN, LIC, TUR, ITA, MIC, RUS, JPN, BRA,
+                FRA, DEU, REU, GBR, ARG, ANZ, SAU, OEX, CAN, ZAF,
+                MEX, KOR},
+%       bar shift = -0.05cm,
+        bar width = 0.15cm,
+        width=0.65\textwidth,
+	xticklabel style = {font=\footnotesize},
+        xticklabels={\texttt{idn}, \texttt{ind}, \texttt{chn}, \texttt{lic}, \texttt{tur}, \texttt{ita},
+        \texttt{mic}, \texttt{rus}, \texttt{jpn}, \texttt{bra}, \texttt{fra}, \texttt{deu},
+        \texttt{reu}, \texttt{gbr}, \texttt{arg}, \texttt{anz}, \texttt{sau}, \texttt{oex},
+        \texttt{can}, \texttt{zaf}, \texttt{mex}, \texttt{kor}},
+        axis x line*= bottom,
+        ymajorgrids = true,
+        axis y line*=left,
+        xlabel shift = 0.05in,
+        ylabel shift = -0.05in,
+        xlabel={Trading partner},
+        ylabel={Tax rate (\%)},
+        xtick=data,
+%       enlarge x limits=0.1,
+        x tick label style={anchor=east, rotate=90, font=\footnotesize},
+%        scale only axis, xmin=IDN, xmax=KOR, enlarge x limits=0.03, % set by texcoords.py
+        ]
+        \addplot+[ybar] table [x=region, y index=1] {../forensics/figures/ARG_txtm_m.data};
+        \label{plot_1}
+        \addlegendentry{Import tariff rate (left axis)}
+        \addplot+[ybar] table [x=region, y index=2] {../forensics/figures/ARG_txtm_m.data};
+        \label{plot_2}
+        \addlegendentry{Export tax rate (left axis)}
+\end{axis}
+\begin{axis}[ybar stacked,
+        legend to name = named2,
+        legend style={draw=none},
+        legend cell align=left,
+        width=0.65\textwidth,
+        ymin=0,
+        ymax=700,
+%       bar shift=0.0cm,
+        axis y line*=right,
+        axis x line=none,
+        bar width = 0.02cm,
+        ylabel={Tariff revenue (\$M)},
+        ylabel near ticks,
+        xtick=data,
+%       enlarge x limits=0.1,
+        symbolic x coords={IDN, IND, CHN, LIC, TUR, ITA, MIC, RUS, JPN, BRA,
+                FRA, DEU, REU, GBR, ARG, ANZ, SAU, OEX, CAN, ZAF,
+                MEX, KOR},
+%        scale only axis, xmin=IDN, xmax=KOR, enlarge x limits=0.03, % set by texcoords.py
+        ]
+	xticklabel style = {font=\footnotesize},
+        xticklabels={\texttt{idn}, \texttt{ind}, \texttt{chn}, \texttt{lic}, \texttt{tur}, \texttt{ita},
+        \texttt{mic}, \texttt{rus}, \texttt{jpn}, \texttt{bra}, \texttt{fra}, \texttt{deu},
+        \texttt{reu}, \texttt{gbr}, \texttt{arg}, \texttt{anz}, \texttt{sau}, \texttt{oex},
+        \texttt{can}, \texttt{zaf}, \texttt{mex}, \texttt{kor}},
+        \addlegendimage{/pgfplots/refstyle=plot_1}\addlegendentry{Import
+        tariff rate (left axis)}
+        x tick label style={anchor=east, rotate=90, font=\footnotesize}]
+        \addlegendimage{/pgfplots/refstyle=plot_2}\addlegendentry{Export
+        tax rate (left axis)}
+        \addplot+[black,mark=none] table [x=region, y index=3] {../forensics/figures/ARG_txtm_m.data};
+        \addlegendentry{Tariff revenue (right axis)}
+\end{axis}
+\end{tikzpicture}
+\caption{ARG imports.}
+\end{subfigure}

@@ -272,7 +272,15 @@ def task_tarifffigs():
     dependencies = [
         'forensics/tradetax.gms',
         'forensics/texcoords.py',
-        f'gamsdata/20{yr}/{ds}.gdx',
+        'forensics/figures/CHN_bycommodity_git.tex',
+        'forensics/figures/CHN_bypartner_git.tex',
+        'forensics/figures/USA_bycommodity_git.tex',
+        'forensics/figures/USA_bypartner_git.tex',
+        'forensics/figures/ZAF_bycommodity_git.tex',
+        'forensics/figures/ZAF_bypartner_git.tex',
+        'forensics/figures/ARG_bycommodity_git.tex',
+        'forensics/figures/ARG_bypartner_git.tex',
+        # f'gamsdata/20{yr}/{ds}.gdx',  #
     ]
     targets = [
         'forensics/tradetax.gdx',
@@ -280,7 +288,7 @@ def task_tarifffigs():
 
     def run_paperfigs():
         # extract import tariffs and export taxes from
-        os.system(f'cd forensics & gams tradetax --ds={ds} & cd ..')
+        os.system('cd forensics & gams tradetax --ds=g20 & cd ..')
         os.system(
             "cd forensics & python texcoords.py" +
             " --top 23 & cd ..")

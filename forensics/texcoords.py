@@ -168,7 +168,7 @@ def main():
                     help="folder with the .data files (default: = figdir)")
     ap.add_argument("--top", type=int, default=None,
                     help="keep only the first N rows of each .data file")
-    ap.add_argument("--regions", default="USA,CHN")
+    ap.add_argument("--regions", default="USA,CHN,ZAF,ARG")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     datadir = a.datadir or a.figdir

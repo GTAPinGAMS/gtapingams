@@ -1,23 +1,14 @@
 $if not set ds $set ds g20
 
-$call gdxmerge output\%ds%\gtapingams\soe\*.gdx o=output\%ds%\gtapingams\soe.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtapingams\sate\*.gdx o=output\%ds%\gtapingams\sate.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtapingams\sate2\*.gdx o=output\%ds%\gtapingams\sate2.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtapingams\gmr\*.gdx o=output\%ds%\gtapingams\gmr.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtapingams\gmr_ls\*.gdx o=output\%ds%\gtapingams\gmr_ls.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtap\soe\*.gdx o=output\%ds%\gtap\soe.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtap\sate\*.gdx o=output\%ds%\gtap\sate.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtap\sate2\*.gdx o=output\%ds%\gtap\sate2.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtap\gmr\*.gdx o=output\%ds%\gtap\gmr.gdx id=results,gdpresults,yresults,figresults
-$call gdxmerge output\%ds%\gtap\gmr_ls\*.gdx o=output\%ds%\gtap\gmr_ls.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\soe\*.gdx o=output\%ds%\soe.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\sate\*.gdx o=output\%ds%\sate.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\sate_ls\*.gdx o=output\%ds%\sate_ls.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\sate2\*.gdx o=output\%ds%\sate2.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gmr\*.gdx o=output\%ds%\gmr.gdx id=results,gdpresults,yresults,figresults
+$call gdxmerge output\%ds%\gmr_ls\*.gdx o=output\%ds%\gmr_ls.gdx id=results,gdpresults,yresults,figresults
 
-
-$call gdxmerge output\%ds%\gtapingams\*.gdx o=output\%ds%\gtapingams.gdx
-$call gdxmerge output\%ds%\gtap\*.gdx o=output\%ds%\gtap.gdx
 
 $call gdxmerge output\%ds%\*.gdx o=output\%ds%.gdx
-*.$call gdxmerge output\%ds%_macro\*.gdx o=output\%ds%_macro.gdx
-
 
 $call gdxmerge output\*.gdx o=results.gdx
 

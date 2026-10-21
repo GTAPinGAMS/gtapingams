@@ -51,6 +51,8 @@
 \newcommand{\AUES}{\textsc{aues}\xspace}
 \newcommand{\GMR}{\textsc{gmr}\xspace}
 \newcommand{\GMRLS}{\textsc{gmr\_ls}\xspace}
+\newcommand{\SATELS}{\textsc{sate\_ls}\xspace}
+\newcommand{\TODO}[1]{\textcolor{red}{[TODO: #1]}}
 \newcommand{\MCP}{\textsc{mcp}\xspace}
 \newcommand{\MGE}{\textsc{mge}\xspace}
 \newcommand{\IOT}{\textsc{iot}\xspace}
@@ -138,6 +140,8 @@ I report results for two large economies, the United States and China, and for t
 
 The results show that the \SATE closure tracks the welfare effects of the \GMR model closely and identifies the welfare-maximizing level of trade taxes much better than the \SOE closure, which recommends free trade in almost all cases.
 The careful calibration of \citet{Schreiber2024} can be expected to be more accurate still, but the deviations of the \SATE results from the \GMR results do not exceed the sensitivity of the \GMR results to uncertain Armington elasticities, which I assess by halving these elasticities.
+I also ask whether a modeller who only has the single-country model can learn how sensitive the global model is to these elasticities: I halve them in the \SATE closure as well and compare the change of the \SATE results with the change of the \GMR results.
+\TODO{One sentence on the answer once the new results are processed.}
 The straightforward calibration of the \SATE closure makes it an attractive choice for single-country \CGE models.
 For sectoral activity levels, the \SATE closure reproduces the global model almost exactly for the two small economies, but tends to overstate output responses for the two large ones.
 
@@ -158,13 +162,13 @@ Each region hosts a representative agent who owns the primary factors (labor, ca
 Production in each sector combines intermediate inputs and a \CES value-added aggregate of primary factors in a Leontief technology; land and natural resources are sluggish and allocated to sectors through a constant elasticity of transformation (\CET) function.
 Each intermediate input and each good in final demand is an Armington composite of domestic and imported varieties, with elasticity of substitution $\sigma^{DM}_i$, and the imported variety is itself a \CES composite of imports from all source regions with elasticity $\sigma^m_i$ (\texttt{esubm}).
 Bilateral trade flows carry international transport margins, export taxes or subsidies of the exporter, and import tariffs of the importer.
-Output of a sector can be sold on the domestic market and exported; a \CET function with elasticity $\eta^{DX}_i$ governs the transformation between the two.
+Output of a sector can be sold on the domestic market and exported; in the \SOE closure, a \CET function with elasticity $\eta^{DX}_i$ governs the transformation between the two (Section \ref{sec:elasticities}).
 Final demand of the representative agent can be represented by Cobb-Douglas (\CD), linear expenditure (\LES), or constant difference of elasticities (\CDE) preferences.
 All simulations reported here use \CD preferences (\citealt{LanzRutherford2016} found the demand system to matter little for the experiment considered here).
 
 The model can be solved as a global multiregional model (\GMR) or as a small open economy model (\SOE), in which only one region (or a subset of regions) is modelled explicitly and the remaining regions form a rest of the world (\textsc{row}) with fixed prices.
 In the \SOE closure of \citet{LanzRutherford2016}, exports of the modelled region are converted into foreign exchange at fixed world prices, imports are available in any quantity at fixed world prices, and a real exchange rate, $p^{FX}$, adjusts so as to keep the current account at its benchmark level.
-Both closures are calibrated to the same benchmark data and use the same elasticities.
+Both closures are calibrated to the same benchmark data; their elasticities differ only in the treatment of domestic and export supply (Section \ref{sec:elasticities}).
 In the \GMR closure, a region's policy affects the prices of its exports in all importing regions and the prices of its imports from all exporting regions; in the \SOE closure, these terms of trade effects are absent by construction.
 
 \subsection{The small Armington trade economy}\label{sec:sate}
@@ -230,36 +234,46 @@ Both versions are included in the code to verify that they yield the same result
 They do: in all simulations of Section \ref{sec:comparison}, results of \texttt{sate} and \texttt{sate2} agree up to the six digits reported.
 Below, I therefore only report results for \texttt{sate}, labelled \SATE.
 
-\subsection{Model versions: \texttt{gtap} and \texttt{gtapingams}}\label{sec:versions}
+\subsection{Trade elasticities in the different closures}\label{sec:elasticities}
 
 The standard \GTAP model views domestic output as a homogeneous good that is sold domestically and exported alike ($\eta^{DX}_i=\infty$).
-\citet{LanzRutherford2016} follow \citet{DeMeloRobinson1989} and introduce a finite elasticity of transformation between exported and domestically marketed output, which is needed to avoid corner solutions in the \SOE closure.
-To keep the trade responses comparable to the standard \GTAP model, they compensate the finite transformation elasticity by a higher elasticity of substitution between imported and domestic goods (Appendix \ref{app:thetadx}): with parameter $\theta$ (\texttt{thetadx}), the elasticities are $\eta^{DX}_i=\sigma^D_i/(1-\theta)$ and $\sigma^{DM}_i=\sigma^D_i/\theta$, where $\sigma^D_i$ is the \GTAP elasticity of substitution between domestic and imported goods (\texttt{esubd}).
-In line with \citet{LanzRutherford2016}, I use the same values in the \GMR and in the small open economy closures, and I consider two model versions:
+In the \SOE closure, this specification produces corner solutions: with fixed world prices, the world price of an exported good pins down its domestic producer price, and output responds to trade policy in a bang-bang fashion (Appendix \ref{app:closures}).
+\citet{LanzRutherford2016} therefore follow \citet{DeMeloRobinson1989} and introduce a finite elasticity of transformation between exported and domestically marketed output for the \SOE closure.
+To keep the trade responses comparable to the global model, they compensate the finite transformation elasticity by a higher elasticity of substitution between imported and domestic goods (Appendix \ref{app:thetadx}): with parameter $\theta$ (\texttt{thetadx}), the elasticities are $\eta^{DX}_i=\sigma^D_i/(1-\theta)$ and $\sigma^{DM}_i=\sigma^D_i/\theta$, where $\sigma^D_i$ is the \GTAP elasticity of substitution between domestic and imported goods (\texttt{esubd}).
+The finite transformation elasticity, and with it the separate export supply of each sector (export price \texttt{PE} and export supply \texttt{vxm} in the code), is meant for the \SOE closure only.
+I follow this intention of \citet{LanzRutherford2016}:
 \begin{description}
-\item[\texttt{gtap}] $\theta=1$: $\eta^{DX}_i=\infty$ and $\sigma^{DM}_i=\sigma^D_i$, as in the standard \GTAP model.
-\item[\texttt{gtapingams}] $\theta=0.5$, the default of \citet{LanzRutherford2016}: $\eta^{DX}_i=\sigma^{DM}_i=2\sigma^D_i$.
+\item[\GMR and \SATE] $\theta=1$: $\eta^{DX}_i=\infty$ and $\sigma^{DM}_i=\sigma^D_i$, as in the standard \GTAP model.
+\item[\SOE] $\theta=0.5$, the default of \citet{LanzRutherford2016}: $\eta^{DX}_i=\sigma^{DM}_i=2\sigma^D_i$.
 \end{description}
-Table \ref{tab:elasticities} reports the resulting elasticities for the four sectors of the aggregation used below.
+The \SATE closure does not need a finite transformation elasticity, because the downward sloping export demand curve \eqref{sate} rules out the corner solutions of the \SOE closure.
+The \GMR and \SATE closures thus share all elasticities, so that differences between their results are due to the closure alone.
+
+The Armington elasticities $\sigma^m_i$ are uncertain.
+\citet{Ahmad2021} show that different studies produce different estimates for Armington elasticities and that the \GTAP estimates are at the upper end of the range of estimates in the literature.
+To assess the consequences of this uncertainty, all $\sigma^m_i$ can be scaled by a common factor (option \texttt{fsubm}); I halve them (Section \ref{sec:design}).
+In the \SATE closure, $\sigma^m_i$ has two roles: it governs the substitution between imports from different sources, as in the global model, and it is the price elasticity of the world's demand for the country's exports \eqref{sate}.
+Halving $\sigma^m_i$ in the \SATE closure therefore also halves the export demand elasticity.
+Table \ref{tab:elasticities} reports the elasticities for the four sectors of the aggregation used below.
 
 \begin{table}[t!]
 \begin{center}
 \caption{Trade and substitution elasticities of the \texttt{g20\_macro} aggregation (\GTAP 12, 2023).}\label{tab:elasticities}
 \small
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
- & & & & \multicolumn{2}{c}{\texttt{gtap}} & \texttt{gtapingams} \\
-Sector & $\sigma^{VA}_i$ & $\sigma^D_i$ & $\sigma^m_i$ & $\sigma^{DM}_i$ & $\eta^{DX}_i$ & $\sigma^{DM}_i=\eta^{DX}_i$ \\
+ & & & & & \multicolumn{2}{c}{\GMR, \SATE} & \SOE \\
+Sector & $\sigma^{VA}_i$ & $\sigma^D_i$ & $\sigma^m_i$ & $\sigma^m_i/2$ & $\sigma^{DM}_i$ & $\eta^{DX}_i$ & $\sigma^{DM}_i=\eta^{DX}_i$ \\
 \midrule
-Agriculture (\texttt{agr})   & 0.27 & 2.27 & 4.62 & 2.27 & $\infty$ & 4.53 \\
-Manufacturing (\texttt{mfr}) & 1.18 & 3.37 & 7.14 & 3.37 & $\infty$ & 6.73 \\
-Services (\texttt{ser})      & 1.37 & 1.91 & 3.80 & 1.91 & $\infty$ & 3.82 \\
-Energy (\texttt{enr})        & 0.77 & 3.31 & 12.16 & 3.31 & $\infty$ & 6.63 \\
+Agriculture (\texttt{agr})   & 0.27 & 2.27 & 4.62 & 2.31 & 2.27 & $\infty$ & 4.53 \\
+Manufacturing (\texttt{mfr}) & 1.18 & 3.37 & 7.14 & 3.57 & 3.37 & $\infty$ & 6.73 \\
+Services (\texttt{ser})      & 1.37 & 1.91 & 3.80 & 1.90 & 1.91 & $\infty$ & 3.82 \\
+Energy (\texttt{enr})        & 0.77 & 3.31 & 12.16 & 6.08 & 3.31 & $\infty$ & 6.63 \\
 \bottomrule
 \end{tabular}
 \end{center}
 \footnotesize{Notes: $\sigma^{VA}_i$: substitution between primary
-factors (\texttt{esubva}); $\sigma^D_i$: \GTAP elasticity between domestic and imported goods (\texttt{esubd}); $\sigma^m_i$: substitution between import sources (\texttt{esubm}), which is also the export demand elasticity of the \SATE closure; $\sigma^{DM}_i$: elasticity between domestic and imported goods used in the model (\texttt{esubdm}); $\eta^{DX}_i$: transformation between domestic and export supply (\texttt{etadx}).
+factors (\texttt{esubva}); $\sigma^D_i$: \GTAP elasticity between domestic and imported goods (\texttt{esubd}); $\sigma^m_i$: substitution between import sources (\texttt{esubm}), which is also the export demand elasticity of the \SATE closure; $\sigma^m_i/2$: halved value used in the \GMRLS and \SATELS scenarios; $\sigma^{DM}_i$: elasticity between domestic and imported goods used in the model (\texttt{esubdm}); $\eta^{DX}_i$: transformation between domestic and export supply (\texttt{etadx}).
 Values are aggregated from the \GTAP 12 values by the aggregation routine of \GTAPINGAMS.}
 \end{table}
 
@@ -333,7 +347,7 @@ services, recreational and other services, dwellings (18 sectors)\\
 Table \ref{tab:changes} summarizes the changes of the code relative to the \GTAPnine distribution of \citet{LanzRutherford2016}.
 The update to the \GTAP 12 Data Base mainly concerns the data routines: the \GDX version of the database replaces the \GEMPACK \HAR files, the reading routine has been rewritten accordingly, and the build stream is managed by the Python tool \texttt{doit}.
 The model equations of \citet{LanzRutherford2016} are unchanged.
-The extensions made for this paper add the \SATE closures, options to set $\theta$ and to scale $\sigma^m_i$ from the command line, and the update of average export taxes on exports to the rest of the world in the small open economy closures, which the original code held at benchmark values.
+The extensions made for this paper add the \SATE closures, the closure-specific choice of $\theta$, an option to scale $\sigma^m_i$ from the command line, and the update of average export taxes on exports to the rest of the world in the small open economy closures, which the original code held at benchmark values.
 
 \begin{table}[t!]
 \begin{center}
@@ -362,11 +376,13 @@ can be set from the command line. \\
 \texttt{code/gtap12data.gms} & Flags \texttt{sate}, \texttt{sate2};
 parameters \texttt{theta\_xi}, \texttt{fix0}; scaling of
 $\sigma^m_i$ by \texttt{fsubm}. \\
-\texttt{forensics/tgrid.gms} & Options \texttt{--mdl=sate|sate2},
-\texttt{--thetadx}, \texttt{--fsubm}, \texttt{--soextax}; macro
+\texttt{forensics/tgrid.gms} & Options \texttt{--mdl=gmr|soe|sate|sate2},
+\texttt{--fsubm}, \texttt{--soextax}; $\theta=1$, except
+$\theta=0.5$ for \texttt{--mdl=soe}; macro
 \texttt{updrow} updating export taxes on exports to \textsc{row};
 results for sectoral activity levels. \\
-\texttt{forensics/*} & Batch runs (\texttt{ssasolve.gms}), merging of
+\texttt{forensics/*} & Batch runs of the scenarios of Section
+\ref{sec:design} (\texttt{ssasolve.gms}), merging of
 results (\texttt{ssamerge.gms}), data for figures
 (\texttt{tradetax.gms}, \texttt{process\_results.gms}). \\
 \bottomrule
@@ -380,20 +396,20 @@ results (\texttt{ssamerge.gms}), data for figures
 
 \subsection{Scenario design}\label{sec:design}
 
-\paragraph{\bf Model versions.}
-Each scenario is computed for the \texttt{gtap} and the \texttt{gtapingams} model versions of Section \ref{sec:versions}.
-
-\paragraph{\bf Trade closures.}
-I consider four trade closures:
+\paragraph{\bf Closures and elasticities.}
+I consider five scenarios, which differ in the trade closure and in the Armington elasticities $\sigma^m_i$:
 \begin{description}
-\item[\GMR] The standard global multiregional model, which serves as the reference.
-\item[\GMRLS] The global model with the elasticities of substitution between imports from different sources ($\sigma^m_i$) halved.
-\citet{Ahmad2021} show that different studies produce different estimates for Armington elasticities and that the \GTAP estimates are at the upper end of the range of estimates in the literature.
-\GMRLS serves as a sensitivity analysis of the global model with respect to this uncertainty.
-\item[\SOE] The small open economy model with fixed world prices of \citet{LanzRutherford2016}.
-Without a finite elasticity of transformation between domestic and export supply, this closure is bound to produce bang-bang solutions in the \texttt{gtap} model version.
-\item[\SATE] The small Armington trade economy (implementation \texttt{sate}), in which the world's demand for the exports of the modelled region has price elasticity $\sigma^m_i$ (benchmark values, not halved).
+\item[\GMR] The global multiregional model with the \GTAP elasticities, which serves as the reference.
+\item[\SOE] The small open economy model with fixed world prices of \citet{LanzRutherford2016}, with a finite elasticity of transformation between domestic and export supply ($\theta=0.5$, Section \ref{sec:elasticities}).
+\item[\SATE] The small Armington trade economy (implementation \texttt{sate}), in which the world's demand for the exports of the modelled region has price elasticity $\sigma^m_i$.
+\item[\GMRLS] The global model with all $\sigma^m_i$ halved.
+\item[\SATELS] The \SATE closure with all $\sigma^m_i$ halved, which halves the export demand elasticity as well.
 \end{description}
+The first three scenarios compare the closures for given elasticities.
+The last two address the uncertainty about $\sigma^m_i$, and they do so from two perspectives.
+\GMRLS shows how sensitive the results of the global model are to this uncertainty.
+\SATELS asks whether a modeller who has only the single-country model can find this out: if the \SATE results respond to halving $\sigma^m_i$ in the same way as the \GMR results, the \SATE closure is informative not only about the level of the global model's results but also about their sensitivity to $\sigma^m_i$.
+In the \SOE closure, $\sigma^m_i$ cannot affect the terms of trade, and I do not consider a variant with halved elasticities.
 
 \paragraph{\bf Tariff scenarios.}
 I reuse the tariff scenarios of \citet{LanzRutherford2016}.
@@ -412,38 +428,22 @@ The updated tariff rates are illustrated in Appendix \ref{app:tariffs}.
 \subsection{Results}\label{sec:results}
 
 \paragraph{\bf Welfare.}
-Figures \ref{fig:W1} and \ref{fig:W2} show the welfare effects of the tariff scenarios for the four countries and both model versions.
-Table \ref{tab:optimum} reports the tariff levels which maximize welfare in each case.
-%, and Table \ref{tab:rmsdW} the root mean squared deviation (RMSD) of each closure from the \GMR results across the eleven tariff levels.
+Figure \ref{fig:W} shows the welfare effects of the tariff scenarios for the four countries.
+Table \ref{tab:optimum} reports the tariff levels which maximize welfare in each case, and Table \ref{tab:rmsdW} summarizes the deviations between the scenarios.
 
 \begin{figure}[p!]
 \centering
-\input{jgea_new/figures/res_USA_W_gtap}\hfill
-\input{jgea_new/figures/res_USA_W_gtapingams}
+\input{jgea_new/figures/res_USA_W}\hfill
+\input{jgea_new/figures/res_CHN_W}
 
 \vspace{0.1in}
-\input{jgea_new/figures/res_CHN_W_gtap}\hfill
-\input{jgea_new/figures/res_CHN_W_gtapingams}
+\input{jgea_new/figures/res_ZAF_W}\hfill
+\input{jgea_new/figures/res_ARG_W}
 
 \pgfplotslegendfromname{welfare_legend}
-\caption{Welfare effect of unilateral changes of trade taxes, United States and China.
+\caption{Welfare effect of unilateral changes of trade taxes.
 The dot marks the benchmark.
-\SOE results outside the range shown are cut off.}\label{fig:W1}
-\end{figure}
-
-\begin{figure}[p!]
-\centering
-\input{jgea_new/figures/res_ZAF_W_gtap}\hfill
-\input{jgea_new/figures/res_ZAF_W_gtapingams}
-
-\vspace{0.1in}
-\input{jgea_new/figures/res_ARG_W_gtap}\hfill
-\input{jgea_new/figures/res_ARG_W_gtapingams}
-
-\pgfplotslegendfromname{welfare_legend}
-\caption{Welfare effect of unilateral changes of trade taxes, South Africa and Argentina.
-The dot marks the benchmark.
-\SOE results outside the range shown are cut off.}\label{fig:W2}
+\SOE results outside the range shown are cut off.}\label{fig:W}
 \end{figure}
 
 \begin{table}[t!]
@@ -458,87 +458,57 @@ The dot marks the benchmark.
 ``Benchmark'': benchmark average trade tax rate in the \texttt{g20\_macro} aggregation.}
 \end{table}
 
-% \begin{table}[t!]
-% \begin{center}
-% \caption{Welfare: range of \GMR results and deviations of the other closures from \GMR (percentage points of Hicksian EV).}\label{tab:rmsdW}
-% \small
-% \input{jgea_new/figures/tab_rmsd_W}
-% \end{center}
-% \footnotesize{Notes: Range: maximum minus minimum of the \GMR results
-% over the eleven tariff levels.
-% RMSD: root mean squared deviation from the \GMR results over the eleven tariff levels.
-% Bold: \SATE deviates less from \GMR than \GMRLS.}
-% \end{table}
+\begin{table}[t!]
+\begin{center}
+\caption{Welfare: range of \GMR results, deviations between closures, and effects of halving $\sigma^m_i$ (percentage points of Hicksian EV).}\label{tab:rmsdW}
+\small
+\input{jgea_new/figures/tab_rmsd_W}
+\end{center}
+\footnotesize{Notes: Range: maximum minus minimum of the \GMR results over the eleven tariff levels.
+RMSD: root mean squared deviation over the eleven tariff levels between the scenarios indicated.
+Effect of halving $\sigma^m_i$: root mean square of the change in the results when $\sigma^m_i$ is halved, in the global model (\GMRLS--\GMR) and in the \SATE closure (\SATELS--\SATE).}
+\end{table}
 
-The \SOE closure recommends free trade in seven of the eight cases (and an average rate of 1.4\% for Argentina in the \texttt{gtapingams} version).
+\TODO{Describe the \SOE results relative to \GMR (Figure \ref{fig:W}, Table \ref{tab:optimum}).}
 This is the well-known consequence of fixed terms of trade: without market power, trade taxes only distort.
-In the \texttt{gtap} version, where domestic and exported output are perfect substitutes, the \SOE welfare curve has a kink near the benchmark tariff level which reflects a bang-bang reallocation of output between sectors: for China, the welfare change ranges from $+4.0\%$ under free trade to $-4.0\%$ at an average rate of 10\%, compared with a range of less than one percentage point in the \GMR model.
-The finite transformation elasticity of the \texttt{gtapingams} version tames these responses, but the \SOE welfare curves remain much steeper than the \GMR curves.
 
-The \SATE closure follows the \GMR welfare curve closely.
-%Its RMSD from the \GMR results is at most 0.19 percentage points, and it is below 0.1 percentage points in five of the eight cases, whereas the RMSD of the \SOE closure ranges from 0.16 to 3.12 percentage points.
-For the United States and Argentina in the \texttt{gtap} version, the \SATE and \GMR curves are almost indistinguishable.
-The welfare-maximizing tariff level, however, is not identified as well.
-Welfare curves are flat around their maximum, the welfare gains relative to the benchmark are small (less than 0.1\% of expenditure in all \GMR and \SATE cases), and small differences in curvature shift the optimum considerably.
-In the \texttt{gtap} version, the \SATE optimum coincides with the \GMR optimum for the United States (free trade) and differs from it by about 0.3 percentage points for China and Argentina.
-In the \texttt{gtapingams} version, the differences are 0.7 percentage points for Argentina and 1.2 percentage points for the United States and China.
-The largest deviations occur for South Africa, where the \SATE closure puts the optimum at 3.0--3.7\% instead of 5.6--5.7\%.
-Still, the \SATE closure gets the order of magnitude of the optimal tariff right in all cases, which the \SOE closure does not.
-\SATE also reproduces a pattern of the \GMR results that the \SOE closure cannot produce: Argentina and South Africa, whose benchmark protection is relatively high, would lose from unilateral free trade, whereas China and the United States would gain from it in the \texttt{gtap} version.
+\TODO{Describe how closely \SATE follows \GMR, and compare the welfare-maximizing tariff levels.}
+Welfare curves are flat around their maximum, and small differences in curvature can shift the optimum considerably.
 
-The remaining deviations between \SATE and \GMR should be put into perspective.
-Halving the elasticities of substitution between import sources in the global model (\GMRLS) changes the results much more than switching from the \GMR to the \SATE closure.
-%: the RMSD of \GMRLS from \GMR ranges from 0.14 to 0.90 percentage points, and the welfare-maximizing tariff level lies beyond the upper end of the grid (10\%) in all cases.
-The intuition behind why substitution elasticities are so relevant to  locating the welfare optimum seems clear:
+\paragraph{\bf Sensitivity to the Armington elasticities.}
+Halving the elasticities of substitution between import sources moves the welfare curves of the global model considerably (\GMRLS versus \GMR).
+The intuition is clear:
 Lower Armington elasticities mean more market power of a country's exports in its export markets (and of other countries' exports in the country's import markets), so that higher import tariffs and export taxes improve the terms of trade without distorting quantities as much as with high elasticities.
-Given that the the range of plausible values for  Armington elasticities is considerable \citep{Ahmad2021}, the uncertainty about the correct elasticities is a larger source of uncertainty about the welfare effects of trade policy than the approximation error of the \SATE closure.
+\TODO{Compare the effect of halving $\sigma^m_i$ in the \SATE closure (\SATELS--\SATE) with the effect in the global model (\GMRLS--\GMR), using the last two columns of Table \ref{tab:rmsdW} and the optima of Table \ref{tab:optimum}; state whether \SATELS tracks \GMRLS as closely as \SATE tracks \GMR.}
+\TODO{Conclude whether a modeller who runs only the \SATE closure can realistically assess the sensitivity of the global model to $\sigma^m_i$, and whether the sensitivity is under- or overstated for the large economies.}
 
 \paragraph{\bf Sectoral activity levels.}
-Figures \ref{fig:sec_large} and \ref{fig:sec_small} compare the changes of sectoral activity levels at an average trade tax rate of 10\%, where the differences between the closures are largest.
-For each sector, the \GMR result is marked by a black dot on a vertical bar; the comparison to results of the \SATE, \GMRLS, and \SOE closures are illustrated by horizontal lines.
-The scale of the x-axis is set by the \GMR, \SATE, and \GMRLS results; \SOE results outside this range are indicated by an arrow and their value.
+Figure \ref{fig:sec} compares the changes of sectoral activity levels at an average trade tax rate of 10\%, where the differences between the scenarios are largest.
+Each sector has two rows.
+In the upper row, the \GMR result is marked by a black dot on a vertical bar, and the \SATE and \SOE results are connected to it by horizontal lines.
+In the lower row, the \GMRLS result is marked by a white dot on a dashed bar, and the \SATELS result is connected to it.
+The step from the upper to the lower row shows the effect of halving $\sigma^m_i$, in the global model (black dots) and in the \SATE closure (red dots).
+The scale of the x-axis is set by the \GMR, \GMRLS, \SATE, and \SATELS results; \SOE results outside this range are indicated by an arrow and their value.
 
 \begin{figure}[p!]
 \centering
-\input{jgea_new/figures/dumbbell_g20_macro_USA_gtap}\hfill
-\input{jgea_new/figures/dumbbell_g20_macro_USA_gtapingams}
+\input{jgea_new/figures/dumbbell_g20_macro_USA}\hfill
+\input{jgea_new/figures/dumbbell_g20_macro_CHN}
 
 \vspace{0.1in}
-\input{jgea_new/figures/dumbbell_g20_macro_CHN_gtap}\hfill
-\input{jgea_new/figures/dumbbell_g20_macro_CHN_gtapingams}
+\input{jgea_new/figures/dumbbell_g20_macro_ZAF}\hfill
+\input{jgea_new/figures/dumbbell_g20_macro_ARG}
 
 \pgfplotslegendfromname{dumbbell_legend}
-\caption{Sectoral activity levels at an average trade tax rate of 10\% (\% change relative to the benchmark), United States and China.
-\SOE results outside the range shown are indicated by arrows and their values.}\label{fig:sec_large}
+\caption{Sectoral activity levels at an average trade tax rate of 10\% (\% change relative to the benchmark).
+Upper row of each sector: benchmark elasticities; lower row: $\sigma^m_i$ halved.
+\SOE results outside the range shown are indicated by arrows and their values.}\label{fig:sec}
 \end{figure}
 
-\begin{figure}[p!]
-\centering
-\input{jgea_new/figures/dumbbell_g20_macro_ZAF_gtap}\hfill
-\input{jgea_new/figures/dumbbell_g20_macro_ZAF_gtapingams}
-
-\vspace{0.1in}
-\input{jgea_new/figures/dumbbell_g20_macro_ARG_gtap}\hfill
-\input{jgea_new/figures/dumbbell_g20_macro_ARG_gtapingams}
-
-\pgfplotslegendfromname{dumbbell_legend}
-\caption{Sectoral activity levels at an average trade tax rate of 10\% (\% change relative to the benchmark), South Africa and Argentina.
-\SOE results outside the range shown are indicated by arrows and their values.}\label{fig:sec_small}
-\end{figure}
-
-Across the 32 combinations of country, model version, and sector, the \SATE result is closer to the \GMR result than the \SOE result in 25 cases and closer than the \GMRLS result in 19 cases.
-The \SOE closure fails most clearly in the \texttt{gtap} version, where domestic and exported output are perfect substitutes: an average trade tax rate of 10\% shrinks manufacturing by 15--36\% and expands services by 3--11\% in all four countries, whereas the \GMR model predicts changes of less than 1.5\% in these sectors.
-In the \texttt{gtapingams} version, the \SOE results are of the right order of magnitude, but they still deviate substantially for energy, where they overstate the output response in the United States, China, and South Africa.
-
-For the two small economies, the \SATE closure reproduces the \GMR results almost exactly (Figure \ref{fig:sec_small}).
-For Argentina, its deviations do not exceed 0.03 percentage points in any sector and model version, and for South Africa they are at most 0.13 percentage points; in both countries they are mostly smaller than the deviations of \GMRLS.
-The \GMRLS results are quite different in the energy sector of South Africa, where halving the Armington elasticities reverses the sign of the output change in both model versions.
-
-The fit is weaker for the large economies (Figure \ref{fig:sec_large}).
-The \SATE closure tends to overstate the output responses of the \GMR model: energy output in the United States declines by 9.7\% instead of 7.3\% (\texttt{gtap} version) and by 6.9\% instead of 5.8\% (\texttt{gtapingams} version); Chinese manufacturing declines by 1.6\% instead of 1.3\% (\texttt{gtap} version), and Chinese agriculture expands by 3.3\% instead of 2.9\% (\texttt{gtapingams} version).
-In one case, US manufacturing in the \texttt{gtap} version, the \SATE closure gets the sign wrong: it predicts a decline of 0.5\% where the \GMR model predicts a small increase of 0.1\%.
-For these economies, \GMRLS is often closer to the \GMR results than \SATE.
-This is what one would expect: the United States and China are large in many of their export markets, so that the small-economy limit underlying the \SATE closure overstates the elasticity of export demand (Section \ref{sec:sate}), and the terms of trade of their imports, which are fixed in the \SATE closure, matter as well.
+\TODO{Compare \SATE and \SOE with \GMR across the 16 combinations of country and sector.}
+\TODO{Small economies (South Africa, Argentina) versus large economies (United States, China).}
+\TODO{Does \SATELS reproduce the direction and size of the change from \GMR to \GMRLS, including sign reversals?}
+Where the \SATE closure deviates for the large economies, this is what one would expect: the United States and China are large in many of their export markets, so that the small-economy limit underlying the \SATE closure overstates the elasticity of export demand (Section \ref{sec:sate}), and the terms of trade of their imports, which are fixed in the \SATE closure, matter as well.
 
 %	===================================================================
 \section{Conclusion}\label{sec:concl}
@@ -554,11 +524,13 @@ Its deviations from the global model are not larger than the uncertainty in the 
 The fit of sectoral activity levels is mixed, and it is weakest for the largest economies, for which the small-economy limit is least appropriate.
 The more elaborate calibration of a large open economy model by \citet{Schreiber2024}, which estimates export demand and import supply elasticities from the global model, can be expected to do better for such economies, at the price of requiring estimates of elasticities derived from an equivalent, global model.
 
-While the \texttt{gtap} version of the model is closer to the original \GTAP model, the \texttt{gtapingams} version of \citet{LanzRutherford2016} is not without merit.
+\TODO{One or two sentences on what halving $\sigma^m_i$ in the \SATE closure tells a single-country modeller about the sensitivity of the global model.}
+
+Following \citet{LanzRutherford2016}, this paper uses a finite elasticity of transformation between domestic and export supply only in the \SOE closure, where it is needed to avoid corner solutions.
+Imperfect transformability may have merit beyond that purpose.
 \citet{Soderbery2015} and \citet{Broda2008} estimate export supply elasticities, and the latter make them central to their argument for import tariffs based on the market power of importers.
 The \GTAP model does not explicitly calibrate price elasticities of export supply, but export supply functions to a specific country are implied by market interactions, first within the exporting country and then among the different countries importing the commodity in question.
 For a more explicit calibration of export supply functions, imperfect transformability between domestically provided and exported varieties can be of use.
-For the experiments of this paper, the \SATE closure performs similarly well in both versions, whereas the \SOE closure is only usable in the \texttt{gtapingams} version.
 
 \begin{acknowledgements}
 

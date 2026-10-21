@@ -40,9 +40,10 @@ elasticity checks (\texttt{bmkchk.gms}, \texttt{mcpmge.gms},
 Program \texttt{forensics/tgrid.gms} performs the sequence of counterfactuals for one region.
 Its environment variables are listed in Table \ref{tab:tgrid}; for example,
 \begin{Verbatim}
-gams tgrid --ds=g20_macro --rcalc=ZAF --mdl=sate --thetadx=1
+gams tgrid --ds=g20_macro --rcalc=ZAF --mdl=sate
 \end{Verbatim}
-computes the \SATE results of the \texttt{gtap} model version for South Africa.
+computes the \SATE results for South Africa, and adding \texttt{--fsubm=0.5} computes the \SATELS results.
+Program \texttt{forensics/ssasolve.gms} runs the five scenarios of Section \ref{sec:design} and \texttt{sate2} for the four countries and writes the results to \texttt{forensics/output/<ds>/<closure>/<region>.gdx}, where \texttt{<closure>} is one of \texttt{gmr}, \texttt{gmr\_ls}, \texttt{soe}, \texttt{sate}, \texttt{sate\_ls}, and \texttt{sate2}.
 
 \begin{table}[ht!]
 \begin{center}
@@ -56,8 +57,8 @@ Variable & Meaning & Default \\
 \texttt{--yr} & Reference year & \texttt{23} \\
 \texttt{--rcalc} & Region whose trade taxes are scaled & \texttt{CHN} \\
 \texttt{--mdl} & Trade closure: \texttt{gmr}, \texttt{soe}, \texttt{sate}, \texttt{sate2} & \texttt{sate2} \\
-\texttt{--thetadx} & $1$: \texttt{gtap} version ($\eta^{DX}=\infty$); $0.5$: \texttt{gtapingams} version & \texttt{1} \\
-\texttt{--fsubm} & Scaling factor for $\sigma^m_i$ (\texttt{esubm}); $0.5$ for \GMRLS & \texttt{1} \\
+\texttt{--thetadx} & $\theta$ (Appendix \ref{app:thetadx}); set to $0.5$ for \texttt{--mdl=soe} irrespective of this option & \texttt{1} \\
+\texttt{--fsubm} & Scaling factor for $\sigma^m_i$ (\texttt{esubm}); $0.5$ for \GMRLS and \SATELS & \texttt{1} \\
 \texttt{--soextax} & Update $t^{xs,row}_{ir}$ when export taxes change (macro \texttt{updrow}) & \texttt{yes} \\
 \bottomrule
 \end{tabular}

@@ -53,7 +53,8 @@ The market for foreign exchange clears through $p^{FX}$:
 where the rest-of-world agent is endowed with an amount of foreign exchange, \textit{rowpfx} [\texttt{rowpfx}], provides the transport services that \textsc{row} regions export, and finances the current account balances of the modelled regions.
 Its income is $\textit{ROW}=p^{FX}\textit{rowpfx} - p^I_n\sum_{r\in R^M}\textit{vb}_r - \sum_j p^T_j\sum_{i,s}\sum_{k\in R^X}\textit{vtwr}_{jisk}$ (the last term being the transport services used in shipments to \textsc{row} regions), which it spends on foreign exchange.
 Equations \eqref{zpX}--\eqref{mktFX} are the closure of \citet{LanzRutherford2016}.
-Without a finite elasticity of transformation between domestic and export supply ($\textit{etrndx}_i=\infty$, the \texttt{gtap} model version), \eqref{zpX} pins down the domestic producer price of every exported good, and output responds to trade policy in a bang-bang fashion.
+Without a finite elasticity of transformation between domestic and export supply ($\textit{etrndx}_i=\infty$, \texttt{thetadx}$=1$), \eqref{zpX} pins down the domestic producer price of every exported good, and output responds to trade policy in a bang-bang fashion.
+The \SOE closure is therefore solved with \texttt{thetadx}$=0.5$; the \SATE closures below do not need a finite transformation elasticity and use \texttt{thetadx}$=1$, as the \GMR model.
 
 \subsubsection{Small Armington trade economy, implementation \texttt{sate}}
 

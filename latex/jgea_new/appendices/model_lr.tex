@@ -313,7 +313,8 @@ In the standard \GTAP model, transformation elasticities $\eta^{DX}_{ir} = \text
 This implies that the supply price of output $p^Y_{jr}$ is the same if output is used locally or in a different region.
 With $\textit{etrndx}_{i} < \infty$, the output price may differ when supplied domestically or abroad.
 In this case, $p^Y_{jr}$ in equation \eqref{profitmax} is replaced by $p^D_{jr}$.
-In \GTAPINGAMS, the choice of $\textit{etrndx}_{i}$ is governed by the parameter \texttt{thetadx} (see Appendix \ref{app:thetadx}) and applies to both the \GMR and the small open economy closures: \texttt{thetadx}$=1$ yields $\textit{etrndx}_{i}=\infty$ (the \texttt{gtap} model version of this paper), \texttt{thetadx}$=0.5$ yields a finite elasticity (the \texttt{gtapingams} model version, the default of \citealp{LanzRutherford2016}).
+In \GTAPINGAMS, the choice of $\textit{etrndx}_{i}$ is governed by the parameter \texttt{thetadx} (see Appendix \ref{app:thetadx}): \texttt{thetadx}$=1$ yields $\textit{etrndx}_{i}=\infty$, \texttt{thetadx}$=0.5$ (the default of \citealp{LanzRutherford2016}) yields a finite elasticity.
+A finite elasticity is intended for the \SOE closure, where it avoids corner solutions; in this paper, the \GMR and \SATE closures use \texttt{thetadx}$=1$ and the \SOE closure uses \texttt{thetadx}$=0.5$.
 
 \begin{figure}[t!]
 \centering

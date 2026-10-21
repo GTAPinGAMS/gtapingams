@@ -60,11 +60,12 @@ As in the previous model, $a$ and $b$ are benchmark demand and supply with a 20\
 While free trade in the original model is at point $c$, free trade in the revised model is at point $d$.
 Supply is less elastic, so social surplus increases are captured by the supply side of the market, and the equilibrium price following tariff removal increases by over 10\% from the benchmark level.
 
-Note that, with this calibration, \texttt{thetadx}$=\theta$ applies in both directions of trade and to all closures: the elasticity of transformation between domestic and export supply is $\eta^{DX}_i=\sigma^D_i/(1-\theta)$ and the elasticity of substitution between domestic and imported goods is raised to $\sigma^{DM}_i=\sigma^D_i/\theta$, where $\sigma^D_i$ is the \GTAP value \texttt{esubd(i)}.
-For $\theta=1$ the standard \GTAP specification is obtained ($\eta^{DX}_i=\infty$, $\sigma^{DM}_i=\sigma^D_i$); this is the \texttt{gtap} model version of the present paper.
-For $\theta=0.5$, the default of \citet{LanzRutherford2016} and the \texttt{gtapingams} model version of this paper, $\eta^{DX}_i=\sigma^{DM}_i=2\sigma^D_i$.
+Note that, with this calibration, \texttt{thetadx}$=\theta$ applies in both directions of trade: the elasticity of transformation between domestic and export supply is $\eta^{DX}_i=\sigma^D_i/(1-\theta)$ and the elasticity of substitution between domestic and imported goods is raised to $\sigma^{DM}_i=\sigma^D_i/\theta$, where $\sigma^D_i$ is the \GTAP value \texttt{esubd(i)}.
+For $\theta=1$ the standard \GTAP specification is obtained ($\eta^{DX}_i=\infty$, $\sigma^{DM}_i=\sigma^D_i$); the present paper uses it in the \GMR and \SATE closures.
+For $\theta=0.5$, the default of \citet{LanzRutherford2016}, $\eta^{DX}_i=\sigma^{DM}_i=2\sigma^D_i$; the present paper uses it in the \SOE closure.
 
 In the \GAMS code, this adjustment takes place near the end of \texttt{gtap12data.gms}; the default \texttt{thetadx}$=0.5$ is set in \texttt{mge.gms} and may be overridden on the command line.
+Program \texttt{forensics/tgrid.gms} sets \texttt{thetadx}$=1$, except for the \SOE closure (\texttt{--mdl=soe}), for which it sets \texttt{thetadx}$=0.5$.
 The run-time environment variable \texttt{thetadx} defines how the adjustment of export supply and import demand is to be calibrated to match the \GMR model.
 The associated assignments are reported here.
 

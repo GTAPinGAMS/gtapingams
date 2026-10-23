@@ -207,6 +207,8 @@ ds = 'g20_macro'
 def task_grid():
     """Run all model runs necessary for paper reconstruction"""
     dependencies = [
+        'code/mge.gms',
+        'code/gtap12data.gms',
         'forensics/ssasolve.gms',
         'forensics/tgrid.gms',
         ]
@@ -322,8 +324,6 @@ def task_paperfigs():
     ]
     targets = [
         f'latex/jgea_new/figures/dumbbell_{ds}_USA.tex',
-        f'latex/jgea_new/figures/dumbbell_{ds}_USA.tex',
-        'latex/jgea_new/figures/res_USA_W.tex',
         'latex/jgea_new/figures/res_USA_W.tex',
         'latex/jgea_new/figures/tariff_commodity_USA.tex',
         'latex/jgea_new/figures/tariff_txtm_USA.tex',

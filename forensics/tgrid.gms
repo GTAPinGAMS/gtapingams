@@ -31,7 +31,7 @@ $if not set fsubm	$setglobal fsubm	1
 $if not set thetadx 	$setglobal thetadx	1
 $if %mdl%==soe		$setglobal thetadx	0.5
 
-set	tlvl /0*10/;
+set	tlvl /0*20/;
 
 *	Read the model here (this writes gtap12.gen in the working directory,
 *	which is moved to the scratch directory so that parallel runs do not

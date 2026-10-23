@@ -14,8 +14,8 @@ $sectors:
 	M(i,r)$(rm(r)*vim(i,r))		! Imports
 	YT(j)$vtw(j)			! Transportation services
 	FT(f,r)$(rm(r)*sf(f)*evom(f,r))	! Specific factor transformation
-	A(i,r)$(rm(r)*cde(r)*vcm(i,r))	! Armington final demand quantity index (CDE model)
-	X(i,r)$vem(i,r)			! Exports to or from rest of world (SOE model)
+	A(i,r)$(rm(r)*cde(r)*vcm(i,r))	! Armington final demand quantity index (CDE mdl)
+	X(i,r)$vem(i,r)			! Exports to or from rest of world (SOE mdl)
 
 $commodities:
 	P(g,r)$(rm(r)*(vom(g,r)-vxm(g,r)))		! Domestic output price
@@ -24,14 +24,14 @@ $commodities:
 	PT(j)$vtw(j)					! Transportation services
 	PF(f,r)$(rm(r)*evom(f,r))			! Primary factors rent
 	PS(f,g,r)$(rm(r)*sf(f)*vfm(f,g,r))		! Sector-specific primary factors
-	PFX$card(rx)					! Real exchange rate (SOE model)
+	PFX$card(rx)					! Real exchange rate (SOE mdl)
 	PA(i,r)$(rm(r)*cde(r)*vcm(i,r))			! Armington final demand price
 	PPX(g,r)$(rm(r)*vem(g,r)*sate)			! Export foreign exchange price
 	PFIX(i,r)$(rm(r)*vem(i,r)*sate2)			! Fixed factor for exports
 
 $consumers:
 	RA(r)$rm(r)		! Representative agent
-	ROW$card(rx)		! Rest of world (SOE model)
+	ROW$card(rx)		! Rest of world (SOE mdl)
 
 $auxiliary:
 	D(i,r)$(rm(r)*cde(r)*vcm(i,r)) ! Demand (index)
@@ -63,7 +63,7 @@ $prod:M(i,r)$(rm(r)*vim(i,r))	s:esubm(i)  s.tl:0
 +		a:RA(rm) t:(-rtxs(i,rm,r)) a:RA(r) t:(rtms(i,rm,r)*(1-rtxs(i,rm,r)))
 	i:P(i,rm)$(not vxm(i,rm))	q:vxmd(i,rm,r)	p:pvxmd(i,rm,r) rm.tl:
 +		a:RA(rm) t:(-rtxs(i,rm,r)) a:RA(r) t:(rtms(i,rm,r)*(1-rtxs(i,rm,r)))
-	i:PT(j)#(s)			q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl: a:RA(r) t:rtms(i,s,r)
+	i:PT(j)#(s)		q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl: a:RA(r) t:rtms(i,s,r)
 	i:PE(i,rx)$vem(i,rx)		q:vxmd(i,rx,r)	p:pvxmd(i,rx,r) rx.tl:
 +		a:ROW    t:(-rtxs(i,rx,r)) a:RA(r) t:(rtms(i,rx,r)*(1-rtxs(i,rx,r)))
 
@@ -206,19 +206,25 @@ alias (i,i_,j_), (f,f_);
 * REVEXP.lo(g)	= 0;
 *---------------------------------------------------------------------------------------
 
-$macro pnum(r)		(sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))/sum(i_,vdfm(i_,"c",r)+vifm(i_,"c",r)))
+$macro pnum(r)		(sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))\
+    /sum(i_,vdfm(i_,"c",r)+vifm(i_,"c",r)))
 $macro DFM(f,g,r)	(V_FM.L(f,g,r)$(rm(r)*vom(g,r)*vfm(f,g,r)))
 $macro DDFM(i,g,r)	(V_DFM.L(i,g,r) + V_VDA.L(i,r)$(vcm(i,r) and sameas(g,"c")))
 $macro DIFM(i,g,r)	(V_IFM.L(i,g,r) + V_VIA.L(i,r)$(vcm(i,r) and sameas(g,"c")))
-$macro REV_TO(g,r)	((rto(g,r)*((P.L(g,r)*V_VDM.L(g,r))$(vom(g,r)-vxm(g,r))+(PE.L(g,r)*v_vxm.L(g,r))$vxm(g,r)))$(rm(r)*vom(g,r)))
+$macro REV_TO(g,r)	((rto(g,r)*((P.L(g,r)*V_VDM.L(g,r))$(vom(g,r)-vxm(g,r))\
+    +(PE.L(g,r)*v_vxm.L(g,r))$vxm(g,r)))$(rm(r)*vom(g,r)))
 $macro REV_TFD(i,g,r)	(rtfd(i,g,r) * P.L(i,r)  * DDFM(i,g,r))
 $macro REV_TFI(i,g,r)	(rtfi(i,g,r) * PM.L(i,r) * DIFM(i,g,r))
-$macro REV_TF(f,g,r) 	((rtf(f,g,r)  * v_fm.L(f,g,r) * ((PS.L(f,g,r))$sf(f)+(PF.L(f,r))$mf(f)))$(rm(r)*vom(g,r)*vfm(f,g,r)))
-$macro XMD(i,s,r)	((V_XMD.L(i,s,r)/vxmd(i,s,r))$(rm(r)*vim(i,r)*vxmd(i,s,r)) + X.L(i,s)$(rm(s) and rx(r) and vxmd(i,s,r)))
-$macro PX(i,r)		((P.L(i,r)$(not vxm(i,r)) + PE.L(i,r)$vxm(i,r))$rm(r) + PE.L(i,r)$rx(r))
-$macro REV_TXS(i,s,r)	((XMD(i,s,r)*rtxs(i,s,r)*vxmd(i,s,r) * PX(i,s))$(rm(s)*vxmd(i,s,r)*rtxs(i,s,r)))
+$macro REV_TF(f,g,r) 	((rtf(f,g,r)  * v_fm.L(f,g,r) * ((PS.L(f,g,r))$sf(f)\
+    +(PF.L(f,r))$mf(f)))$(rm(r)*vom(g,r)*vfm(f,g,r)))
+$macro XMD(i,s,r)	((V_XMD.L(i,s,r)/vxmd(i,s,r))$(rm(r)*vim(i,r)*vxmd(i,s,r))\
+    + X.L(i,s)$(rm(s) and rx(r) and vxmd(i,s,r)))
+$macro PX(i,r)		((P.L(i,r)$(not vxm(i,r)) + PE.L(i,r)$vxm(i,r))$rm(r)\
+    + PE.L(i,r)$rx(r))
+$macro REV_TXS(i,s,r)	((XMD(i,s,r)*rtxs(i,s,r)*vxmd(i,s,r)\
+    * PX(i,s))$(rm(s)*vxmd(i,s,r)*rtxs(i,s,r)))
 $macro REV_TMS(i,s,r)	((XMD(i,s,r)*rtms(i,s,r)*(PX(i,s)*(1-rtxs(i,s,r))*vxmd(i,s,r)  + \
-			 sum(j_$vtwr(j_,i,s,r), PT.L(j_)*vtwr(j_,i,s,r))))$(rm(r)*vxmd(i,s,r)*rtms(i,s,r)))
+    sum(j_$vtwr(j_,i,s,r), PT.L(j_)*vtwr(j_,i,s,r))))$(rm(r)*vxmd(i,s,r)*rtms(i,s,r)))
 
 gtap12.workspace = 1024;
 gtap12.iterlim = 0;

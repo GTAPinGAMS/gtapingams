@@ -7,7 +7,7 @@ $title	Write pgfplots .data Files from figresults in results.gdx
 *	   d2  model closure      (gmr, soe, sate, ...)
 *	   d3  region             (ARG, CHN, ...)
 *	   d4  demand system      (cd, les, cde)
-*	   d5  tariff level       (0*10)
+*	   d5  tariff level       (0*20)
 *	   d6  item               (sectors and welfare W)
 *
 *	For every (d1,d3,d6) a file  <d1>_<d3>_<d6>.data  is written with one

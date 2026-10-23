@@ -191,7 +191,7 @@ def result_panel(c, item, legend=None, width="0.48\\textwidth",
   width=\\textwidth, height={height},
   xlabel={{Average trade tax rate (\\%)}}, ylabel={{{ylab}}},
   grid=major, grid style={{dashed, gray!30}},
-  xmin=0, xmax=10, ymin={fmt(ymin)}, ymax={fmt(ymax)}, ytick distance={fmt(step)},
+  xmin=0, xmax=20, ymin={fmt(ymin)}, ymax={fmt(ymax)}, ytick distance={fmt(step)},
   yticklabel style={{/pgf/number format/fixed}},
   unbounded coords=jump, label style={{font=\\footnotesize}},
   tick label style={{font=\\footnotesize}}]
@@ -233,7 +233,7 @@ def table_optimum():
         for m in TABORDER:
             t, border = optimum(x, df[m])
             if border and t == x[-1]:
-                cells.append(r"$\geq$10")
+                cells.append(r"$\geq$" + f"{x[-1]:g}")
             else:
                 cells.append(f"{t:.1f}")
         rows.append(f"{NAMES[c]} & {averate(c):.2f} & " + " & ".join(cells) + r" \\")

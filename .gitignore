@@ -54,3 +54,5 @@
 /forensics/tradetax.gdx
 /forensics/results_*.xlsx
 /forensics/figures/g20_macro_*_*.tex
+/forensics/output_fine/*
+/forensics/results_fine.gdx

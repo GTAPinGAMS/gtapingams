@@ -233,6 +233,33 @@ def task_grid():
     }
 
 
+def task_grid_fine():
+    """Run all model runs necessary for paper reconstruction"""
+    dependencies = [
+        'code/mge.gms',
+        'code/gtap12data.gms',
+        'forensics/ssasolve_fine.gms',
+        'forensics/tgrid_fine.gms',
+        ]
+    targets = [
+        f'forensics/output_fine/{ds}/gmr/CHN.gdx',
+        f'forensics/output_fine/{ds}/gmr_ls/CHN.gdx',
+        f'forensics/output_fine/{ds}/sate/CHN.gdx',
+        f'forensics/output_fine/{ds}/sate_ls/CHN.gdx',
+        # lst files in output/g20/
+    ]
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [
+            f"cd forensics & gams ssasolve_fine --ds={ds} & cd .."
+        ],
+
+    }
+
+
 def task_merge():
     """Run all model runs necessary for paper reconstruction"""
     dependencies = [
@@ -255,6 +282,38 @@ def task_merge():
 
     def merge():
         os.system(f"cd forensics & gams ssamerge --ds={ds} & cd ..")
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [
+            copy_excel,
+            merge
+        ],
+
+    }
+
+
+def task_merge_fine():
+    """Run all model runs necessary for paper reconstruction"""
+    dependencies = [
+        'forensics/ssamerge_fine.gms',
+        'forensics/results_git.xlsx',
+        f'forensics/output_fine/{ds}/gmr/CHN.gdx',
+        f'forensics/output_fine/{ds}/gmr_ls/CHN.gdx',
+        f'forensics/output_fine/{ds}/sate/CHN.gdx',
+        f'forensics/output_fine/{ds}/sate_ls/CHN.gdx',
+        ]
+    targets = [
+        'forensics/results_fine.gdx'
+    ]
+
+    def copy_excel():
+        shutil.copy('forensics/results_git.xlsx', 'forensics/results.xlsx')
+
+    def merge():
+        os.system(f"cd forensics & gams ssamerge_fine --ds={ds} & cd ..")
 
     return {
         'file_dep': dependencies,

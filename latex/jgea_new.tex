@@ -439,7 +439,7 @@ The benchmark average trade tax rate of each region is marked by a dot in the fi
   % It therefore depends on the aggregation:
   % In the more detailed \texttt{g20} aggregation, more tax-free flows drop out of the denominator, and the averages are 3.00\% for the United States and 3.52\% for China.
 %}
-Table \ref{tab:optimum} reports the tariff levels which maximize welfare in each case.
+Table \ref{tab:optimum} reports the tariff levels which maximize welfare in each case based on a refined grid search with steps of 0.1 percentage points.
 
 
 \begin{figure}[p!]
@@ -461,12 +461,12 @@ The dot marks the benchmark.
 \begin{center}
 \caption{Welfare-maximizing average trade tax rate (\%).}\label{tab:optimum}
 \small
-\input{jgea_new/figures/tab_optimum_byhand}
+\input{jgea_new/figures/tab_optimum}
 \end{center}
-\footnotesize{Notes: Maximum over the grid of tariff levels 0, 1,
-\ldots, 20\%, refined by quadratic interpolation around the best grid point.
-``$\geq$20'': welfare is still increasing at the upper end of the grid.
-``Benchmark'': benchmark average trade tax rate in the \texttt{g20\_macro} aggregation.}
+%\footnotesize{Notes: Maximum over the grid of tariff levels 0, 0.1,
+%\ldots, 20\%.
+%``$\geq$20'': welfare is still increasing at the upper end of the grid.
+%``Benchmark'': benchmark average trade tax rate in the \texttt{g20\_macro} aggregation.}
 \end{table}
 
 The \SOE closure recommends free trade for the United States, China, and South Africa, and an average rate of 1.4\% for Argentina (Table \ref{tab:optimum}).
@@ -482,7 +482,7 @@ The \SATE closure follows the \GMR welfare curve closely.
 \SATE also reproduces a pattern of the \GMR results that the \SOE closure cannot produce:
 Argentina and South Africa, whose benchmark protection is relatively high, would lose from unilateral free trade, whereas China and the United States would gain from it.
 The welfare-maximizing tariff level is not identified as well as the welfare curve itself.
-The \SATE optimum differs from the \GMR optimum by 0.4, 0.2, and 0.3 percentage points for the United States, China, and Argentina, but for South Africa it lies at 3.7\% instead of 5.7\%.
+The \SATE optimum differs from the \GMR optimum by 0.4, 0.2, and 0.2 percentage points for the United States, China, and Argentina, but for South Africa it lies at 3.7\% instead of 5.7\%.
 Welfare curves are flat around their maximum, the welfare gains relative to the benchmark are small (less than 0.1\% of expenditure in all \GMR and \SATE cases), and small differences in curvature can shift the optimum considerably.
 Still, the \SATE closure gets the order of magnitude of the optimal tariff right in all cases, which the \SOE closure does not.
 

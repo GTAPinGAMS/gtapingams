@@ -12,6 +12,10 @@ Inputs (paths relative to the repository root):
                                                directly by the tariff figures
   forensics/output/g20_macro/gmr/<C>.lst       benchmark average trade
                                                tax rates ('averate')
+  forensics/results_fine.gdx                   welfare on a 0.1-step grid around
+                                               each optimum (ssasolve_fine.gms,
+                                               ssamerge_fine.gms), read with the
+                                               GAMS utility gdxdump
 Outputs:
   latex/jgea_new/figures/*.tex                 one file per (sub)figure
                                                (sectoral results: make_dumbbells.py)
@@ -20,8 +24,11 @@ All paths written into the .tex files are relative to ./latex/, where the
 master document jgea_new.tex lives.
 """
 
+import io
 import math
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 import pandas as pd
@@ -31,6 +38,7 @@ ROOT = HERE.parent.parent                         # repository root
 FIGOUT = HERE / "figures"
 FORFIG = ROOT / "forensics" / "figures"
 TEX_FORFIG = "../forensics/figures/"              # as seen from ./latex/
+FINEGDX = ROOT / "forensics" / "results_fine.gdx"
 
 COUNTRIES = ["USA", "CHN", "ZAF", "ARG"]
 NAMES = {"USA": "United States", "CHN": "China", "ZAF": "South Africa",
@@ -211,31 +219,52 @@ def result_panel(c, item, legend=None, width="0.48\\textwidth",
 #  Tables
 # ---------------------------------------------------------------------------
 
-def optimum(x, y):
-    """Welfare-maximizing tariff level (quadratic interpolation around the
-    best grid point) and a flag whether it lies at the border of the grid."""
-    y = list(y)
-    k = max(range(len(y)), key=lambda j: y[j])
-    if 0 < k < len(y) - 1:
-        a, b, c = y[k - 1], y[k], y[k + 1]
-        den = a - 2 * b + c
-        d = 0.5 * (a - c) / den if den else 0.0
-        return x[k] + d, False
-    return x[k], True
+def read_welfare_fine(gdx=FINEGDX):
+    """Read welfare_fine(ds, closure, region, tlvl) from results_fine.gdx
+    with gdxdump (part of the GAMS system, on the PATH wherever gams runs).
+    Returns {(closure, region): pandas Series of welfare indexed by the
+    tariff level (float)}."""
+    exe = shutil.which("gdxdump")
+    if exe is None:
+        raise RuntimeError("gdxdump not found: put the GAMS system directory on the PATH")
+    out = subprocess.run([exe, str(gdx), "symb=welfare_fine", "format=csv"],
+                         capture_output=True, text=True, check=True).stdout
+    df = pd.read_csv(io.StringIO(out))
+    df.columns = ["ds", "closure", "region", "tlvl", "W"]
+    df["tlvl"] = df["tlvl"].astype(float)
+    return {(m.lower(), r.upper()): g.set_index("tlvl")["W"].sort_index()
+            for (m, r), g in df.groupby(["closure", "region"])}
+
+
+def optimum_cell(fine, coarse, m, c):
+    """Table entry for the welfare-maximizing tariff level of closure m and
+    region c.  Uses the 0.1-step grid of results_fine.gdx if it covers this
+    case; otherwise the 1-step grid of the main runs (this is the case for
+    optima at the border of the main grid: free trade or the upper end)."""
+    x = coarse.tlvl.astype(float)
+    k = coarse[m].astype(float).idxmax()
+    tc = float(x[k])
+    if (m, c) in fine:
+        w = fine[(m, c)]
+        t = float(w.idxmax())
+        lo, hi = float(w.index.min()), float(w.index.max())
+        if (t == lo and t > 0) or (t == hi and t < x.max()):
+            print(f"WARNING: optimum of {m} for {c} at the border of the fine grid "
+                  f"({lo:g}-{hi:g}); extend the fine grid in ssasolve_fine.gms")
+        return f"{t:.1f}"
+    if tc == x.max():
+        return r"$\geq$" + f"{tc:g}"
+    if tc > x.min():
+        print(f"WARNING: no fine-grid results for {m}, {c}; reporting the grid point {tc:g}")
+    return f"{tc:.1f}"
 
 
 def table_optimum():
+    fine = read_welfare_fine()
     rows = []
     for c in COUNTRIES:
         df = pd.read_csv(FORFIG / f"g20_macro_{c}_W.data", sep=r"\s+")
-        x = list(df.tlvl)
-        cells = []
-        for m in TABORDER:
-            t, border = optimum(x, df[m])
-            if border and t == x[-1]:
-                cells.append(r"$\geq$" + f"{x[-1]:g}")
-            else:
-                cells.append(f"{t:.1f}")
+        cells = [optimum_cell(fine, df, m, c) for m in TABORDER]
         rows.append(f"{NAMES[c]} & {averate(c):.2f} & " + " & ".join(cells) + r" \\")
     labels = {m: lab for m, lab, _ in CLOSURES}
     head = " & ".join(labels[m] for m in TABORDER)

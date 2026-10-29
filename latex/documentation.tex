@@ -92,8 +92,8 @@ and sectoral aggregation from the \GTAP12 dataset.
 This section introduces the structure of core \GMR and \SOE models
 included in the \GTAPINGAMS distribution. Both models are static, and
 track the production and distribution of goods in the global economy.
-In the \GTAP 9 Data Base the world is divided into 140 regions
-(typically representing individual countries) and 57 commodities (or
+In the \GTAP 12 Data Base the world is divided into 163 regions
+(typically representing individual countries) and 65 commodities (or
 goods), but computational constraints tend to limit the number of
 regions and goods which can be included in a single
 model. Datasets are easily aggregated which can be useful for
@@ -109,16 +109,15 @@ budget constraint with fixed levels of investment and public
 expenditure; (ii) producers combine intermediate inputs, and primary
 factors (several categories of labor, land, resources and physical
 capital) at least cost for given technology.\footnote{Details about
-\GTAP sectors and primary factors are provided in Appendix
-\ref{sectors}. Readers of this paper who are interested in using
-\GTAPINGAMS as a research tool are encouraged to download the
-supplementary materials for this paper and refer to Appendix
-\ref{installation} for installation instructions. The computer
-programs described have been tested using data files from the \GTAP 9
-Flexagg package, \texttt{flexagg9aY04.zip}, \texttt{flexagg9aY07.zip}
-and \texttt{flexagg9aY11.zip}. A license for these data files must be
-purchased separately by the users. In addition, a licensed
-installation of \GAMS (version 24.7.3 or higher) is required. }
+  \GTAP sectors and primary factors are provided in Appendix
+  \ref{sectors}. Readers of this paper who are interested in using
+  \GTAPINGAMS as a research tool are encouraged to refer to Appendix
+  \ref{installation} for installation instructions. The computer
+  programs described have been tested using data files from the \GTAP
+  12 GDX package, contained in \texttt{GDX12a\_AY16994.zip}. A license
+  for these data files must be purchased separately by the users. In
+  addition, a licensed installation of \GAMS (version 24.7.3 or
+  higher) is required. }
 
 While \GMR and \SOE models are based on the same data and employ the
 same representation of production technology and consumer preferences,
@@ -177,12 +176,12 @@ Set &Definition  \\
 \addlinespace
 \midrule
 \addlinespace
-$i,j$ & Sectors, an aggregation of the 57 sectors in the \GTAP 9
+$i,j$ & Sectors, an aggregation of the 65 sectors in the \GTAP 12
 Data Base \\
 $g$ & Production sectors $i$, plus private consumption \texttt{"C"},
 public demand \texttt{"G"} and investment \texttt{"I"} \\
-$r,s$ & Regions, an aggregation of the 140 regions in the
-\GTAP 9 Data Base\\
+$r,s$ & Regions, an aggregation of the 163 regions in the
+\GTAP 12 Data Base\\
 $f$ & Factors of production (consisting of
 \textit{mobile factors}, $f \in m_f$, skilled labor (i. officials,
 mangers and legislators (ISCO-88 Major Groups 1-2), ii. technicians
@@ -405,7 +404,7 @@ sectors represented in the model plus private consumption
 (See Table \ref{sets}.) For the LES demand representation, it also
 includes price indices for discretionary demand \texttt{"dd"} and
 subsistence demand \texttt{"sd"}. } The accounting identity in the
-\GTAP 9 dataset is thus:
+\GTAP 12 dataset is thus:
 $$\textit{vom}_{ir} = \sum_s \textit{vxmd}_{irs} + \textit{vst}_{ir}
 + \sum_j \textit{vdfm}_{ijr} + \textit{vdfm}_{iCr} +
 \textit{vdfm}_{iIr} + \textit{vdfm}_{iGr}\,,$$ where $j$ indexes all
@@ -545,7 +544,7 @@ intermediate inputs produced domestically and imported from abroad
 which are similarly a composite of imports from varieties from
 different regions.  $\textit{esubva}_i$ represents the elasticity of
 substitution between primary inputs in the value added nest. (Both of
-these parameters are provided in the \GTAP 9 Data Base
+these parameters are provided in the \GTAP 12 Data Base
 \citep[see][]{HertelvanderMensbrugghe2015}.) Note further that the
 specific source of tax revenue is indicated in this figure, consisting
 of output taxes, taxes on intermediate inputs and taxes on factor
@@ -565,7 +564,7 @@ profit-maximization problem:
 where $G$ is the \CET function with structure illustrated in Figure
 \ref{prodfunDX}. In the \GMR model,
 transformation elasticities $\eta^{DX}_{ir} = \textit{etrndx}_{i}$ are
-set to infinity, which is the default value in the \GTAP 9 Data Base.
+set to infinity, which is the default value in the \GTAP 12 Data Base.
 This implies that the supply price of output $p^Y_{jr}$ is the same if
 output is used locally or in a different region. By contrast, in the
 \SOE model we have that $\textit{etrndx}_{i} < \infty$,
@@ -705,7 +704,7 @@ profit-maximization problem:
 \end{eqnarray}
 where $\Gamma$ is the \CET function with structure illustrated in
 Figure \ref{prodfunFT}. Note that in the figure $\eta$ represents
-transformation elasticities provided in the \GTAP 9 Data Base.
+transformation elasticities provided in the \GTAP 12 Data Base.
 
 \begin{figure}[t!]
 \centering
@@ -1197,7 +1196,7 @@ policy shocks.
 In this section we overview the structure of the distribution
 directory. Practicalities on how to run the code is provided in
 Appendix \ref{installation}. Details of the directories and \GAMS
-programs provided in \GTAPINGAMS version 9 are provided in Appendix
+programs provided in \GTAPINGAMS version 12 are provided in Appendix
 \ref{programs}. More detailed comments may also be found interspersed
 in the GAMS code presented in Appendix \ref{code}.
 
@@ -1207,19 +1206,15 @@ whose content we now overview in alphabetical sequence:
 \begin{itemize}
 
 \item[\textsc{build}] contains a command script which automates
-dataset construction and testing. This script (\texttt{build.gms})
-calls programs stored in the \textsc{code} subfolder, including
-\textsc{flex2gdx.gms}, which translates data from \textsc{.har} to
-\textsc{.gdx} format,\footnote{The \textsc{.har} format is used in the
-original distribution of the \GTAP 9 Data Base. These data files need to
-be obtained separately and stored in the \textsc{gtapdata}
-subdirectory, which is discussed below. } \textsc{filter.gms}, a
-program which filters and then rebalances the core dataset (see data
-filtering section below), \textsc{gtap12data.gms}, a program which
-reads a \textsc{.gdx} \GTAPINGAMS dataset, \textsc{gtapaggr.gms}, a
-program which performs dataset aggregation, and \textsc{cdecalib.gms},
-a program which computes coefficients of the \CDE demand system which
-are consistent with price and income elasticities of demand.
+  dataset construction and testing. This script (\texttt{build.gms})
+  calls programs stored in the \textsc{code}
+  subfolder. \textsc{filter.gms}, a program which filters and then
+  rebalances the core dataset (see data filtering section below),
+  \textsc{gtap12data.gms}, a program which reads a \textsc{.gdx}
+  \GTAPINGAMS dataset, \textsc{gtapaggr.gms}, a program which performs
+  dataset aggregation, and \textsc{cdecalib.gms}, a program which
+  computes coefficients of the \CDE demand system which are consistent
+  with price and income elasticities of demand.
 
 The distributed copy of \texttt{build.gms} reads, filters and
 aggregates data files for 2011. At the end of the computational
@@ -1248,7 +1243,7 @@ representation.
 \end{description}
 
 \item[\textsc{defines}] contains mapping files for aggregations of
-\GTAP 9 datasets. Files ending with \textsc{.map} define an
+\GTAP 12 datasets. Files ending with \textsc{.map} define an
 aggregation in terms of the source dataset and mappings from sets in
 the source to sets in the target. Three single dimensional sets and
 three two-dimensional tuples are included in each mapping file. The
@@ -1287,7 +1282,7 @@ Four alternative regional / commodity aggregation are included in the
 \textsc{defines} directory to illustrate how aggregation works in
 \GTAPINGAMS. The first is the full disaggregate dataset
 \textsc{gtapingams.map} which retains all regions and markets from the
-\GTAP 9 Data Base after original data have been filtered and a few sector
+\GTAP 12 Data Base after original data have been filtered and a few sector
 labels have been changed.\footnote{The sectoral identifier which
 differ from the \GEMPACK model are as follows: \textsc{oil} (crude
 oil) is relabeled \textsc{cru}, \textsc{coa} (coal) becomes
@@ -1340,13 +1335,11 @@ datasets produced for a 2011 base year:
 \end{Verbatim}
 
 \item[\textsc{gtapdata}] contains \texttt{.zip} files from the \GTAP
-distribution (Flexagg package). These files are not provided in the
+distribution (GDX package). These files are not provided in the
 \GTAPINGAMS distribution, but must be copied here by the user. They
-may include any or all of these files:
+are shipped in a file that includes all reference years:
 \begin{Verbatim}
-  23-Aug-2016   2:57:22p     77,616,861   flexagg9aY04.zip
-  23-Aug-2016   2:57:38p     80,406,868   flexagg9aY07.zip
-  23-Aug-2016   2:57:08p     80,056,730   flexagg9aY11.zip
+  GDX12a_AY16994.zip
 \end{Verbatim}
 
 \end{itemize}
@@ -1363,7 +1356,7 @@ to obtain a more precise empirical estimate.
 Conveniently, all \GTAP datasets are defined in terms of three primary
 sets: $i$, the set of sectors and produced commodities, $r$ the set of
 countries and regions, and $f$ the set of primary factors.
-Table~\ref{allsectors} presents the identifiers for the 57 \GTAP 9
+Table~\ref{allsectors} presents the identifiers for the 65 \GTAP 12
 sectors (plus CGD investment goods) in their most disaggregate form
 (see Appendix \ref{sectors}). These sectors may be aggregated freely to produce
 more compact dataset.

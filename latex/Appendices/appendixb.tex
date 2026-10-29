@@ -1,36 +1,35 @@
 \section[B]{Practicalities}\label{installation}
 \subsection*{System Requirements}
- 
+
 You will need to have the following:
 
 \begin{itemize}
 \item{A computer.}
-\item{A \GTAP 9 license and data file.}
+\item{A \GTAP 12 license and data file.}
 \item{A \GAMS system, Version 24.7.1 or newer.}
 \item{A nonlinear solver (PATH, IPOPT or CONOPT).}
 \item{The MPSGE subsystem (optional)}
 \end{itemize}
- 
+
 \subsection*{Getting Started}
- 
+
 The \GTAPINGAMS package is distributed as a zip file containing the
 directory structure and \GAMS programs which can be unzipped into a
 clean working directory. \GTAP source data are not distributed with
 the \GTAPINGAMS system.  In order to generate models with the
-\GTAPINGAMS tools, it is necessary to obtain the \GTAP 9 distribution
+\GTAPINGAMS tools, it is necessary to obtain the \GTAP 12 distribution
 archives.
- 
+
 Here are the steps involved in installing \GTAPINGAMS:
 \begin{enumerate}
 \item   Create an empty root directory for \GTAP.
-\item   Unzip \texttt{gtap9ingams.zip} in this directory.
-\item   Install the \GTAP data file \texttt{flexagg9aY11.zip} into the \texttt{gtapdata}
-subdirectory.\footnote{You need only one data files, but these data
-are provided for three different years in the GTAP ``flexhar'' distribution.}
+\item   Unzip \texttt{gtap12ingams.zip} in this directory.
+\item   Install the \GTAP data file \texttt{GDX12a\_AY16994.zip} into the \texttt{gtapdata}
+subdirectory.
 \item   Connect to the \texttt{build} directory and execute
 \texttt{gams build.gms}  This will take some time to complete.  The batch
 file is set up to begin with the 2011 base year data. Choose a different year if you wish.
-\item   Run \texttt{test.gms} in the \texttt{build} directory  to 
+\item   Run \texttt{test.gms} in the \texttt{build} directory  to
 evaluate benchmark consistency of the generated datasets.
 \item   The \GAMS programs in the \texttt{forensics} directory provide
 a template for how to conduct counterfactual policy simulations, using

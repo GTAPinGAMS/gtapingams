@@ -2,11 +2,11 @@
 \subsection*{Declarations}
 
 \begin{GAMSCode*}
-$title   GTAP9inGAMS -- GAMS/MCP Formulation
+$title   GTAP12inGAMS -- GAMS/MCP Formulation
 
 $if not set yr $set yr 11
 $if not set ds $set ds g20_macro
-$include "%system.fp%gtap9data"
+$include "%system.fp%gtap12data"
 
 nonnegative
 variables
@@ -111,7 +111,7 @@ vxmd0(i,r,s) = vxmd(i,r,s);
 vtwr0(j,i,r,s) = vtwr(j,i,r,s);
 
 $setlocal datetime %system.date%%system.time%
-$echo   *       Calibration code for mcp.gms (%datetime%)    >gtap9.gen
+$echo   *       Calibration code for mcp.gms (%datetime%)    >gtap12.gen
 
 *       Save copy of the benchmark trade flows so that we can turn off
 *       demand as needed in the SOE model:
@@ -141,7 +141,7 @@ alias (f,f_);
 
 *       Factor cost index:
 
-$macro C_F(g,r) ( \ 
+$macro C_F(g,r) ( \
         ( (sum(f_$theta_vfm(f_,g,r),  theta_vfm(f_,g,r)*P_PF(f_,g,r)))$Leontief(esubva(g)) + \
           (prod(f_$theta_vfm(f_,g,r), P_PF(f_,g,r)**theta_vfm(f_,g,r)))$CobbDouglas(esubva(g)) + \
           (sum(f_$theta_vfm(f_,g,r),  theta_vfm(f_,g,r)* \
@@ -225,7 +225,7 @@ prf_y(g,r)$(rm(r)*vom(g,r))..   cy0(g,r)*C_Y(g,r) =e= vom(g,r)*(1-rto(g,r))*R_Y(
 
 $macro PYT(j,r) (PX(j,r)$rm(r) + (PFX)$rx(r))
 
-prf_yt(j)$vtw(j).. sum(r,vst(j,r)) * 
+prf_yt(j)$vtw(j).. sum(r,vst(j,r)) *
         prod(r, PYT(j,r)**theta_vst(j,r)) =e= vtw(j)*PT(j);
 
 *       Demand Function:
@@ -238,13 +238,13 @@ $macro DST(j,r)    ((vst(j,r)*YT(j)*PT(j)/PYT(j,r))$vst(j,r))
 \begin{GAMSCode*}
 * $prod:M(i,r)$(rm(r)*vim(i,r)) s:esubm(i)  s.tl:0
 *       o:PM(i,r)       q:vim(i,r)
-*       i:PE(i,s)$(rm(s)*vxm(i,s))      q:vxmd(i,s,r)   p:pvxmd(i,s,r) s.tl: 
+*       i:PE(i,s)$(rm(s)*vxm(i,s))      q:vxmd(i,s,r)   p:pvxmd(i,s,r) s.tl:
 * +             a:RA(s) t:(-rtxs(i,s,r)) a:RA(r) t:(rtms(i,s,r)*(1-rtxs(i,s,r)))
 *       i:P(i,s)$(rm(s)*(not vxm(i,s))) q:vxmd(i,s,r)   p:pvxmd(i,s,r) s.tl:
 * +             a:RA(s) t:(-rtxs(i,s,r)) a:RA(r) t:(rtms(i,s,r)*(1-rtxs(i,s,r)))
-*       i:PT(j)#(s)                     q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl: 
+*       i:PT(j)#(s)                     q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl:
 * +             a:RA(r) t:rtms(i,s,r)
-*       i:PE(i,rx)$vem(i,rx)            q:vxmd(i,rx,r)  p:pvxmd(i,rx,r) rx.tl: 
+*       i:PE(i,rx)$vem(i,rx)            q:vxmd(i,rx,r)  p:pvxmd(i,rx,r) rx.tl:
 * +             a:ROW t:(-rtxs(i,rx,r))    a:RA(r) t:(rtms(i,rx,r)*(1-rtxs(i,rx,r)))
 
 *       User cost indices:
@@ -320,15 +320,15 @@ alias (g,gg);
 mkt_p(g,rm(r))$(rm(r)*(vom(g,r)-vxm(g,r)))..
         S_D(g,r) =e= (RA(r)/P(g,r))$(vom(g,r) and cd(g)) +
                 vom(g,r)$(sameas(g,"G") or sameas(g,"I") or sameas(g,"sd")) +
-                sum(i$sameas(i,g),  
-                  sum(gg,DDFM(i,gg,r)) + 
+                sum(i$sameas(i,g),
+                  sum(gg,DDFM(i,gg,r)) +
                         (X(i,r)*vem(i,r)+sum(sm(s),DXMD(i,r,s)) + DST(i,r))$(not vxm(i,r)));
 \end{GAMSCode*}
 
 \subsubsection*{Export supply and demand -- \texttt{PE(i,r)}}
 \begin{GAMSCode*}
 mkt_pe(i,r)$(rm(r)*vxm(i,r) or rx(r)*vem(i,r))..
-        S_E(i,r)$rm(r) + (X(i,r)*vem(i,r))$rx(r) =e= 
+        S_E(i,r)$rm(r) + (X(i,r)*vem(i,r))$rx(r) =e=
                 sum(sm(s),DXMD(i,r,s)) + (X(i,r)*vem(i,r) + DST(i,r))$rm(r);
 \end{GAMSCode*}
 
@@ -348,14 +348,14 @@ mkt_pt(j)$vtw(j)..      YT(j) * vtw(j) =e= sum((i,s,r)$vtwr(j,i,s,r),
 \subsubsection*{Primary factors -- \texttt{PF(f,r)}}
 
 \begin{GAMSCode*}
-mkt_pf(f,rm(r))$evom(f,r)..     
+mkt_pf(f,rm(r))$evom(f,r)..
         evom(f,r) =e= sum(j, DFM(f,j,r))$mf(f) + (evom(f,r)*FT(f,r))$sf(f);
 \end{GAMSCode*}
 
 \subsubsection*{Specific factors -- \texttt{PS(f,j,r)}}
 \begin{GAMSCode*}
-mkt_ps(sf,j,rm(r))$vfm(sf,j,r)..        
-        vfm(sf,j,r) * (PS(sf,j,r)/PF(sf,r))**etrae(sf) * FT(sf,r) =e= DFM(sf,j,r);      
+mkt_ps(sf,j,rm(r))$vfm(sf,j,r)..
+        vfm(sf,j,r) * (PS(sf,j,r)/PF(sf,r))**etrae(sf) * FT(sf,r) =e= DFM(sf,j,r);
 \end{GAMSCode*}
 
 \subsection*{Regional income balance -- \texttt{RA(r)}}
@@ -371,10 +371,10 @@ mkt_ps(sf,j,rm(r))$vfm(sf,j,r)..
 *       e:PF(f,r)$cde(r)        q:evom(f,r)
 *       e:PA(i,r)               q:(-vcm(i,r))   R:D(i,r)
 
-inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..   
+inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..
         RA(r) =e=       ( sum(f$evom(f,r), PF(f,r)*evom(f,r))
                         - sum(i$vcm(i,r), PA(i,r)*vcm(i,r)*D(i,r)) )$cde(r)
-                        + vb(r)*((PFX)$rx(rnum)+P("i",rnum)$rm(rnum)) 
+                        + vb(r)*((PFX)$rx(rnum)+P("i",rnum)$rm(rnum))
                         - P("g",r)*vom("g",r)
                         - P("i",r)*vom("i",r)
                         - (P("sd",r)*vom("sd",r))$vom("sd",r)
@@ -383,7 +383,7 @@ inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..
                         + sum((i,g),REV_TFD(i,g,r))
                         + sum((i,g),REV_TFI(i,g,r))
                         + sum((f,g),REV_TF(f,g,r))
-                        - sum((i,s),REV_TXS(i,r,s)) 
+                        - sum((i,s),REV_TXS(i,r,s))
                         + sum((i,s),REV_TMS(i,s,r));
 \end{GAMSCode*}
 
@@ -394,16 +394,16 @@ inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..
 
 \begin{GAMSCode*}
 *       Two flavors:  The MCP declaration declares equations
-*       and associates these with variables.  The CNS declaration simply declares 
+*       and associates these with variables.  The CNS declaration simply declares
 *       equations:
 
-model gtap9 /
+model gtap12 /
         prf_y.Y,prf_x.X,prf_a.A,prf_m.M,prf_yt.YT,prf_ft.FT,
         mkt_p.P,mkt_pe.PE,mkt_pa.PA,mkt_pm.PM,mkt_pt.PT,mkt_pf.PF,mkt_ps.PS,mkt_pfx.PFX,
         constraint_D.D, constraint_U.U, constraint_CC.CC, constraint_W.W,
         inc_ra.RA, inc_row.ROW/;
 
-model gtap9cns /
+model gtap12cns /
         prf_y,prf_x,prf_a,prf_m,prf_yt,prf_ft,
         mkt_p,mkt_pe,mkt_pa,mkt_pm,mkt_pt,mkt_pf,mkt_ps,mkt_pfx,
         constraint_D, constraint_U, constraint_CC, constraint_W,
@@ -440,7 +440,7 @@ PS.LO(sf,g,r)$vfm(sf,g,r) = 0.001;
 \subsection*{Calibration algebra executed before model solution: }
 
 \begin{GAMSCode*}
-$onechov >>gtap9.gen
+$onechov >>gtap12.gen
 
 cf0(g,r) = sum(f, vfm(f,g,r)*(1+rtf0(f,g,r)));
 cm0(g,r) = sum(i, vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r)));
@@ -448,9 +448,9 @@ cy0(g,r) = cf0(g,r) + cm0(g,r);
 
 theta_cf0(g,r)$vom(g,r)  = cf0(g,r) / cy0(g,r);
 theta_vfm(f,g,r)$cf0(g,r) = vfm(f,g,r)*(1+rtf0(f,g,r)) / cf0(g,r);
-theta_cm0(i,g,r)$cm0(g,r) = 
+theta_cm0(i,g,r)$cm0(g,r) =
         (vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r))) / cm0(g,r);
-theta_vdfm(i,g,r)$vdfm(i,g,r) = vdfm(i,g,r)*(1+rtfd0(i,g,r)) / 
+theta_vdfm(i,g,r)$vdfm(i,g,r) = vdfm(i,g,r)*(1+rtfd0(i,g,r)) /
         (vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r)));
 theta_vxm(g,r)$vom(g,r)  = vxm(g,r)/vom(g,r);
 theta_vst(j,r)$vtw(j) = vst(j,r)/sum(r.local,vst(j,r));
@@ -463,9 +463,9 @@ theta_vtwr(j,i,s,r) = (vtwr(j,i,s,r)*pvtwr(i,s,r) / vxmt(i,s,r))$vxmt(i,s,r);
 theta_vim(i,s,r)$vxmt(i,s,r)    = vxmt(i,s,r)/vim(i,r);
 theta_evom(sf,j,r)$evom(sf,r) = vfm(sf,j,r)/evom(sf,r);
 
-RA.L(r) = sum(cd,vom(cd,r))$(not cde(r)) + sum(f,evom(f,r))$cde(r); 
+RA.L(r) = sum(cd,vom(cd,r))$(not cde(r)) + sum(f,evom(f,r))$cde(r);
 
-ROW.L = rowpfx  - sum(rm,vb(rm))$rm(rnum) - sum((j,i,s,rx), vtwr(j,i,s,rx)) 
+ROW.L = rowpfx  - sum(rm,vb(rm))$rm(rnum) - sum((j,i,s,rx), vtwr(j,i,s,rx))
         - sum((i,rx,rm), rtxs(i,rx,rm)*vxmd(i,rx,rm));
 RA.LO(r) = 0; RA.UP(r) = +INF; RA.FX(rnum) = RA.L(rnum);
 $offecho
@@ -478,8 +478,8 @@ $offecho
 $macro loaddsys(ff,r) \
         if (sameas(ff,"les"), loadles(r); ); \
         if (sameas(ff,"cd"),  loadcd(r); ); \
-        if (sameas(ff,"cde"), loadcde(r); ); 
-        
+        if (sameas(ff,"cde"), loadcde(r); );
+
 $macro loadles(r)  \
         cde(r) = no; \
         cd(r) = no; \
@@ -490,7 +490,7 @@ $macro loadles(r)  \
         vdfm(i,"dd",r) = vdfm(i,"c",r)*betales(r)*eta(i,r); \
         vifm(i,"dd",r) = vifm(i,"c",r)*betales(r)*eta(i,r);  \
         vom(lesd,r) = sum(i,vdfm(i,lesd,r)*(1+rtfd(i,lesd,r)) +  \
-                            vifm(i,lesd,r)*(1+rtfi(i,lesd,r))); 
+                            vifm(i,lesd,r)*(1+rtfi(i,lesd,r)));
 $macro  loadcde(r) \
         les(r) = no; \
         cd(r) = no; \
@@ -511,7 +511,7 @@ $macro loadcd(r)  \
         vom(lesd,les(r)) = 0; \
         vdfm(i,lesd,r) = 0; \
         vifm(i,lesd,r) = 0; \
-        vom("c",r) = sum(i,vdfm(i,"c",r)*(1+rtfd(i,"c",r)) + vifm(i,"c",r)*(1+rtfi(i,"c",r))); 
+        vom("c",r) = sum(i,vdfm(i,"c",r)*(1+rtfd(i,"c",r)) + vifm(i,"c",r)*(1+rtfi(i,"c",r)));
 
 $if defined ii_ $abort "The loadrm(r) macro requires a uniquely defined alias for i."
 $if defined ss_ $abort "The loadrm(r) macro requires a uniquely defined alias for s."
@@ -543,10 +543,10 @@ $ifthen.undefined not defined gdpcat
         set     gdpcat  GDP Categories  /
                         expend          Expenditure (C + G + I - (X-M)),
                         income          Income (Factor income + taxes),
-                        valueadded      Sectoral factor earnings plus tax payments, 
+                        valueadded      Sectoral factor earnings plus tax payments,
                         total           Total GDP/,
 
-                gdpitem /"X-M",set.g,set.f, 
+                gdpitem /"X-M",set.g,set.f,
                          revto,revtfd,revtfi,revtf,revtxs,revtms,
                          expend,income,valueadded,chksum/;
 
@@ -560,7 +560,7 @@ $endif.undefined
 
 $ondotl
 loop(rm(r),
-        gdp("expend",r,"C") =  RA(r)/pnum(r) 
+        gdp("expend",r,"C") =  RA(r)/pnum(r)
                 + ( sum(i$vcm(i,r), PA(i,r)*vcm(i,r)*D(i,r))/pnum(r)
                   - sum(f_$evom(f_,r), PF(f_,r)*evom(f_,r)) /pnum(r) )$cde(r)
                 + (P("sd",r)*vom("sd",r)/pnum(r)                     )$vom("sd",r);
@@ -576,7 +576,7 @@ loop(rm(r),
         vadd(g,"revtf",r) = sum(f,REV_TF(f,g,r))/pnum(r);
         vadd(i,"revtxs",r) = -sum(s,REV_TXS(i,r,s))/pnum(r);
         vadd(i,"revtms",r) = sum(s, REV_TMS(i,s,r))/pnum(r);
-        
+
         gdp("valueadded",r,gdpitem(g)) = sum(gdpi,vadd(g,gdpi,r));
 
         gdp("income",r,gdpitem(f)) = PF(f,r)*evom(f,r)/pnum(r);
@@ -589,12 +589,12 @@ loop(rm(r),
 
         gdp("total",r,"valueadded") = sum((g,gdpitem),vadd(g,gdpitem,r));
 
-        gdp("total",r,"expend") = 
+        gdp("total",r,"expend") =
                         gdp("expend",r,"c")
                         + gdp("expend",r,"i")
                         + gdp("expend",r,"g")
                         + gdp("expend",r,"x-m");
-        gdp("total",r,"income") = 
+        gdp("total",r,"income") =
                         sum(gdpitem(f), gdp("income",r,gdpitem))
                         + gdp("income",r,"revto")
                         + gdp("income",r,"revtfd")
@@ -604,7 +604,7 @@ loop(rm(r),
                         + gdp("income",r,"revtms");
         gdp("total",r,"chksum") = abs(gdp("total",r,"expend") - gdp("total",r,"income")) +
                                   abs(gdp("total",r,"expend") - gdp("total",r,"valueadded")) ;
-); 
+);
 
 \end{GAMSCode*}
 
@@ -613,14 +613,14 @@ loop(rm(r),
 \section*{GAMS/MPSGE Version}
 
 \begin{GAMSCode*}
-$title   GTAP9inGAMS -- GAMS/MPSGE Formulation
+$title   GTAP12inGAMS -- GAMS/MPSGE Formulation
 
 $if not set yr $set yr 11
 $if not set ds $set ds g20
-$include "%system.fp%gtap9data"
+$include "%system.fp%gtap12data"
 
 $ontext
-$model:gtap9
+$model:gtap12
 
 $sectors:
         Y(g,r)$(rm(r)*vom(g,r))         ! Supply
@@ -650,7 +650,7 @@ $auxiliary:
         CC(r)$(rm(r)*cde(r))    ! Consumption cost index
         W(r)$(rm(r)*cde(r))     ! Per capita welfare (money metric index);
 
-$prod:Y(g,r)$(rm(r)*vom(g,r)) s:0 t:etadx(g) m:esub(g,r) va:esubva(g) i.tl(m):esubdm(i)  
+$prod:Y(g,r)$(rm(r)*vom(g,r)) s:0 t:etadx(g) m:esub(g,r) va:esubva(g) i.tl(m):esubdm(i)
         o:P(g,r)        q:(vom(g,r)-vxm(g,r))   a:RA(r)  t:rto(g,r)     p:(1-rto(g,r))
         o:PE(g,r)       q:vxm(g,r)              a:RA(r)  t:rto(g,r)     p:(1-rto(g,r))
         i:P(i,r)        q:vdfm(i,g,r)   p:(1+rtfd0(i,g,r)) i.tl:  a:RA(r) t:rtfd(i,g,r)
@@ -666,12 +666,12 @@ $prod:YT(j)$vtw(j)  s:1
 
 $prod:M(i,r)$(rm(r)*vim(i,r))   s:esubm(i)  s.tl:0
         o:PM(i,r)                       q:vim(i,r)
-        i:PE(i,rm)$vxm(i,rm)            q:vxmd(i,rm,r)  p:pvxmd(i,rm,r) rm.tl: 
+        i:PE(i,rm)$vxm(i,rm)            q:vxmd(i,rm,r)  p:pvxmd(i,rm,r) rm.tl:
 +               a:RA(rm) t:(-rtxs(i,rm,r)) a:RA(r) t:(rtms(i,rm,r)*(1-rtxs(i,rm,r)))
         i:P(i,rm)$(not vxm(i,rm))       q:vxmd(i,rm,r)  p:pvxmd(i,rm,r) rm.tl:
 +               a:RA(rm) t:(-rtxs(i,rm,r)) a:RA(r) t:(rtms(i,rm,r)*(1-rtxs(i,rm,r)))
         i:PT(j)#(s)                     q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl: a:RA(r) t:rtms(i,s,r)
-        i:PE(i,rx)$vem(i,rx)            q:vxmd(i,rx,r)  p:pvxmd(i,rx,r) rx.tl: 
+        i:PE(i,rx)$vem(i,rx)            q:vxmd(i,rx,r)  p:pvxmd(i,rx,r) rx.tl:
 +               a:ROW    t:(-rtxs(i,rx,r)) a:RA(r) t:(rtms(i,rx,r)*(1-rtxs(i,rx,r)))
 
 $prod:FT(sf,r)$(rm(r)*evom(sf,r))  t:etrae(sf)
@@ -732,16 +732,16 @@ $demand:ROW$card(rx)
         e:PT(j)                 q:(-sum((i,s,rx), vtwr(j,i,s,rx)))
         d:PFX
 
-$prod:A(i,r)$(rm(r)*cde(r)*vcm(i,r))  s:esubdm(i)  
+$prod:A(i,r)$(rm(r)*cde(r)*vcm(i,r))  s:esubdm(i)
         o:PA(i,r)       q:vcm(i,r)
         i:P(i,r)        q:vdfm(i,"c",r) p:(1+rtfd0(i,"c",r)) a:RA(r) t:rtfd(i,"c",r)
         i:PM(i,r)       q:vifm(i,"c",r) p:(1+rtfi0(i,"c",r)) a:RA(r) t:rtfi(i,"c",r)
 
 
 $constraint:D(i,r)$(rm(r)*vcm(i,r))
-        D(i,r) * sum(j$thetac(j,r), thetac(j,r) * 
-          U(r)**((1-subpar(j,r))*incpar(j,r)) * 
-                (PA(j,r)/CC(r))**(1-subpar(j,r))) 
+        D(i,r) * sum(j$thetac(j,r), thetac(j,r) *
+          U(r)**((1-subpar(j,r))*incpar(j,r)) *
+                (PA(j,r)/CC(r))**(1-subpar(j,r)))
                    =e= U(r)**((1-subpar(i,r))*incpar(i,r)) *
                         (PA(i,r)/CC(r))**(-subpar(i,r));
 
@@ -749,11 +749,11 @@ $constraint:U(r)$(cde(r)*rm(r))
         sum(f, PF(f,r)*evom(f,r)) =e= RA(r);
 
 $constraint:CC(r)$(cde(r)*rm(r))
-        sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+        sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) *
                 (PA(i,r)/CC(r))**(1-subpar(i,r))) =e= 1;
 
 $constraint:W(r)$(cde(r)*rm(r))
-        sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+        sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) *
                          (1/W(r))**(1-subpar(i,r))) =e= 1;
 
 $report:
@@ -772,7 +772,7 @@ $report:
         v:V_VIA(i,r)$(RM(R)*vcm(i,r)*vifm(i,"c",r))             i:PM(i,r)       PROD:A(i,r)
 
 $offtext
-$sysinclude mpsgeset gtap9
+$sysinclude mpsgeset gtap12
 alias (i,i_,j_), (f,f_);
 
 $macro pnum(r)          (sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r)) / \
@@ -795,11 +795,11 @@ $macro REV_TMS(i,s,r)   ((XMD(i,s,r)*rtms(i,s,r)*(PX(i,s)*(1-rtxs(i,s,r))*vxmd(i
                          sum(j_$vtwr(j_,i,s,r), \
                                 PT.L(j_)*vtwr(j_,i,s,r))))$(rm(r)*vxmd(i,s,r)*rtms(i,s,r)))
 
-gtap9.workspace = 1024;
-gtap9.iterlim = 0;
-$include gtap9.gen
-solve gtap9 using mcp;
+gtap12.workspace = 1024;
+gtap12.iterlim = 0;
+$include gtap12.gen
+solve gtap12 using mcp;
 
 parameter       maxdev /1e-3/;
-abort$(gtap9.objval > maxdev) "GTAP9 replication fails.", gtap9.objval;
-\end{GAMSCode*} 
+abort$(gtap12.objval > maxdev) "GTAP12 replication fails.", gtap12.objval;
+\end{GAMSCode*}

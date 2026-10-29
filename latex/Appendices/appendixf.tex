@@ -1,0 +1,805 @@
+\section[F]{GAMS Code}\label{code}
+\subsection*{Declarations}
+
+\begin{GAMSCode*}
+$title   GTAP9inGAMS -- GAMS/MCP Formulation
+
+$if not set yr $set yr 11
+$if not set ds $set ds g20_macro
+$include "%system.fp%gtap9data"
+
+nonnegative
+variables
+
+*$sectors:
+        Y(g,r)          Supply
+        M(i,r)          Imports
+        YT(j)           Transportation services
+        FT(f,r)         Specific factor transformation
+        X(i,r)          Exports to rest of world (SOE model)
+        A(i,r)          Armington final demand quantity index (CDE model)
+
+*$commodities:
+        P(g,r)          Domestic output price
+        PA(i,r)         Armington final demand price
+        PE(g,r)         Export market
+        PM(j,r)         Import price
+        PT(j)           Transportation services
+        PF(f,r)         Primary factors rent
+        PS(f,g,r)       Sector-specific primary factors
+        PFX             Real exchange rate (SOE model)
+
+*$consumers:
+        RA(r)           Representative agent
+        ROW             Rest of world (SOE model)
+
+*$auxiliary:
+        D(i,r)          CDE Demand (index)
+        U(r)            CDE utility (index)
+        CC(r)           CDE Consumption cost index,
+        W(r)            CDE money metric welfare;
+
+equations
+        prf_y(g,r)              Supply,
+        prf_a(i,r)              Armington demand,
+        prf_x(i,r)              Exports,
+        prf_m(i,r)              Imports,
+        prf_yt(j)               Transportation services,
+        prf_ft(f,r)             Factor transformation,
+
+        mkt_p(g,r)              Domestic market,
+        mkt_pe(g,r)             Export market,
+        mkt_pm(j,r)             Import market,
+        mkt_pa(i,r)             Armington market,
+        mkt_pt(j)               Transportation service market,
+        mkt_pf(f,r)             Primary factor markets,
+        mkt_ps(f,j,r)           Specific factor markets,
+        mkt_pfx                 Market for foreign exchange,
+
+        inc_ra(r)               Representative agent
+        inc_row                 Rest of world agent
+
+        constraint_D            Defines D (CDE model)
+        constraint_U            Defines U (CDE model)
+        constraint_CC           Defines CC (CDE model),
+        constraint_W            Defines W (CDE model);
+\end{GAMSCode*}
+
+\subsection*{Zero profit (arbitrage) conditions}
+
+\subsubsection*{Sectoral production -- \texttt{Y(g,r)}}
+
+\begin{GAMSCode*}
+*       Define some macros which diagnose the functional form:
+
+$macro  Leontief(sigma)         (yes$(round(sigma,2)=0))
+$macro  CobbDouglas(sigma)      (yes$(round(sigma-1,2)=0))
+$macro  CES(sigma)              (yes$(round(sigma-1,2)<>0 and round(sigma,2)<>0))
+
+*       -------------------------------------------------------------------------------
+*       Profit function for production and consumption activities:
+
+* $prod:Y(g,r)$(rm(r)*vom(g,r)) s:0 m:esub(g,r) t:etadx(g) i.tl(m):esubdm(i)  va(s):esubva(g)
+*       o:P(g,r)        q:(vom(g,r)-vxm(g,r))   a:RA(r)  t:rto(g,r)
+*       o:PE(g,r)       q:vxm(g,r)              a:RA(r)  t:rto(g,r)
+*       i:P(i,r)        q:vdfm(i,g,r)   p:(1+rtfd0(i,g,r)) i.tl:  a:RA(r) t:rtfd(i,g,r)
+*       i:PM(i,r)       q:vifm(i,g,r)   p:(1+rtfi0(i,g,r)) i.tl:  a:RA(r) t:rtfi(i,g,r)
+*       i:PS(sf,g,r)    q:vfm(sf,g,r)   p:(1+rtf0(sf,g,r))  va:   a:RA(r) t:rtf(sf,g,r)
+*       i:PF(mf,r)      q:vfm(mf,g,r)   p:(1+rtf0(mf,g,r))  va:   a:RA(r) t:rtf(mf,g,r)
+
+*       Benchmark value shares:
+
+parameter
+        cf0(g,r)                Factor cost
+        cm0(g,r)                Material cost
+        cy0(g,r)                Reference total cost,
+        theta_cf0(g,r)          Value added share of cost,
+        theta_vfm(f,g,r)        Factor share of value added,
+        theta_cm0(i,g,r)        Armington share of material cost,
+        theta_vdfm(i,g,r)       Domestic share of Armington composite,
+        theta_vxm(g,r)          Export share of output,
+        theta_vst(j,r)          Value share,
+        theta_vxmd(i,s,r)       Value share of goods in imports,
+        theta_vtwr(j,i,s,r)     Value share of transportation services,
+        theta_vim(i,s,r)        Bilateral import value share
+        vxmt(i,s,r)             Value of imports gross transport cost,
+        vxmd0(i,r,s)            Trade - bilateral exports at market prices (dataset values),
+        vtwr0(j,i,r,s)          Trade - margins for international transportation at world prices,
+        theta_evom(f,j,r)       Value shares of specific factors;
+
+vxmd0(i,r,s) = vxmd(i,r,s);
+vtwr0(j,i,r,s) = vtwr(j,i,r,s);
+
+$setlocal datetime %system.date%%system.time%
+$echo   *       Calibration code for mcp.gms (%datetime%)    >gtap9.gen
+
+*       Save copy of the benchmark trade flows so that we can turn off
+*       demand as needed in the SOE model:
+
+vxmd(i,r,s) = vxmd0(i,r,s);
+vxmd(i,rx(r),rm(s)) = vxmd0(i,r,s)$vem(i,r);
+
+vtwr(j,i,r,s) = vtwr0(j,i,r,s);
+vtwr(j,i,rx(r),rm(s)) = vtwr0(j,i,r,s)$vem(i,r);
+
+*       User cost indices for factors, domestic and imported
+*       intermediate inputs:
+
+$macro P_PF(f,g,r) (((PF(f,r)$mf(f)+PS(f,g,r)$sf(f))*(1+rtf(f,g,r)) \
+                / (1+rtf0(f,g,r)))$theta_vfm(f,g,r)  + 1$(theta_vfm(f,g,r)=0))
+
+$macro P_D(i,g,r)  ((P(i,r)*(1+rtfd(i,g,r)) \
+                / (1+rtfd0(i,g,r)))$theta_vdfm(i,g,r) + 1$(not theta_vdfm(i,g,r)))
+
+$macro P_I(i,g,r)  ((PM(i,r)*(1+rtfi(i,g,r)) \
+                / (1+rtfi0(i,g,r)))$(1-theta_vdfm(i,g,r)) + 1$(theta_vdfm(i,g,r)=1))
+
+*       Compensated cost functions:
+
+$if defined f_ $abort "The CF(g,r) macro requires a uniquely defined alias for f."
+alias (f,f_);
+
+*       Factor cost index:
+
+$macro C_F(g,r) ( \ 
+        ( (sum(f_$theta_vfm(f_,g,r),  theta_vfm(f_,g,r)*P_PF(f_,g,r)))$Leontief(esubva(g)) + \
+          (prod(f_$theta_vfm(f_,g,r), P_PF(f_,g,r)**theta_vfm(f_,g,r)))$CobbDouglas(esubva(g)) + \
+          (sum(f_$theta_vfm(f_,g,r),  theta_vfm(f_,g,r)* \
+                P_PF(f_,g,r)**(1-esubva(g)))**(1/(1-esubva(g))))$CES(esubva(g)))$cf0(g,r) )
+
+*       Armington cost index:
+
+$macro C_A(i,g,r) ( \
+        (theta_vdfm(i,g,r)*P_D(i,g,r) + (1-theta_vdfm(i,g,r))*P_I(i,g,r))$Leontief(esubdm(i)) + \
+        (P_D(i,g,r)**theta_vdfm(i,g,r) * P_I(i,g,r)**(1-theta_vdfm(i,g,r)))$CobbDouglas(esubdm(i)) + \
+        ( (theta_vdfm(i,g,r) *P_D(i,g,r)**(1-esubdm(i)) + \
+        (1-theta_vdfm(i,g,r))*P_I(i,g,r)**(1-esubdm(i)))**(1/(1-esubdm(i))))$CES(esubdm(i)))
+
+$if defined i_ $abort "The C_M(g,r) macro requires a uniquely defined alias for i."
+alias (i,i_);
+$macro C_M(g,r) ( \
+ ( (sum(i_$theta_cm0(i_,g,r),  theta_cm0(i_,g,r) * \
+        C_A(i_,g,r)**(1-esub(g,r)))**(1/(1-esub(g,r))))$CES(esub(g,r)) + \
+    prod(i_$theta_cm0(i_,g,r), C_A(i_,g,r)**theta_cm0(i_,g,r))$CobbDouglas(esub(g,r)) + \
+    sum(i_$theta_cm0(i_,g,r),  theta_cm0(i_,g,r) * C_A(i_,g,r))$Leontief(esub(g,r)) ) )
+
+*       Unit cost function:
+
+$macro C_Y(g,r) (theta_cf0(g,r)*C_F(g,r) + (1-theta_cf0(g,r))*C_M(g,r))
+
+*       Unit revenue function:
+
+$macro R_Y(g,r) (  P(g,r)$(not vxm(g,r)) + \
+ (((1-theta_vxm(g,r))*  P(g,r)**(1+etadx(g)) + \
+      theta_vxm(g,r) * PE(g,r)**(1+etadx(g)))**(1/(1+etadx(g))))$vxm(g,r) )
+
+*       Demand functions:
+
+$macro DDY(i,g,r)       ((vdfm(i,g,r)*Y(g,r)*(C_A(i,g,r)/P_D(i,g,r))**esubdm(i) * \
+                                (C_M(g,r)/C_A(i,g,r))**esub(g,r))$vdfm(i,g,r))
+
+$macro DDA(i,r)         ((vdfm(i,"C",r)*A(i,r)*(C_A(i,"C",r)/P_D(i,"C",r))**esubdm(i) * \
+                                (C_M("C",r)/C_A(i,"C",r))**esub("c",r))$vdfm(i,"c",r))
+
+$macro DIY(i,g,r)       ((vifm(i,g,r)   * Y(g,r) * (C_A(i,g,r) /P_I(i,g,r)  )**esubdm(i) * \
+                                                   (C_M(g,r)/C_A(i,g,r))**esub(g,r))$vifm(i,g,r))
+
+$macro DIA(i,r)         ((vifm(i,"c",r) * A(i,r) * \
+
+                        (C_A(i,"C",r)/P_I(i,"C",r))**esubdm(i))$(vifm(i,"C",r)*vcm(i,r)))
+
+$macro DDFM(i,g,r)      (DDY(i,g,r)$vom(g,r) + DDA(i,r)$(sameas(g,"c") and vcm(i,r)))
+
+$macro DIFM(i,g,r)      (DIY(i,g,r)$vom(g,r) + DIA(i,r)$(sameas(g,"c") and vcm(i,r)))
+
+$macro DFM(f,g,r)       (vfm(f,g,r)  * Y(g,r) * (C_F(g,r)/P_PF(f,g,r))**esubva(g))$vfm(f,g,r)
+
+$macro S_D(g,r)         ((1$(not vxm(g,r)) + ((P(g,r) /R_Y(g,r))**etadx(g))$vxm(g,r)) * \
+                        (vom(g,r)-vxm(g,r)) * Y(g,r))
+
+$macro S_E(g,r)         (vxm(g,r)*Y(g,r)*(PE(g,r)/R_Y(g,r))**etadx(g))
+
+*       Associated tax revenue flows:
+
+$macro REV_TO(g,r)  (rto(g,r)*R_Y(g,r)*vom(g,r)*Y(g,r))
+
+$macro REV_TFD(i,g,r)   ((rtfd(i,g,r) * P(i,r)  * DDFM(i,g,r))$(rm(r)*rtfd(i,g,r)*vdfm(i,g,r)))
+
+$macro REV_TFI(i,g,r)   ((rtfi(i,g,r) * PM(i,r) * DIFM(i,g,r))$(rm(r)*rtfi(i,g,r)*vifm(i,g,r)))
+
+$macro REV_TF(f,g,r)    ((rtf(f,g,r)  * DFM(f,g,r) * ((PS(f,g,r))$sf(f) + \
+                        (PF(f,r))$mf(f)))$(rm(r)*vom(g,r)*rtf(f,g,r)*vfm(f,g,r)))
+
+prf_y(g,r)$(rm(r)*vom(g,r))..   cy0(g,r)*C_Y(g,r) =e= vom(g,r)*(1-rto(g,r))*R_Y(g,r);
+\end{GAMSCode*}
+
+\subsubsection*{International transportation services -- \texttt{YT(j)}}
+
+\begin{GAMSCode*}
+*       $prod:YT(j)$vtw(j)  s:1
+*               o:PT(j)                         q:vtw(j)
+*               i:PE(j,r)$(rm(r)*vxm(j,r))      q:vst(j,r)
+*               i:P(j,r)$(rm(r)*(not vxm(j,r))) q:vst(j,r)
+*               i:PFX                           q:(sum(rx(r),vst(j,r)))
+
+
+$macro PYT(j,r) (PX(j,r)$rm(r) + (PFX)$rx(r))
+
+prf_yt(j)$vtw(j).. sum(r,vst(j,r)) * 
+        prod(r, PYT(j,r)**theta_vst(j,r)) =e= vtw(j)*PT(j);
+
+*       Demand Function:
+
+$macro DST(j,r)    ((vst(j,r)*YT(j)*PT(j)/PYT(j,r))$vst(j,r))
+\end{GAMSCode*}
+
+\subsubsection*{Aggregate imports -- \texttt{M(i,r)}}
+
+\begin{GAMSCode*}
+* $prod:M(i,r)$(rm(r)*vim(i,r)) s:esubm(i)  s.tl:0
+*       o:PM(i,r)       q:vim(i,r)
+*       i:PE(i,s)$(rm(s)*vxm(i,s))      q:vxmd(i,s,r)   p:pvxmd(i,s,r) s.tl: 
+* +             a:RA(s) t:(-rtxs(i,s,r)) a:RA(r) t:(rtms(i,s,r)*(1-rtxs(i,s,r)))
+*       i:P(i,s)$(rm(s)*(not vxm(i,s))) q:vxmd(i,s,r)   p:pvxmd(i,s,r) s.tl:
+* +             a:RA(s) t:(-rtxs(i,s,r)) a:RA(r) t:(rtms(i,s,r)*(1-rtxs(i,s,r)))
+*       i:PT(j)#(s)                     q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl: 
+* +             a:RA(r) t:rtms(i,s,r)
+*       i:PE(i,rx)$vem(i,rx)            q:vxmd(i,rx,r)  p:pvxmd(i,rx,r) rx.tl: 
+* +             a:ROW t:(-rtxs(i,rx,r))    a:RA(r) t:(rtms(i,rx,r)*(1-rtxs(i,rx,r)))
+
+*       User cost indices:
+
+$macro P_M(i,s,r)   ((PX(i,s) * \
+        (1-rtxs(i,s,r))*(1+rtms(i,s,r))/pvxmd(i,s,r))$vxmd(i,s,r) + 1$(vxmd(i,s,r)=0))
+
+$macro P_T(j,i,s,r) ((PT(j)*(1+rtms(i,s,r))/pvtwr(i,s,r))$vtwr(j,i,s,r)+1$(vtwr(j,i,s,r)=0))
+
+*       Price index of bilateral imports (Leontief cost function):
+
+$if defined j1 $abort "The PT_M(i,s,r) macro requires a uniquely defined alias for j."
+alias (j,j1);
+$macro PT_M(i,s,r) (P_M(i,s,r)*theta_vxmd(i,s,r) + sum(j1, P_T(j1,i,s,r)*theta_vtwr(j1,i,s,r)))
+
+*       Unit cost function for imports (CES):
+
+$if defined s_ $abort "The CIM(i,r) macro requires a uniquely defined alias for s."
+alias (s,s_);
+$macro CIM(i,r) ( \
+   sum(s_, theta_vim(i,s_,r) * PT_M(i,s_,r) )$Leontief(esubm(i)) + \
+   prod(s_, PT_M(i,s_,r)**theta_vim(i,s_,r) )$CobbDouglas(esubm(i)) + \
+  (sum(s_, theta_vim(i,s_,r) * PT_M(i,s_,r)**(1-esubm(i)))**(1/(1-esubm(i))))$CES(esubm(i)) )
+
+prf_m(i,rm(r))$vim(i,r)..       CIM(i,r)*vim(i,r) =e= PM(i,r)*vim(i,r);
+
+*       Demand function:
+
+$macro DXMD(i,s,r)   ((vxmd(i,s,r)   * M(i,r) * (PM(i,r)/PT_M(i,s,r))**esubm(i))$vxmd(i,s,r))
+$macro DTWR(j,i,s,r) ((vtwr(j,i,s,r) * M(i,r) * (PM(i,r)/PT_M(i,s,r))**esubm(i))$vtwr(j,i,s,r))
+
+*       Associated tax revenue:
+
+alias (rm,sm);
+
+$macro XMD(i,s,r)       ((DXMD(i,s,r)/vxmd(i,s,r))$(rm(r)*vim(i,r)*vxmd(i,s,r)) + \
+                                X(i,s)$(rm(s) and rx(r) and vxmd(i,s,r)))
+$macro REV_TXS(i,s,r)   ((XMD(i,s,r)*vxmd(i,s,r)*PX(i,s)*rtxs(i,s,r))$(rm(s) and vxmd(i,s,r)))
+
+$if defined j2 $abort "The REVTMS(r) macro requires a uniquely defined alias for j."
+alias (j,j2);
+
+$macro REV_TMS(i,s,r)   ((XMD(i,s,r)*rtms(i,s,r)* \
+                ((1-rtxs(i,s,r))*vxmd(i,s,r)*PX(i,s) + \
+                 sum(j$vtwr(j,i,s,r), PT(j)*vtwr(j,i,s,r))))$(rm(r)*vxmd(i,s,r)*rtms(i,s,r)))
+\end{GAMSCode*}
+
+\subsubsection*{Sector-specific factor transformation -- \texttt{FT(f,r)}}
+
+\begin{GAMSCode*}
+*       $prod:FT(sf,r)$evom(sf,r)  t:etrae(sf)
+*               o:PS(sf,j,r)    q:vfm(sf,j,r)
+*               i:PF(sf,r)      q:evom(sf,r)
+
+$if defined j3 $abort "The PVFM(sf,r) macro requires a uniquely defined alias for j."
+alias (j,j3);
+$macro PVFM(sf,r) (sum(j3,theta_evom(sf,j3,r)*PS(sf,j3,r)**(1+etrae(sf)))**(1/(1+etrae(sf))))
+
+prf_ft(sf,rm(r))$evom(sf,r)..   evom(sf,r)*PF(sf,r) =e= evom(sf,r)*PVFM(sf,r);
+\end{GAMSCode*}
+
+\subsection*{Market clearance}
+
+These equations do not appear explicitly in the MPSGE model, as they
+are generated automatically on the basis of the production function
+information provided above.
+
+\subsubsection*{Domestic production and final demand -- \texttt{PY(g,r)}}
+
+\begin{GAMSCode*}
+alias (g,gg);
+
+mkt_p(g,rm(r))$(rm(r)*(vom(g,r)-vxm(g,r)))..
+        S_D(g,r) =e= (RA(r)/P(g,r))$(vom(g,r) and cd(g)) +
+                vom(g,r)$(sameas(g,"G") or sameas(g,"I") or sameas(g,"sd")) +
+                sum(i$sameas(i,g),  
+                  sum(gg,DDFM(i,gg,r)) + 
+                        (X(i,r)*vem(i,r)+sum(sm(s),DXMD(i,r,s)) + DST(i,r))$(not vxm(i,r)));
+\end{GAMSCode*}
+
+\subsubsection*{Export supply and demand -- \texttt{PE(i,r)}}
+\begin{GAMSCode*}
+mkt_pe(i,r)$(rm(r)*vxm(i,r) or rx(r)*vem(i,r))..
+        S_E(i,r)$rm(r) + (X(i,r)*vem(i,r))$rx(r) =e= 
+                sum(sm(s),DXMD(i,r,s)) + (X(i,r)*vem(i,r) + DST(i,r))$rm(r);
+\end{GAMSCode*}
+
+\subsubsection*{Composite imports -- \texttt{PM(i,r)}}
+
+\begin{GAMSCode*}
+mkt_pm(i,rm(r))$vim(i,r)..      M(i,r) * vim(i,r) =e= sum(g, DIFM(i,g,r));
+\end{GAMSCode*}
+
+\subsubsection*{Transport services -- \texttt{PT(j)}}
+
+\begin{GAMSCode*}
+mkt_pt(j)$vtw(j)..      YT(j) * vtw(j) =e= sum((i,s,r)$vtwr(j,i,s,r),
+                                DTWR(j,i,s,r)$rm(r) + vtwr(j,i,s,r)$rx(r));
+\end{GAMSCode*}
+
+\subsubsection*{Primary factors -- \texttt{PF(f,r)}}
+
+\begin{GAMSCode*}
+mkt_pf(f,rm(r))$evom(f,r)..     
+        evom(f,r) =e= sum(j, DFM(f,j,r))$mf(f) + (evom(f,r)*FT(f,r))$sf(f);
+\end{GAMSCode*}
+
+\subsubsection*{Specific factors -- \texttt{PS(f,j,r)}}
+\begin{GAMSCode*}
+mkt_ps(sf,j,rm(r))$vfm(sf,j,r)..        
+        vfm(sf,j,r) * (PS(sf,j,r)/PF(sf,r))**etrae(sf) * FT(sf,r) =e= DFM(sf,j,r);      
+\end{GAMSCode*}
+
+\subsection*{Regional income balance -- \texttt{RA(r)}}
+\begin{GAMSCode*}
+* $demand:RA(r)$rm(r)  s:0
+*       d:P("c",r)              q:vom("c",r)
+*       e:P("g",r)              q:(-vom("g",r))
+*       e:P("i",r)              q:(-vom("i",r))
+*       e:P("i",rnum)$rm(rnum)  q:vb(r)
+*       e:PFX$rx(rnum)          q:vb(r)
+*       e:PF(f,r)               q:evom(f,r)
+*       d:PF(f,r)$cde(r)        q:evom(f,r)
+*       e:PF(f,r)$cde(r)        q:evom(f,r)
+*       e:PA(i,r)               q:(-vcm(i,r))   R:D(i,r)
+
+inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..   
+        RA(r) =e=       ( sum(f$evom(f,r), PF(f,r)*evom(f,r))
+                        - sum(i$vcm(i,r), PA(i,r)*vcm(i,r)*D(i,r)) )$cde(r)
+                        + vb(r)*((PFX)$rx(rnum)+P("i",rnum)$rm(rnum)) 
+                        - P("g",r)*vom("g",r)
+                        - P("i",r)*vom("i",r)
+                        - (P("sd",r)*vom("sd",r))$vom("sd",r)
+                        + sum(f$evom(f,r), PF(f,r)*evom(f,r))
+                        + sum(g,REV_TO(g,r))
+                        + sum((i,g),REV_TFD(i,g,r))
+                        + sum((i,g),REV_TFI(i,g,r))
+                        + sum((f,g),REV_TF(f,g,r))
+                        - sum((i,s),REV_TXS(i,r,s)) 
+                        + sum((i,s),REV_TMS(i,s,r));
+\end{GAMSCode*}
+
+%%Model Declaration: equations of inc_row, constraint_D, constraint_U,
+%%constraint_CC are missing.
+
+\subsection*{Model Declaration}
+
+\begin{GAMSCode*}
+*       Two flavors:  The MCP declaration declares equations
+*       and associates these with variables.  The CNS declaration simply declares 
+*       equations:
+
+model gtap9 /
+        prf_y.Y,prf_x.X,prf_a.A,prf_m.M,prf_yt.YT,prf_ft.FT,
+        mkt_p.P,mkt_pe.PE,mkt_pa.PA,mkt_pm.PM,mkt_pt.PT,mkt_pf.PF,mkt_ps.PS,mkt_pfx.PFX,
+        constraint_D.D, constraint_U.U, constraint_CC.CC, constraint_W.W,
+        inc_ra.RA, inc_row.ROW/;
+
+model gtap9cns /
+        prf_y,prf_x,prf_a,prf_m,prf_yt,prf_ft,
+        mkt_p,mkt_pe,mkt_pa,mkt_pm,mkt_pt,mkt_pf,mkt_ps,mkt_pfx,
+        constraint_D, constraint_U, constraint_CC, constraint_W,
+        inc_ra, inc_row/;
+
+*       Assign default values:
+
+Y.L(g,r) = 1;
+A.L(i,r) = 1;
+X.L(i,r) = 1;
+M.L(i,r) = 1;
+YT.L(j) = 1;
+FT.L(sf,r) = 1;
+P.L(g,r) = 1;
+PA.L(i,r) = 1;
+PM.L(j,r) = 1;
+PM.FX(j,r)$(not vim(j,r))  = 0;
+PT.L(j) = 1;
+PF.L(f,r) = 1;
+PS.L(sf,j,r) = 1;
+PFX.L = 1;
+X.L(i,r)$vem(i,r) = 1;
+PE.L(i,r)$vxm(i,r) = 1;
+
+*       Assign some lower bounds to avoid bad function calls:
+
+P.LO(g,r)$vom(g,r) = 0.001;
+PM.LO(j,r)$vim(j,r) = 0.001;
+PT.LO(j) = 0.001;
+PF.LO(f,r)$evom(f,r) = 0.001;
+PS.LO(sf,g,r)$vfm(sf,g,r) = 0.001;
+\end{GAMSCode*}
+
+\subsection*{Calibration algebra executed before model solution: }
+
+\begin{GAMSCode*}
+$onechov >>gtap9.gen
+
+cf0(g,r) = sum(f, vfm(f,g,r)*(1+rtf0(f,g,r)));
+cm0(g,r) = sum(i, vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r)));
+cy0(g,r) = cf0(g,r) + cm0(g,r);
+
+theta_cf0(g,r)$vom(g,r)  = cf0(g,r) / cy0(g,r);
+theta_vfm(f,g,r)$cf0(g,r) = vfm(f,g,r)*(1+rtf0(f,g,r)) / cf0(g,r);
+theta_cm0(i,g,r)$cm0(g,r) = 
+        (vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r))) / cm0(g,r);
+theta_vdfm(i,g,r)$vdfm(i,g,r) = vdfm(i,g,r)*(1+rtfd0(i,g,r)) / 
+        (vdfm(i,g,r)*(1+rtfd0(i,g,r)) + vifm(i,g,r)*(1+rtfi0(i,g,r)));
+theta_vxm(g,r)$vom(g,r)  = vxm(g,r)/vom(g,r);
+theta_vst(j,r)$vtw(j) = vst(j,r)/sum(r.local,vst(j,r));
+vxmt(i,s,r)$vxmd(i,s,r)         = vxmd(i,s,r)*pvxmd(i,s,r) + sum(j,vtwr(j,i,s,r)*pvtwr(i,s,r));
+
+vxmt(i,s,r)$(rx(s) and rm(r) and (not vem(i,s))) = 0;
+
+theta_vxmd(i,s,r)= (vxmd(i,s,r)*pvxmd(i,s,r) / vxmt(i,s,r))$vxmt(i,s,r);
+theta_vtwr(j,i,s,r) = (vtwr(j,i,s,r)*pvtwr(i,s,r) / vxmt(i,s,r))$vxmt(i,s,r);
+theta_vim(i,s,r)$vxmt(i,s,r)    = vxmt(i,s,r)/vim(i,r);
+theta_evom(sf,j,r)$evom(sf,r) = vfm(sf,j,r)/evom(sf,r);
+
+RA.L(r) = sum(cd,vom(cd,r))$(not cde(r)) + sum(f,evom(f,r))$cde(r); 
+
+ROW.L = rowpfx  - sum(rm,vb(rm))$rm(rnum) - sum((j,i,s,rx), vtwr(j,i,s,rx)) 
+        - sum((i,rx,rm), rtxs(i,rx,rm)*vxmd(i,rx,rm));
+RA.LO(r) = 0; RA.UP(r) = +INF; RA.FX(rnum) = RA.L(rnum);
+$offecho
+
+\end{GAMSCode*}
+
+\subsection*{Macros to Move Between Closures and Demand Systems }
+
+\begin{GAMSCode*}
+$macro loaddsys(ff,r) \
+        if (sameas(ff,"les"), loadles(r); ); \
+        if (sameas(ff,"cd"),  loadcd(r); ); \
+        if (sameas(ff,"cde"), loadcde(r); ); 
+        
+$macro loadles(r)  \
+        cde(r) = no; \
+        cd(r) = no; \
+        vom("c",r) = 0; \
+        les(r) = yes; \
+        vdfm(i,"sd",r) = vdfm(i,"c",r)*(1-betales(r)*eta(i,r)); \
+        vifm(i,"sd",r) = vifm(i,"c",r)*(1-betales(r)*eta(i,r));  \
+        vdfm(i,"dd",r) = vdfm(i,"c",r)*betales(r)*eta(i,r); \
+        vifm(i,"dd",r) = vifm(i,"c",r)*betales(r)*eta(i,r);  \
+        vom(lesd,r) = sum(i,vdfm(i,lesd,r)*(1+rtfd(i,lesd,r)) +  \
+                            vifm(i,lesd,r)*(1+rtfi(i,lesd,r))); 
+$macro  loadcde(r) \
+        les(r) = no; \
+        cd(r) = no; \
+        cde(r) = yes; \
+        vom("c",r) = 0; \
+        vom(lesd,les(r)) = 0; \
+        vdfm(i,lesd,r) = 0; \
+        vifm(i,lesd,r) = 0; \
+        W.L(r) = 1; \
+        U.L(r) = 1; \
+        D.L(i,r)$vcm(i,r) = 1; \
+        CC.L(r) = 1;
+
+$macro loadcd(r)  \
+        les(r) = no; \
+        cd(r) = yes; \
+        cde(r) = no; \
+        vom(lesd,les(r)) = 0; \
+        vdfm(i,lesd,r) = 0; \
+        vifm(i,lesd,r) = 0; \
+        vom("c",r) = sum(i,vdfm(i,"c",r)*(1+rtfd(i,"c",r)) + vifm(i,"c",r)*(1+rtfi(i,"c",r))); 
+
+$if defined ii_ $abort "The loadrm(r) macro requires a uniquely defined alias for i."
+$if defined ss_ $abort "The loadrm(r) macro requires a uniquely defined alias for s."
+
+alias (r,r_,rr), (j,j_),(i,ii_), (s,ss_), (f,f_);
+
+$macro loadrm(r) \
+        rm(r_) = no; \
+        rm(r)  = yes; \
+        loop(r_$(rm(r_) and (vom("c",r_)+vom("sd",r_)+vom("dd",r_)= \
+          smax(rm,vom("c",rm)+vom("sd",rm)+vom("dd",rm)))), rnum(r_) = yes;); \
+        rx(r_) = (not rm(r_)); \
+        vem(ii_,r_) = sum(rx,vxmd(ii_,r_,rx))$rm(r_) + sum(rm,vxmd(ii_,r_,rm))$rx(r_); \
+        vem(ii_,r_)$(not round(vem(ii_,r_),5)) = 0; \
+        rtxs_row(ii_,r_) = (sum(rx,vxmd(ii_,r_,rx)* \
+				rtxs(ii_,r_,rx))/vem(ii_,r_))$(rm(r_) and vem(ii_,r_));\
+        rowpfx = sum(rx, vom("c",rx)+vom("sd",rx)+vom("dd",rx)+ \
+                 sum(ii_,vcm(ii_,rx))+sum((j_,ii_,ss_),vtwr(j_,ii_,ss_,rx))) + sum(rm,vb(rm));\
+        pem0(ii_,r_) = (1-rtxs_row(ii_,r_))$rm(r_);
+\end{GAMSCode*}
+
+\subsection*{GDP Reporting Code}
+
+\begin{GAMSCode*}
+$stitle         GAMS Code for GDP Reporting from the MGE Model
+
+$ifthen.undefined not defined gdpcat
+
+        set     gdpcat  GDP Categories  /
+                        expend          Expenditure (C + G + I - (X-M)),
+                        income          Income (Factor income + taxes),
+                        valueadded      Sectoral factor earnings plus tax payments, 
+                        total           Total GDP/,
+
+                gdpitem /"X-M",set.g,set.f, 
+                         revto,revtfd,revtfi,revtf,revtxs,revtms,
+                         expend,income,valueadded,chksum/;
+
+        alias (gdpitem, gdpi);
+
+        parameter       gdp(gdpcat,*,gdpitem)   Real GDP accouting
+                        vadd(g, gdpitem, r)     GDP on a value-added basis;
+
+$endif.undefined
+
+
+$ondotl
+loop(rm(r),
+        gdp("expend",r,"C") =  RA(r)/pnum(r) 
+                + ( sum(i$vcm(i,r), PA(i,r)*vcm(i,r)*D(i,r))/pnum(r)
+                  - sum(f_$evom(f_,r), PF(f_,r)*evom(f_,r)) /pnum(r) )$cde(r)
+                + (P("sd",r)*vom("sd",r)/pnum(r)                     )$vom("sd",r);
+
+        gdp("expend",r,"X-M") = -vb(r)*(PFX$rx(rnum)+P("i",rnum)$rm(rnum))/pnum(r);
+        gdp("expend",r,"g") = P("g",r)*vom("g",r)/pnum(r) ;
+        gdp("expend",r,"i") = P("i",r)*vom("i",r)/pnum(r) ;
+
+        vadd(i,gdpitem(f),r) = DFM(f,i,r)*(PF.L(f,r)*mf(f)+PS.L(f,i,r)$sf(f))/pnum(r);
+        vadd(g,"revto",r) = REV_TO(g,r)/pnum(r);
+        vadd(g,"revtfd",r) = sum(i,REV_TFD(i,g,r))/pnum(r);
+        vadd(g,"revtfi",r) = sum(i,REV_TFI(i,g,r))/pnum(r);
+        vadd(g,"revtf",r) = sum(f,REV_TF(f,g,r))/pnum(r);
+        vadd(i,"revtxs",r) = -sum(s,REV_TXS(i,r,s))/pnum(r);
+        vadd(i,"revtms",r) = sum(s, REV_TMS(i,s,r))/pnum(r);
+        
+        gdp("valueadded",r,gdpitem(g)) = sum(gdpi,vadd(g,gdpi,r));
+
+        gdp("income",r,gdpitem(f)) = PF(f,r)*evom(f,r)/pnum(r);
+        gdp("income",r,"revto") =  sum(g,REV_TO(g,r))/pnum(r);
+        gdp("income",r,"revtfd") = sum((i,g), REV_TFD(i,g,r))/pnum(r);
+        gdp("income",r,"revtfi") = sum((i,g), REV_TFI(i,g,r))/pnum(r);
+        gdp("income",r,"revtf")  = sum((f,g), REV_TF(f,g,r))/pnum(r);
+        gdp("income",r,"revtxs") = -sum((i,s), REV_TXS(i,r,s))/pnum(r);
+        gdp("income",r,"revtms") = sum((i,s), REV_TMS(i,s,r))/pnum(r);
+
+        gdp("total",r,"valueadded") = sum((g,gdpitem),vadd(g,gdpitem,r));
+
+        gdp("total",r,"expend") = 
+                        gdp("expend",r,"c")
+                        + gdp("expend",r,"i")
+                        + gdp("expend",r,"g")
+                        + gdp("expend",r,"x-m");
+        gdp("total",r,"income") = 
+                        sum(gdpitem(f), gdp("income",r,gdpitem))
+                        + gdp("income",r,"revto")
+                        + gdp("income",r,"revtfd")
+                        + gdp("income",r,"revtfi")
+                        + gdp("income",r,"revtf")
+                        + gdp("income",r,"revtxs")
+                        + gdp("income",r,"revtms");
+        gdp("total",r,"chksum") = abs(gdp("total",r,"expend") - gdp("total",r,"income")) +
+                                  abs(gdp("total",r,"expend") - gdp("total",r,"valueadded")) ;
+); 
+
+\end{GAMSCode*}
+
+\clearpage
+
+\section*{GAMS/MPSGE Version}
+
+\begin{GAMSCode*}
+$title   GTAP9inGAMS -- GAMS/MPSGE Formulation
+
+$if not set yr $set yr 11
+$if not set ds $set ds g20
+$include "%system.fp%gtap9data"
+
+$ontext
+$model:gtap9
+
+$sectors:
+        Y(g,r)$(rm(r)*vom(g,r))         ! Supply
+        M(i,r)$(rm(r)*vim(i,r))         ! Imports
+        YT(j)$vtw(j)                    ! Transportation services
+        FT(f,r)$(rm(r)*sf(f)*evom(f,r)) ! Specific factor transformation
+        A(i,r)$(rm(r)*cde(r)*vcm(i,r))  ! Armington final demand quantity index (CDE model)
+        X(i,r)$vem(i,r)                 ! Exports to or from rest of world (SOE model)
+
+$commodities:
+        P(g,r)$(rm(r)*(vom(g,r)-vxm(g,r)))              ! Domestic output price
+        PE(g,r)$(rx(r)*vem(g,r)+rm(r)*vxm(g,r))         ! Export market
+        PM(j,r)$(rm(r)*vim(j,r))                        ! Import price
+        PT(j)$vtw(j)                                    ! Transportation services
+        PF(f,r)$(rm(r)*evom(f,r))                       ! Primary factors rent
+        PS(f,g,r)$(rm(r)*sf(f)*vfm(f,g,r))              ! Sector-specific primary factors
+        PFX$card(rx)                                    ! Real exchange rate (SOE model)
+        PA(i,r)$(rm(r)*cde(r)*vcm(i,r))                 ! Armington final demand price
+
+$consumers:
+        RA(r)$rm(r)             ! Representative agent
+        ROW$card(rx)            ! Rest of world (SOE model)
+
+$auxiliary:
+        D(i,r)$(rm(r)*vcm(i,r)) ! Demand (index)
+        U(r)$(rm(r)*cde(r))     ! Utility (index)
+        CC(r)$(rm(r)*cde(r))    ! Consumption cost index
+        W(r)$(rm(r)*cde(r))     ! Per capita welfare (money metric index);
+
+$prod:Y(g,r)$(rm(r)*vom(g,r)) s:0 t:etadx(g) m:esub(g,r) va:esubva(g) i.tl(m):esubdm(i)  
+        o:P(g,r)        q:(vom(g,r)-vxm(g,r))   a:RA(r)  t:rto(g,r)     p:(1-rto(g,r))
+        o:PE(g,r)       q:vxm(g,r)              a:RA(r)  t:rto(g,r)     p:(1-rto(g,r))
+        i:P(i,r)        q:vdfm(i,g,r)   p:(1+rtfd0(i,g,r)) i.tl:  a:RA(r) t:rtfd(i,g,r)
+        i:PM(i,r)       q:vifm(i,g,r)   p:(1+rtfi0(i,g,r)) i.tl:  a:RA(r) t:rtfi(i,g,r)
+        i:PS(sf,g,r)    q:vfm(sf,g,r)   p:(1+rtf0(sf,g,r))  va:   a:RA(r) t:rtf(sf,g,r)
+        i:PF(mf,r)      q:vfm(mf,g,r)   p:(1+rtf0(mf,g,r))  va:   a:RA(r) t:rtf(mf,g,r)
+
+$prod:YT(j)$vtw(j)  s:1
+        o:PT(j)                         q:vtw(j)
+        i:PE(j,r)$(rm(r)*vxm(j,r))      q:vst(j,r)
+        i:P(j,r)$(rm(r)*(not vxm(j,r))) q:vst(j,r)
+        i:PFX                           q:(sum(rx,vst(j,rx)))
+
+$prod:M(i,r)$(rm(r)*vim(i,r))   s:esubm(i)  s.tl:0
+        o:PM(i,r)                       q:vim(i,r)
+        i:PE(i,rm)$vxm(i,rm)            q:vxmd(i,rm,r)  p:pvxmd(i,rm,r) rm.tl: 
++               a:RA(rm) t:(-rtxs(i,rm,r)) a:RA(r) t:(rtms(i,rm,r)*(1-rtxs(i,rm,r)))
+        i:P(i,rm)$(not vxm(i,rm))       q:vxmd(i,rm,r)  p:pvxmd(i,rm,r) rm.tl:
++               a:RA(rm) t:(-rtxs(i,rm,r)) a:RA(r) t:(rtms(i,rm,r)*(1-rtxs(i,rm,r)))
+        i:PT(j)#(s)                     q:vtwr(j,i,s,r) p:pvtwr(i,s,r) s.tl: a:RA(r) t:rtms(i,s,r)
+        i:PE(i,rx)$vem(i,rx)            q:vxmd(i,rx,r)  p:pvxmd(i,rx,r) rx.tl: 
++               a:ROW    t:(-rtxs(i,rx,r)) a:RA(r) t:(rtms(i,rx,r)*(1-rtxs(i,rx,r)))
+
+$prod:FT(sf,r)$(rm(r)*evom(sf,r))  t:etrae(sf)
+        o:PS(sf,j,r)    q:vfm(sf,j,r)
+        i:PF(sf,r)      q:evom(sf,r)
+
+*       Cobb-Douglas (or CES) demand:
+
+$demand:RA(r)$(rm(r) and cd(r))  s:0
+        d:P("c",r)              q:vom("c",r)
+
+        e:P("g",r)              q:(-vom("g",r))
+        e:P("i",r)              q:(-vom("i",r))
+        e:P("i",rnum)$rm(rnum)  q:vb(r)
+        e:PFX$rx(rnum)          q:vb(r)
+        e:PF(f,r)               q:evom(f,r)
+
+*       Linear expenditure system:
+
+$demand:RA(r)$(rm(r) and les(r))  s:0
+        d:P("dd",r)             q:vom("dd",r)
+        e:P("sd",r)             q:(-vom("sd",r))
+
+        e:P("g",r)              q:(-vom("g",r))
+        e:P("i",r)              q:(-vom("i",r))
+        e:P("i",rnum)$rm(rnum)  q:vb(r)
+        e:PFX$rx(rnum)          q:vb(r)
+        e:PF(f,r)               q:evom(f,r)
+
+*       CDE demand:
+
+$demand:RA(r)$(rm(r) and cde(r))  s:0
+        d:PF(f,r)               q:evom(f,r)
+        e:PF(f,r)               q:evom(f,r)
+        e:PA(i,r)               q:(-vcm(i,r))   R:D(i,r)
+
+        e:P("g",r)              q:(-vom("g",r))
+        e:P("i",r)              q:(-vom("i",r))
+        e:P("i",rnum)$rm(rnum)  q:vb(r)
+        e:PFX$rx(rnum)          q:vb(r)
+        e:PF(f,r)               q:evom(f,r)
+
+*       -------------------------------------------------------------------
+*       Additional code for the SOE closure:
+
+$prod:X(i,r)$(rm(r)*vem(i,r))
+        o:PFX                           q:(pem0(i,r)*vem(i,r))
+        i:P(i,r)$(not vxm(i,r))         q:vem(i,r)      a:RA(r) t:(-rtxs_row(i,r))
+        i:PE(i,r)$vxm(i,r)              q:vem(i,r)      a:RA(r) t:(-rtxs_row(i,r))
+
+$prod:X(i,r)$(rx(r)*vem(i,r))
+        o:PE(i,r)               q:vem(i,r)
+        i:PFX                   q:vem(i,r)
+
+$demand:ROW$card(rx)
+        e:PFX                   q:rowpfx
+        e:P("i",rnum)$rm(rnum)  q:(-sum(rm,vb(rm)))
+        e:PT(j)                 q:(-sum((i,s,rx), vtwr(j,i,s,rx)))
+        d:PFX
+
+$prod:A(i,r)$(rm(r)*cde(r)*vcm(i,r))  s:esubdm(i)  
+        o:PA(i,r)       q:vcm(i,r)
+        i:P(i,r)        q:vdfm(i,"c",r) p:(1+rtfd0(i,"c",r)) a:RA(r) t:rtfd(i,"c",r)
+        i:PM(i,r)       q:vifm(i,"c",r) p:(1+rtfi0(i,"c",r)) a:RA(r) t:rtfi(i,"c",r)
+
+
+$constraint:D(i,r)$(rm(r)*vcm(i,r))
+        D(i,r) * sum(j$thetac(j,r), thetac(j,r) * 
+          U(r)**((1-subpar(j,r))*incpar(j,r)) * 
+                (PA(j,r)/CC(r))**(1-subpar(j,r))) 
+                   =e= U(r)**((1-subpar(i,r))*incpar(i,r)) *
+                        (PA(i,r)/CC(r))**(-subpar(i,r));
+
+$constraint:U(r)$(cde(r)*rm(r))
+        sum(f, PF(f,r)*evom(f,r)) =e= RA(r);
+
+$constraint:CC(r)$(cde(r)*rm(r))
+        sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+                (PA(i,r)/CC(r))**(1-subpar(i,r))) =e= 1;
+
+$constraint:W(r)$(cde(r)*rm(r))
+        sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+                         (1/W(r))**(1-subpar(i,r))) =e= 1;
+
+$report:
+        v:V_VST(i,r)$(vst(i,r) and rm(r) and (not vxm(i,r)))    i:P(i,r)        prod:YT(i)
+        v:V_VST(i,r)$(vst(i,r) and rm(r) and vxm(i,r))          i:PE(i,r)       prod:YT(i)
+        v:V_VDM(g,r)$(rm(r)*(vom(g,r)-vxm(g,r)))                o:P(g,r)        prod:Y(g,r)
+        v:V_XMD(i,s,r)$(vxmd(i,s,r)*rm(s)*vxm(i,s))             i:PE(i,s)       prod:M(i,r)
+        v:V_XMD(i,s,r)$(vxmd(i,s,r)*rx(s))                      i:PE(i,s)       prod:M(i,r)
+        v:V_VXM(g,r)$(rm(r)*vom(g,r)*vxm(g,r))                  o:PE(g,r)       prod:Y(g,r)
+        v:V_DFM(i,g,r)$(rm(r)*vom(g,r)*vdfm(i,g,r))             i:P(i,r)        prod:Y(g,r)
+        v:V_IFM(i,g,r)$(rm(r)*vom(g,r)*vifm(i,g,r))             i:PM(i,r)       prod:Y(g,r)
+        v:V_FM(f,g,r)$(sf(f)*rm(r)*vom(g,r)*vfm(f,g,r))         i:PS(f,g,r)     prod:Y(g,r)
+        v:V_FM(f,g,r)$(mf(f)*rm(r)*vom(g,r)*vfm(f,g,r))         i:PF(f,r)       prod:Y(g,r)
+        v:V_XMD(i,s,r)$(vxmd(i,s,r)*rm(s)*(not vxm(i,s)))       i:P(i,s)        prod:M(i,r)
+        v:V_VDA(i,r)$(RM(R)*vcm(i,r)*vdfm(i,"c",r))             i:P(i,r)        PROD:A(i,r)
+        v:V_VIA(i,r)$(RM(R)*vcm(i,r)*vifm(i,"c",r))             i:PM(i,r)       PROD:A(i,r)
+
+$offtext
+$sysinclude mpsgeset gtap9
+alias (i,i_,j_), (f,f_);
+
+$macro pnum(r)          (sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r)) / \
+                                sum(i_,vdfm(i_,"c",r)+vifm(i_,"c",r)))
+$macro DFM(f,g,r)       (V_FM.L(f,g,r)$(rm(r)*vom(g,r)*vfm(f,g,r)))
+$macro DDFM(i,g,r)      (V_DFM.L(i,g,r) + V_VDA.L(i,r)$(vcm(i,r) and sameas(g,"c")))
+$macro DIFM(i,g,r)      (V_IFM.L(i,g,r) + V_VIA.L(i,r)$(vcm(i,r) and sameas(g,"c")))
+$macro REV_TO(g,r)      ((rto(g,r)*((P.L(g,r)*V_VDM.L(g,r))$(vom(g,r)-vxm(g,r)) + \
+                        (PE.L(g,r)*v_vxm.L(g,r))$vxm(g,r)))$(rm(r)*vom(g,r)))
+$macro REV_TFD(i,g,r)   (rtfd(i,g,r) * P.L(i,r)  * DDFM(i,g,r))
+$macro REV_TFI(i,g,r)   (rtfi(i,g,r) * PM.L(i,r) * DIFM(i,g,r))
+$macro REV_TF(f,g,r)    ((rtf(f,g,r)  * v_fm.L(f,g,r) * \
+                        ((PS.L(f,g,r))$sf(f)+(PF.L(f,r))$mf(f)))$(rm(r)*vom(g,r)*vfm(f,g,r)))
+$macro XMD(i,s,r)       ((V_XMD.L(i,s,r)/vxmd(i,s,r))$(rm(r)*vim(i,r)*vxmd(i,s,r)) + \
+                         X.L(i,s)$(rm(s) and rx(r) and vxmd(i,s,r)))
+$macro PX(i,r)          ((P.L(i,r)$(not vxm(i,r)) + PE.L(i,r)$vxm(i,r))$rm(r) + PE.L(i,r)$rx(r))
+$macro REV_TXS(i,s,r)   ((XMD(i,s,r)*rtxs(i,s,r)*vxmd(i,s,r) * \
+                                PX(i,s))$(rm(s)*vxmd(i,s,r)*rtxs(i,s,r)))
+$macro REV_TMS(i,s,r)   ((XMD(i,s,r)*rtms(i,s,r)*(PX(i,s)*(1-rtxs(i,s,r))*vxmd(i,s,r)  + \
+                         sum(j_$vtwr(j_,i,s,r), \
+                                PT.L(j_)*vtwr(j_,i,s,r))))$(rm(r)*vxmd(i,s,r)*rtms(i,s,r)))
+
+gtap9.workspace = 1024;
+gtap9.iterlim = 0;
+$include gtap9.gen
+solve gtap9 using mcp;
+
+parameter       maxdev /1e-3/;
+abort$(gtap9.objval > maxdev) "GTAP9 replication fails.", gtap9.objval;
+\end{GAMSCode*} 

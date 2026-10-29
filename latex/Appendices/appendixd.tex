@@ -1,0 +1,308 @@
+\section[D]{The CDE Demand System}\label{CDE}
+\subsection*{Theory and Analytics}
+
+Our implementation of the \CDE model follows \cite{Chen}. 
+In the \CDE model, the utility index $U$ for a given region (subscript
+$r$ suppressed) is defined implicitly by the
+following equation:
+\begin{equation}
+\label{CDEdef}
+\sum_i \theta_i U^{e_i (1-\alpha_i)} \left(\frac{P_i}{C}
+\right)^{1-\alpha_{i}} = 1\,
+\end{equation}
+where $C$ is the shadow price on the budget constraint, $\alpha_{i}$ is the substitution
+parameter ($\texttt{subpar}_{i}$ in the \GTAP database), and
+$e_{i}$ is the income parameter ($\texttt{incpar}_{i}$).
+
+In the \CDE model $C$ is dual to the budget constraint,
+$$\sum_i P_{i} x_{i} = M$$
+and demand functions can be derived using Roy's identify:\footnote{The
+partial derivatives $\partial C/\partial P_i$ and $\partial C / \partial M$
+are obtained by differentiating (\ref{CDEdef}).}
+$$x_{i} = \frac{\partial C / \partial P_i}{\partial C / \partial M} =
+        \theta_i \frac{ U^{(1-\alpha_i) e_i} (P_i / C)^{-\alpha_i} }
+                {\sum_j, U^{(1-\alpha_j)e_j} (P_j/C)^{-\alpha_j}}$$
+
+While $U$ may be interpreted as a utility index, it does not
+correspond to a money-metric measure.  The corresponding Hicksian
+welfare index ($W$) corresponds to the cost index $C$ which solves
+(\ref{CDEdef}) with commodity prices equal to unity, i.e. $W$
+solves
+\begin{equation}
+\label{Wdef}
+\sum_i \theta_i U^{e_i (1-\alpha_i)} \left(\frac{1}{W}
+\right)^{1-\alpha_{i}} = 1.
+\end{equation}
+
+Here is a \GAMS model which evaluates \CDE demand across commodities $i$
+and regions $r \in \rm{rc}$.  We have $n+3$ variables ($x_i$, $C$,
+$U$  and $W$) determined by $n+3$ equations.  While the \CDE model is
+essentially a nonlinear system of equations, we write down the model
+using mixed complementarity syntax so as to associate equations with
+variables.\footnote{If \texttt{U(r)} is fixed prior to a \CDE solve, the
+corresponding \texttt{budget(r)} constraint is automatically dropped
+thereby providing the compensated demand response.}
+
+\begin{Verbatim}
+variables       D(i,r)  Demand,
+                C(r)    Price index,
+                U(r)    CDE Utility index
+                W(r)    Hicksian utility index;
+
+equations       ddef, budget, choice;
+
+ddef(i,rc(r))$theta(i,r)..
+        D(i,r) * sum(j, theta(j,r) * U(r)**((1-alpha(j,r))*e(j,r)) 
+                        *  (P(j,r)/C(r))**(1-alpha(j,r))) 
+                =e= theta(i,r)*U(r)**((1-alpha(i,r))*e(i,r)) 
+                        * (P(i,r)/C(r))**(-alpha(i,r));
+
+budget(rc(r))..
+        sum(i, D(i,r)*P(i,r)) =e= M(r);
+
+choice(rc(r))..
+        sum(i, theta(i,r) * U(r)**((1-alpha(i,r))*e(i,r)) 
+                        * (P(i,r)/C(r))**(1-alpha(i,r))) =e= 1;
+
+welfare(rc(r))..
+        sum(i, theta(i,r) * U(r)**((1-alpha(i,r))*e(i,r)) * 
+                         (1/W(r))**(1-alpha(i,r))) =e= 1;
+
+
+model cdeeval /ddef.D, budget.U, choice.C, welfare.W/;
+\end{Verbatim}
+
+The price elasticity of demand in this model is given by:
+$$\epsilon^{CDE}_i = \theta_i \left( 2 \alpha_i - \left( \sum_k \theta_k
+\alpha_k \right)\right) - \alpha_i$$
+and the income elasticity of demand is given by:
+$$\eta^{CDE}_i = \frac{ e_i (1-\alpha_i) + \sum_k \theta_k e_k
+\alpha_k}{\sum_k \theta_k e_k} + \alpha_i - \sum_k \theta_k \alpha_k$$
+
+\subsection*{Calibration}
+
+Calibration of the \CDE parameters involves a least squares optimization model of the form:
+\begin{equation}
+\label{calibcde}
+\min_{\alpha,e} \sum_i \theta_i \left( \left(\epsilon^{CDE}_i-\epsilon_i \right)^2 + 
+                                         \left(\eta^{CDE}_i-\eta_i
+                                         \right)^2 \right)
+\end{equation}
+Here is a \GAMS model which calibrates \CDE demand across commodities $i$
+and regions $r \in \rm{rc}$:
+\begin{Verbatim}
+variables
+        E(i,r)          Substitution parameter,
+        ALPHA(i,r)      Income parameter
+
+        EPSILONV(i,r)   Calibrated own-price elasticity of demand,
+        ETAV(i,r)       Calibrated income elasticity of demand;
+
+equations       objcde, epsilondef, etadef;
+
+objcde..        OBJ =e= sum((i,rb(r))$theta(i,r), theta(i,r) * 
+                        (sqr(EPSILONV(i,r) - epsilon(i,r))) + 
+                         sqr(ETAV(i,r)     - eta(i,r)));
+
+epsilondef(i,rb(r))$theta(i,r)..
+        EPSILONV(i,r) =e= theta(i,r) * 
+                (2*ALPHA_(i,r)-sum(k,theta(k,r)*ALPHA_(k,r))) - ALPHA_(i,r);
+
+etadef(i,rb(r))$theta(i,r)..
+        ETAV(i,r) =e= 
+           (E(i,r)*(1-ALPHA_(i,r)) + sum(k,theta(k,r)*E(k,r)*ALPHA_(k,r))) / 
+             sum(k,theta(k,r)*E(k,r)) 
+         + (ALPHA_(i,r) - sum(k,theta(k,r)*ALPHA_(k,r))); 
+
+model cdecalib /objcde, epsilondef, etadef/;
+\end{Verbatim}
+
+Finally, we note that in the \CDE model the Allen-Uzawa elasticities of
+substitution for compensated demand are given by:
+\begin{equation}
+\label{sigmacde}
+\sigma^{CDE}_{ij} = \left\{ \begin{array}{ll}
+\alpha_i + \alpha_j - \left( \sum_k \theta_k \alpha_k\right) & i \neq j\\
+2 \alpha_i - \left( \sum_k \theta_k \alpha_k\right) - \frac{\alpha_i}{\theta_i} & i = j
+\end{array} \right.
+\end{equation}
+The ``constant difference of elasticities'' feature of the \CDE demand
+system is evident through the calculation based on the AUES
+elasticities of sustitution:
+$$\sigma_{ik} - \sigma_{jk} = \alpha_i - \alpha_j$$
+
+\subsection*{Parallel Processing}
+
+The \GAMS program \texttt{cdecalib.gms} has a runtime environment
+variable named \texttt{maxthreads}.  This variable determines whether
+the \CDE calibration is executed one region at a time or, taking
+advantage of multi-core processors, several regions at a time.  When
+\texttt{threads=1}, the program runs in serial model and solutions
+listings are generated for each calibration.  Otherwise, solution
+listings are suppressed and multiple (typically 8) demand system
+calibrations are solved at once.
+
+The grid computing facilities are a relative new and evolving feature
+in \GAMS programming, and they are very useful for applied general
+equilibrium modeling, so we provide some annotated \GAMS code which
+describes how jobs are submitted and collected:
+\begin{Verbatim}
+*       When handle(r)=0, region r is inactive, otherwise 
+*       it is currently being solved:
+
+parameter       handle(r)       Pointer to a grid solve job;
+
+*       When submit(r)=yes, the calibration job for region r
+*       is ready to submit.  done(r)=yes when region r is completed.
+
+set             submit(r)       List of regions to submit,
+                done(r)         List of regions which are completed;
+
+*       Initialization:
+
+done(r) = no;
+handle(r) = 0;
+
+*       Open a file which can be used to update the title bar:
+
+file ktitle;  ktitle.lw=0; ktitle.nd=0;
+
+repeat
+
+          submit(r) = no;
+
+*       Submit as many as maxthreads jobs, choosing from regions
+*       which are neither completed nor currently running.  
+
+          loop(r$(not (done(r) or handle(r))),
+
+            submit(r) = yes$(card(submit)+card(handle)<maxthreads););
+
+*       Submit all the jobs which have been identified, one at a time,
+*       retaining a handle for each of these so we recognize it when
+*       it is completed:
+
+          loop(submit(rr),
+            rb(r) = yes$sameas(r,rr);
+            solve cdecalib using nlp minimizing OBJ;
+            handle(rr) = cdecalib.handle;);
+
+*       Update the title bar with a status report of the number of
+*       completed jobs, the number remaining and a count of the number
+*       currently being processed:
+
+          put_utility 'title'/ktitle 'CDE calibration.'
+                ' Finished: ',card(done),','
+                ' remaining: ',(card(r)-card(done)),','
+                ' running: ',card(handle),'.';
+
+*       Wait for an instance to complete:
+
+          display$ReadyCollect(handle) 'Waiting for next instance to collect';
+
+
+*       Go through the list of running jobs to find the one which is
+*       completed:
+
+          loop(rr$handlecollect(handle(rr)),
+
+*       Unload the solution (lots of assignments suppressed):
+
+            cdelog(rr,"modelstat") = cdecalib.modelstat;
+            ...
+
+*       Issue a warning if this handle cannot be deleted:
+
+            display$handledelete(handle(rr)) 'trouble deleting handles' ;
+
+*       Label this region job as inactive and completed:
+
+            handle(rr) = 0;
+            done(rr) = yes;);
+
+*       Keep going until we have completed all the jobs or we have run
+*       for a long time:
+
+        until (card(done)=card(r)) or timeelapsed > 300;  
+
+*       Issue a warning if some jobs did not complete:
+
+        abort$(card(done)<>card(r)) 'CDECALIB jobs did not return:', handle;
+\end{Verbatim}
+
+\subsection*{Integrating \CDE Demand in MPSGE}
+
+The integration of \CDE demand in the \MPSGE model is subtle. To
+begin with, we need to introduce an Armington composite price for
+final demand. This is done with the \texttt{A(i,r)} activity which
+converts domestic and imported goods into the \texttt{PA(i,r)} commodity:
+\begin{Verbatim}
+$prod:A(i,r)$(rm(r)*vcm(i,r))  s:esubdm(i)  
+        o:PA(i,r)       q:vcm(i,r)
+        i:P(i,r)        q:vdfm(i,"c",r) p:(1+rtfd0(i,"c",r)) 
++               a:RA(r) t:rtfd(i,"c",r)
+        i:PM(i,r)       q:vifm(i,"c",r) p:(1+rtfi0(i,"c",r)) 
++               a:RA(r) t:rtfi(i,"c",r)
+\end{Verbatim}
+
+The \CDE demand functions are represented by auxiliary variables, and
+they enter the \MPSGE model as rationing multipliers on regional
+endowments. The assigned set \texttt{cde(r)} is used to indicate
+whether region $r$ has a \CDE demand system.  
+
+Here is the tricky business: MPSGE insists that all consumers entering
+the model demand something.  We therefore need to include ``phantom''
+demand and endowment entries which will offset one another in
+equilibrium.  The budget balance condition in the \CDE model (the
+constraint associated with \texttt{U(r)} imposes that in equilibrium
+the value of expenditure for region $r$ (\texttt{RA(r)}) equal to the
+value of the phantom factor endowment vector.
+\begin{Verbatim}
+$demand:RA(r)$(rm(r) and cde(r))  s:0
+
+*       CDE demand enters the model as a negative value, 
+*       the value of which is determined by auxiliary variable D:
+
+        e:PA(i,r)               q:(-vcm(i,r))   R:D(i,r)
+
+
+*       Demand blocks are required to have a demand coefficient,
+*       so we introduce a phantom demand coefficient and a
+*       corresponding endowment which exactly offsets phantom demand
+*       in equilibrium:
+
+        d:PF(f,r)               q:evom(f,r)
+        e:PF(f,r)               q:evom(f,r)
+
+*       Public demand and investment demand are exogenous:
+
+        e:P("g",r)              q:(-vom("g",r))
+        e:P("i",r)              q:(-vom("i",r))
+
+*       Current account balance:
+
+        e:P("i",rnum)$rm(rnum)  q:vb(r)
+        e:PFX$rx(rnum)          q:vb(r)
+
+*       Primary factor endowments:
+
+        e:PF(f,r)               q:evom(f,r)
+
+$constraint:U(r)$(cde(r)*rm(r))
+        sum(f, PF(f,r)*evom(f,r)) =e= RA(r);
+
+$constraint:CC(r)$(cde(r)*rm(r))
+        sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+                (PA(i,r)/CC(r))**(1-subpar(i,r))) =e= 1;
+
+$constraint:D(i,r)$(rm(r)*vcm(i,r))
+        D(i,r) * sum(j$thetac(j,r), thetac(j,r) * 
+          U(r)**((1-subpar(j,r))*incpar(j,r)) * 
+                (PA(j,r)/CC(r))**(1-subpar(j,r))) 
+                   =e= U(r)**((1-subpar(i,r))*incpar(i,r)) *
+                        (PA(i,r)/CC(r))**(-subpar(i,r));
+
+$constraint:W(r)$(cde(r)*rm(r))
+        sum(i, thetac(i,r) * U(r)**((1-subpar(i,r))*incpar(i,r)) * 
+                         (1/W(r))**(1-subpar(i,r))) =e= 1;
+\end{Verbatim}

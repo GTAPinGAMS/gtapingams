@@ -156,7 +156,7 @@ In the following, I describe the model and the modifications relative to \citet{
 
 The model is the static \GTAPINGAMS model of \citet{LanzRutherford2016}, implemented in \GAMS/\MPSGE, updated to the \GTAP 12 Data Base, and extended by the \SATE closure.
 This section gives an overview of the main features and emphasizes what has changed.
-A complete documentation is given in Appendix \ref{app:model}.
+A complete documentation is given in the supplementary material.
 
 \subsection{Overview of the \GTAPINGAMS model}
 
@@ -224,7 +224,8 @@ First, in the \GTAP model the elasticity in \eqref{elasticity} refers to the imp
 Second, the limit argument does not hold for the largest economies, whose shares $\theta_{irk}$ are far from zero in some markets; for these, \eqref{sate} is an approximation whose quality is an empirical question.
 % Both caveats suggest that $\sigma^m_i$ is an upper bound for the true export demand elasticity.
 
-I implement the \SATE closure in two ways (Appendix \ref{app:closures} gives the equilibrium conditions and the code):
+% TODO: make sure \SATE is described appropriately (equilibirum conditions) without relying on an appendix. Or reintroduce Appendix...
+I implement the \SATE closure in two ways:
 \begin{description}
 \item[\texttt{sate}] The export activity of the modelled region sells into an export market with price $p^{PX}_{ir}$.
 Equation \eqref{sate} is added as an auxiliary constraint, and the representative agent receives the foreign exchange value of the exports.
@@ -241,9 +242,9 @@ Below, I therefore only report results for \texttt{sate}, labelled \SATE.
 
 The standard \GTAP model views domestic output as a homogeneous good that is sold domestically and exported alike ($\eta^{DX}_i=\infty$).
 In the \SOE closure, this specification produces corner solutions:
-With fixed world prices, the world price of an exported good pins down its domestic producer price, and output responds to trade policy in a bang-bang fashion (Appendix \ref{app:closures}).
+With fixed world prices, the world price of an exported good pins down its domestic producer price, and output responds to trade policy in a bang-bang fashion.
 \citet{LanzRutherford2016} therefore follow \citet{DeMeloRobinson1989} and introduce a finite elasticity of transformation between exported and domestically marketed output for the \SOE closure.
-To keep the trade responses comparable to the global model, they compensate the finite transformation elasticity by a higher elasticity of substitution between imported and domestic goods (Appendix \ref{app:thetadx}):
+To keep the trade responses comparable to the global model, they compensate the finite transformation elasticity by a higher elasticity of substitution between imported and domestic goods:
 With parameter $\theta^{XM}$ (\texttt{thetadx}), the elasticities are $\eta^{DX}_i=\sigma^D_i/(1-\theta^{XM})$ and $\sigma^{DM}_i=\sigma^D_i/\theta^{XM}$, where $\sigma^D_i$ is the \GTAP elasticity of substitution between domestic and imported goods (\texttt{esubd}).
 %The finite transformation elasticity, and with it the separate export supply of each sector (export price \texttt{PE} and export supply \texttt{vxm} in the code), is meant for the \SOE closure only.
 %I follow this intention of \citet{LanzRutherford2016}:
@@ -373,7 +374,7 @@ model name \texttt{gtap12}, default reference year 2023. \\
 \texttt{defines/*.map} & Aggregation maps for the 163 regions, 65
 sectors and 8 factors of \GTAP 12. \\
 \texttt{dodo.py} & Build stream (\texttt{doit}) for data processing,
-checks, simulations, and figures (Table \ref{tab:dodo}). \\
+checks, simulations, and figures. \\
 \addlinespace
 \multicolumn{2}{l}{\textit{Extensions for this paper}} \\
 \texttt{code/mge.gms} & \SATE closures: commodities \texttt{PPX},
@@ -571,7 +572,7 @@ A single-country modeller can therefore use the \SATE closure not only to approx
 \begin{acknowledgements}
 
 This paper builds on the \GTAPINGAMS model and its documentation by Bruno Lanz and Thomas F.\ Rutherford \citep{LanzRutherford2016}.
-Appendix \ref{app:model} reproduces large parts of their model documentation.
+% Appendix \ref{app:model} reproduces large parts of their model documentation.
 Any remaining errors are mine.
 
 \end{acknowledgements}
@@ -583,7 +584,6 @@ Any remaining errors are mine.
 
 \newpage
 \begin{appendices}
-\input{jgea_new/appendices/appendix_model}
 \input{jgea_new/appendices/appendix_tariffs}
 \end{appendices}
 

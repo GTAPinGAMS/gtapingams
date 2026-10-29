@@ -1,0 +1,218 @@
+\section[E]{Subdirectories and GAMS Programs}\label{programs}
+
+\begin{longtable}{l|l|p{4in}}
+\texttt{\textbf{build/}}&&Working directory for dataset construction.\\
+\hline
+&       \texttt{build.gms} &Command script to read, filter and aggregate a set of GTAP datasets. 
+                        Default configuration: produces datasets \texttt{gtapingams.gdx}, \texttt{g20.gdx}, 
+                        \texttt{g20\_macro.gdx} and \texttt{g20\_iea.gdx} for 2011.  Calls \texttt{code/flex2gdx.gms}, 
+                        \texttt{code/filter.gms}, \texttt{code/gtapaggr.gms} and \texttt{code/cdecalib.gms}.\\[0.1in]
+&       \texttt{filterchk.gms}& Command script to generate data for Table 6: Filtering results. 
+Calls \texttt{code/flex2gdx.gms}, \texttt{code/filter.gms}.  Results
+are written to a PivotData sheet in \texttt{filterchk.xlsx}.\\
+&       \texttt{test.gms}&               Command script which calls \texttt{bmkchk.gms}
+                        for dataset \texttt{g20\_macro}, \texttt{mcpmge.gms} for
+                        dataset \texttt{g20} and \texttt{cdechk.gms} for dataset
+                        \texttt{g20}.\\[0.1in]
+&       \texttt{bmkchk.gms}&    Benchmark consistency is a necessary, but not a
+                        sufficient condition that the model is properly specified.
+                        This routine checks for the \texttt{g20\_macro} dataset in both \MGE
+                        and \MCP formats.  This routine produces a replication check
+                        for the \GMR model and all the single region \SOE  models. \\[0.1in]
+&       \texttt{mcpmge.gms}&    Is designed to perform a check of consistency for the 
+                        \MCP and \MGE models at a point away from the benchmark
+                        equilibrium.  It can be used to verify that
+                        a solution computed with \texttt{mge.gms} also solves \texttt{mcp.gms},
+                        and that a solution computed with \texttt{mcp.gms} solves \texttt{mge.gms}.
+                        The \GAMS savepoint and loadpoint commands are used for
+                        this purpose.\\[0.1in]
+&       \texttt{cdechk.gms}&    Verifies that the CDE demand system reproduces the 
+                        exogenous own-price and income demand elasticities
+                        at the benchmark point.\\
+\hline \multicolumn{3}{c}{} 
+\end{longtable}
+
+\begin{longtable}{l|l|p{4in}}
+\texttt{\textbf{code/}}&&               Code repository -- not a working directory.\\
+\hline
+&       \texttt{flex2gdx.gms}&  Routine which translates the \HAR files from a \GTAP \texttt{.zip}
+                        archive into \GAMS \texttt{.gdx} files.  The routine produces an
+                        echoprint report of benchmark consistency of the database.\\[0.1in]
+&       \texttt{filter.gms}&    Filter routine, based on environment parameter --nd, the
+                        number of decimal points in the filter.\\[0.1in]
+&       \texttt{gtap9data.gms}& Utility routine for read a \GTAPINGAMS version 9 dataset.\\[0.1in]
+&       \texttt{gtapaggr.gms}&  Dataset aggregation routine (call to \texttt{cdecalib.gms} following
+                        aggregation must be made by user).\\[0.1in]
+&       \texttt{aggr.gms}&      Utility routines called by gtapaggr.gms.\\
+&       \texttt{chktarget.gms}&\\
+&       \texttt{checkset.gms}&\\[0.1in]
+&       \texttt{domain.gms}&    Standard purpose libinclude routine for extracting the nonzero domain of a parameter, using the mysterious
+                        "\texttt{option pd\_1<p\_1;}" syntax.\\[0.1in]
+&       \texttt{cdecalib.gms}&  Utility routine to recalibrate \CDE demand following dataset aggregation.\\[0.1in]
+&       \texttt{mcp.gms}&               The canonical static \GTAPINGAMS model in algebraic format.\\[0.1in]
+&       \texttt{mge.gms}&               The canonical static \GTAPINGAMS model in tabular \MPSGE format.\\[0.1in]
+&       \texttt{gdpcalc.gms}&   Utility routine for reporting GDP on the basis of income,
+                        final demand or sectoral value-added, compatible with
+                        either the \texttt{mcp.gms} or \texttt{mge.gms} models.  First call 
+                        declares report parameters.  \\[0.1in]
+&       \texttt{loadmdl.gms}&   Utility routines for switching demand systems (between
+                        Cobb-Douglas, \LES and \CDE) and model closures (\GMR versus
+                        \SOE).  The macros included here are described below.\\
+\hline \multicolumn{3}{c}{}  
+\end{longtable}
+
+\begin{longtable}{l|l|p{4in}}
+\texttt{\textbf{forensics/}}&&  Produces some calculations assessing the economic consequences of
+                proportional unilateral changes in trade taxes.\\
+\hline \\
+& \texttt{run.gms}& This \GAMS script which execute
+\texttt{ssagen.gms}, \texttt{ssasolve.gms}  and \texttt{ssamerge.gms}.  \\
+& \texttt{ssagen.gms}& This \GAMS script produces
+\texttt{ssasolve.gms}  and \texttt{ssamerge.gms}\\
+& \texttt{ssasolve.gms}& is a \GAMS programs
+written by \texttt{ssagen.gms} which processes
+\texttt{tgrid.gms} for several alternative model closures and demand
+system specifications.\\
+& \texttt{ssamerge.gms}& is a \GAMS programs written by
+\texttt{ssagen.gms} which combines model results into a format
+suitable for generating an Excel pivot report.\\
+& \texttt{tgrid.gms}& Performs a sequence of counterfactual
+calculations for a single region, with proportional scaling tariff and
+export subsidy rates to average values between 0 and 10\%.  These
+counterfactual calculations are computed with Cobb-Douglas, \LES and
+\CDE demand.  Macro results (welfare, model status, and global
+welfare) are returned in parameter \texttt{results(dsys,tlvl,*)}.  GDP
+calculations are stored in
+\texttt{gdpresults(dsys,tlvl,gdpcat,r,gdpitem)}. \\
+\hline \multicolumn{3}{c}{}  
+\end{longtable}
+
+\subsection*{Macros for model configuration}
+
+Two user-callable macros provided in \texttt{loadmdl.gms}:\begin{description}
+
+\item[\textbf{\texttt{\$macro loaddsys(ff,r)}}] Loads demand system
+\texttt{ff} for region \texttt{r} where \texttt{ff} is one of \LES,
+\CD or \CDE and \texttt{r} is a region identifier, either a quoted set
+element or a subset of the regions \texttt{r}.  This function alters:
+\begin{itemize}
+\item[\texttt{cd(r)}]  Cobb Douglas demand system flag for model regions
+\item[\texttt{les(r)}]  LES demand system flag for model regions
+\item[\texttt{cde(r)}] CDE demand system flag
+\item[ \texttt{vdfm(),vifm()}] Levels of subsistence and discretionary demand 
+\item[ \texttt{vom()}] Output level which activate aggregate consumer demand, subsistence and discretionary demand.
+\end{itemize}
+
+\item[\texttt{\$macro loadrm(rr)}] Load regions \texttt{rr(r)} as
+endogenous elements of the current model.  If \texttt{rr} is a set
+which includes all regions in \texttt{r}, then a global multiregional
+model is produced.  If \texttt{rr} is singleton or a subset of regions
+in \texttt{r}, then a small open economy closure is provided.  This
+routine alters: \begin{itemize}
+
+\item[\texttt{rm(r)}]   Set of regions in the model,
+\item[\texttt{rx(r)}]   Set of regions in rest of world, 
+\item[\texttt{rnum(r)}] Set defining the numeraire region -- the region in the model with the largest consumption.
+\item[\texttt{vem(i,r)}]        Exports to ROW regions by regions in the model, 
+\item[\texttt{rtxs\_row(i,r)}]  Average subsidy rates on exports to ROW regions.
+\item[\texttt{rowpfx}]          Current account balance for the rest of world regions.
+\end{itemize}
+\end{description}
+
+\newpage
+
+The user-callable macros provided in \texttt{loadmdl.gms} are invoked
+as follows in the \texttt{tgrid.gms} program:
+
+\begin{Verbatim}
+*       Load regions in the model, either a global multiregional
+*       model containing all regions or a small open economy model 
+*       with a single region.
+
+$if not set mdl         $set mdl gmr
+$if not set rcalc       $set rcalc chn
+
+$if %mdl%==gmr loadrm(r);
+$if %mdl%==soe loadrm("%rcalc%");
+\end{Verbatim}
+
+In the same program, a loop over functional forms is used to calculate
+scenario results for three different demand systems, as shown below.
+
+\subsection*{GDP reporting}
+
+\texttt{gdpcalc.gms} declares the following
+identifiers:\footnote{These names may not be used in the calling
+program.}
+
+\begin{Verbatim}
+
+set     gdpcat  GDP Categories  /
+                expend          Expenditure (C + G + I - (X-M)),
+                income          Income (Factor income + taxes),
+                valueadded      Sectoral factor earnings plus tax payments, 
+                total           Total GDP/,
+
+        gdpitem /"X-M",set.g,set.f, 
+                 revto,revtfd,revtfi,revtf,revtxs,revtms,
+                 expend,income,valueadded,chksum/;
+
+alias (gdpitem, gdpi);
+
+parameter       gdp(gdpcat,*,gdpitem)   Real GDP accouting,
+                vadd(g, gdpitem, r)     GDP on a value-added basis;
+\end{Verbatim}
+
+GDP reporting in \texttt{tgrid.gms} consists of an include statement
+at the beginning of the program, just after having read
+\texttt{mge.gms}, in a context permitting declarations:
+
+\begin{Verbatim}
+*       Read the model and calculate GDP at the benchmark point:
+
+$include %code%mge
+
+$include %code%gdpcalc
+\end{Verbatim}
+
+The GDP routine is included following scenarios solutions inside the
+loop over alternative demand systems:
+
+\begin{Verbatim}
+loop(dsys,
+
+*       Load the demand system:
+
+  loaddsys(dsys,r);
+
+*       Initialize tax instruments at benchmark values:
+  rtms(i,s,r) = rtms0(i,s,r);
+  rtxs(i,s,r) = rtxs0(i,s,r);
+
+  loop(tlvl,
+
+*       Assign tax rates for the counterfactual simulation:
+
+    rtms(i,s,rcalc)$max(rtms0(i,s,rcalc),0) = 
+	rtms0(i,s,rcalc) * tlvl.val/averate;
+    rtxs(i,rcalc,s)$max(-rtxs0(i,rcalc,s),0) = 
+	rtxs0(i,rcalc,s) * tlvl.val/averate;
+
+*       Compute the equilibrium values:
+
+$include gtap9.gen
+    solve gtap9 using mcp;
+    abort$(gtap9.objval>1e-3) "Simulation fails: gtap9.";
+
+
+*       Store the GDP results for this simulation:
+
+$include %code%gdpcalc
+
+    gdpresults(dsys,tlvl,gdpcat,r,gdpitem) = gdp(gdpcat,r,gdpitem);
+
+...
+
+))
+
+\end{Verbatim}

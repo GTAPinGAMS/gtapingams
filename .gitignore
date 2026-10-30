@@ -74,3 +74,6 @@
 /latex/jgea_new/figures/tariff_*_*.tex
 /latex/jgea_new.pdf
 /latex/documentation.pdf
+/build/listings/mcp1*.lst
+/build/listings/mcp*.lst
+/build/listings/mge*.lst

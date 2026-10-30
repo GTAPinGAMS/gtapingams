@@ -26,7 +26,7 @@ $commodities:
 	PS(f,g,r)$(rm(r)*sf(f)*vfm(f,g,r))		! Sector-specific primary factors
 	PFX$card(rx)					! Real exchange rate (SOE mdl)
 	PA(i,r)$(rm(r)*cde(r)*vcm(i,r))			! Armington final demand price
-	PPX(g,r)$(rm(r)*vem(g,r)*sate)			! Export foreign exchange price
+	P_X(g,r)$(rm(r)*vem(g,r)*sate)			! Export foreign exchange price
 	PFIX(i,r)$(rm(r)*vem(i,r)*sate2)			! Fixed factor for exports
 
 $consumers:
@@ -82,7 +82,7 @@ $demand:RA(r)$(rm(r) and cd(r))
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
 * ---------------------------------------------------------------------------------------
-	e:PPX(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:P_X(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
 	e:PFX#(g)$(sate)	q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
 * ---------------------------------------------------------------------------------------
 
@@ -99,7 +99,7 @@ $demand:RA(r)$(rm(r) and les(r))  s:0
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
 * ---------------------------------------------------------------------------------------
-	e:PPX(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:P_X(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
 	e:PFX#(g)$(sate)	q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
 * ---------------------------------------------------------------------------------------
 
@@ -116,7 +116,7 @@ $demand:RA(r)$(rm(r) and cde(r))  s:0
 	e:PFX$rx(rnum)		q:vb(r)
 	e:PF(f,r)		q:evom(f,r)
 * ---------------------------------------------------------------------------------------
-	e:PPX(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+	e:P_X(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
 	e:PFX#(g)$(sate)	q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
 * ---------------------------------------------------------------------------------------
 
@@ -133,7 +133,7 @@ $prod:X(i,r)$(rm(r)*vem(i,r) and not sate) s:1
 	i:PFIX(i,r)$sate2		q:fix0(i,r)
 
 $prod:X(i,r)$(rm(r)*vem(i,r) and sate)
-	o:PPX(i,r)			q:(pem0(i,r)*vem(i,r))
+	o:P_X(i,r)			q:(pem0(i,r)*vem(i,r))
 	i:P(i,r)$(not vxm(i,r))		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 	i:PE(i,r)$vxm(i,r)		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 
@@ -156,10 +156,10 @@ $prod:A(i,r)$(rm(r)*cde(r)*vcm(i,r))  s:esubdm(i)
 
 * ---------------------------------------------------------------------------------------
 $constraint:EXPORTS(g,r)$(rm(r)*sate*vem(g,r))
-     EXPORTS(g,r)*PPX(g,r)**esubm(g)	=n= ( PFX )**esubm(g);
+     EXPORTS(g,r)*P_X(g,r)**esubm(g)	=n= ( PFX )**esubm(g);
 
 $constraint:REVEXP(g,r)$(rm(r)*sate*vem(g,r))
-     REVEXP(g,r)*PFX		=n= EXPORTS(g,r)*PPX(g,r);
+     REVEXP(g,r)*PFX		=n= EXPORTS(g,r)*P_X(g,r);
 * ---------------------------------------------------------------------------------------
 
 $constraint:D(i,r)$(cde(r)*rm(r)*vcm(i,r))
@@ -200,10 +200,10 @@ $sysinclude mpsgeset gtap12
 alias (i,i_,j_), (f,f_);
 
 *---------------------------------------------------------------------------------------
-* EXPORTS.l(g)	= 1;
-* EXPORTS.lo(g)	= 0;
-* REVEXP.l(g)	= 1;
-* REVEXP.lo(g)	= 0;
+EXPORTS.l(g,r)	= 1;
+EXPORTS.lo(g,r)	= 0;
+REVEXP.l(g,r)	= 1;
+REVEXP.lo(g,r)	= 0;
 *---------------------------------------------------------------------------------------
 
 $macro pnum(r)		(sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))\

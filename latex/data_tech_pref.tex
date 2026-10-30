@@ -104,51 +104,65 @@ and other resources)\\ \addlinespace \bottomrule
 \vspace{0.4in}
 \end{table}
 
-Table \ref{activities} defines the primal variables (activity levels)
-which characterize an equilibrium. The model determines values of all
-the variables except international capital flows, a parameter which
-would be determined endogenously in an intertemporal model. Table
-\ref{activities} also displays the concordance between the variables
-and their \GAMS equivalents.
+Table \ref{activities} defines the activity levels, the income levels of
+the agents, and the auxiliary variables which characterize an
+equilibrium, and Table \ref{prices} the price variables. The model
+determines values of all the variables except international capital
+flows, a parameter which would be determined endogenously in an
+intertemporal model. The tables list the variables of all variants of
+the model; variables marked with an asterisk appear only in some of
+them. The algebraic symbols follow the names of the corresponding \GAMS
+variables, which the tables list as well: $Y$, $M$, \textit{YT},
+\textit{FT}, $A$, and $X$ are activity levels, $P$, \textit{PM},
+\textit{PE}, \textit{PT}, \textit{PF}, \textit{PS}, and so on are
+prices, and the index $g$ of $Y_{gr}$ and $P_{gr}$ also identifies the
+final demand activities ($g=C,G,I$ and, for the \LES, $g=\textit{DD},\textit{SD}$).
 
 \renewcommand{\arraystretch}{1}
 \renewcommand{\tabcolsep}{1mm}
 \begin{table}[t!]
 \begin{center}
-\caption{Definitions of activity levels (quantity variables).} \label{activities}
+\caption{Activity levels, incomes, and auxiliary variables.} \label{activities}
 \small
-\begin{tabular}{lllr}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.6cm}ll}
 \toprule
-Variable &Definition  & GAMS variable & Benchmark (\GTAP) value \\
-\addlinespace
+Variable & Definition & \GAMS variable & Benchmark value \\
 \midrule
+\multicolumn{4}{l}{\textit{Activity levels}} \\
+$Y_{ir}$ & Production & \texttt{Y(i,r)} & \texttt{vom(i,r)} \\
+$Y_{Cr}$ & Private consumption & \texttt{Y("c",r)} & \texttt{vom("c",r)} \\
+$Y_{Gr}$ & Public demand & \texttt{Y("g",r)} & \texttt{vom("g",r)} \\
+$Y_{Ir}$ & Investment & \texttt{Y("i",r)} & \texttt{vom("i",r)} \\
+$Y_{\mathit{DD}r}$$^*$ & Discretionary demand [\textsc{les}] & \texttt{Y("dd",r)} & \texttt{vom("dd",r)} \\
+$Y_{\mathit{SD}r}$$^*$ & Subsistence demand [\textsc{les}] & \texttt{Y("sd",r)} & \texttt{vom("sd",r)} \\
+$M_{ir}$ & Aggregate imports & \texttt{M(i,r)} & \texttt{vim(i,r)} \\
+$\mathit{YT}_j$ & International transport services & \texttt{YT(j)} & \texttt{vtw(j)} \\
+$\mathit{FT}_{fr}$ & Transformation of sector-specific factors & \texttt{FT(f,r)} & \texttt{evom(f,r)} \\
+$A_{ir}$$^*$ & Armington composite of final demand [\textsc{cde}] & \texttt{A(i,r)} & \texttt{vcm(i,r)} \\
+$X_{ir}$$^*$ & Exports of model region $r$ to the rest of the world, or of rest-of-world region $r$ to the model regions [\textsc{soe}, \textsc{sate}] & \texttt{X(i,r)} & \texttt{vem(i,r)} \\
 \addlinespace
-$Y_{ir}$&       Production & \texttt{Y(i,r)} &\texttt{vom(i,r)}\\
-\\
-$C_{r}$&        Discretionary consumption & \texttt{Y("c",r)} &\texttt{vom("c",r)}\\
-\\
-$G_{r}$&        Aggregate public & \texttt{Y("g",r)}&\texttt{vom("g",r)} \\
-\\
-$I_{r}$&        Aggregate investment & \texttt{Y("i",r)}&\texttt{vom("i",r)} \\
-\\
-$M_{ir}$&       Aggregate imports & \texttt{M(i,r)}&\texttt{vim(i,r)}\\
-\\
-$X_{ir}$&       Trade flows with rest of world regions &
-\texttt{X(i,r)}&\texttt{vem(i,r)}\\
-\\
-$\textit{FT}_{fr}$&      Factor transformation &
-\texttt{FT(f,r)}&\texttt{evom(f,r)}\\
-\\
-$\textit{YT}_j$  &       International transport services & \texttt{YT(j)}&\texttt{vtw(j)}\\
+\multicolumn{4}{l}{\textit{Income levels}} \\
+$\mathit{RA}_r$ & Representative agent of region $r$ & \texttt{RA(r)} & \\
+$\mathit{ROW}$$^*$ & Rest-of-world agent [\textsc{soe}, \textsc{sate}] & \texttt{ROW} & \\
 \addlinespace
+\multicolumn{4}{l}{\textit{Auxiliary variables (indices, benchmark value 1)}} \\
+$E_{ir}$$^*$ & Export demand [\texttt{sate}] & \texttt{EXPORTS(i,r)} & \\
+$\mathit{RE}_{ir}$$^*$ & Foreign exchange earned from exports [\texttt{sate}] & \texttt{REVEXP(i,r)} & \\
+$D_{ir}$$^*$ & Final demand [\textsc{cde}] & \texttt{D(i,r)} & \\
+$U_r$$^*$ & Utility [\textsc{cde}] & \texttt{U(r)} & \\
+$W_r$$^*$ & Per capita welfare (money metric) [\textsc{cde}] & \texttt{W(r)} & \\
 \bottomrule
 \end{tabular}
+\par\smallskip
+\begin{minipage}{\textwidth}\footnotesize
+$^*$ Only in some variants of the model, as indicated in brackets:
+\LES or \CDE final demand; the small open economy closures \SOE and \SATE, in which a rest-of-world agent trades with the modelled region; or one of the two implementations of the \SATE closure, \texttt{sate} and \texttt{sate2}.
+\end{minipage}
 \end{center}
-\vspace{0.4in}
 \end{table}
 
-Table \ref{prices} defines the relative price variables for goods and
-factors in the model. As is the case in any Shoven-Whalley \CGE model,
+Table \ref{prices} defines the relative price variables for goods,
+factors, and foreign exchange in the model. As is the case in any Shoven-Whalley \CGE model,
 the equilibrium conditions determine \textit{relative} rather than
 \textit{nominal} prices.
 
@@ -156,83 +170,50 @@ the equilibrium conditions determine \textit{relative} rather than
 \renewcommand{\tabcolsep}{1mm}
 \begin{table}[t!]
 \begin{center}
-\caption{Definitions of price variables.} \label{prices}
+\caption{Price variables.} \label{prices}
 \small
-\begin{tabular}{lp{3in}r}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{7.6cm}l}
 \toprule
-Variable &Definition & GAMS variable\\
-\addlinespace
+Variable & Definition & \GAMS variable \\
 \midrule
-\addlinespace
-$p^C_{r}$      &       Final demand price index for the Cobb-Douglas
-demand system &\texttt{P("C",r)}\\
-\\
-$p^G_{r}$      &       Public provision price index  &\texttt{P("G",r)}\\
-\\
-$p^I_{r}$      &       Investment price index &\texttt{P("I",r)}\\
-\\
-$p^Y_{ir}$     &       Supply price, gross of indirect producer
-taxes (when $\eta^{DX}_{i} < \infty$, the supply price is
-replaced by and export price, $p^X_{ir}$ and domestic supply price,
-$p^D_{ir}$) &\texttt{P(i,r)}\\
-\\
-$p^M_{ir}$     &       Import price, gross of export
-taxes and tariffs.&\texttt{PM(i,r)}\\
-\\
-$p^E_{ir}$     &       Export price from endogenous or exogenous
-regions.&\texttt{PE(i,r)}\\
-\\
-$p^T_j$         &       Marginal cost of transport services
-&\texttt{PT(j)}\\
-\\
-$p^F_{f,r}$     &       Price of mobile primary factors ($m_f$
-include labor, land and resources) &\texttt{PF(f,r)}\\
-\\
-$p^S_{s_f,ir}$     &       Price of sector-specific primary
-factors&\texttt{PS(sf,i,j)}\\
-\addlinespace
+$P_{ir}$ & Supply price of output, gross of indirect producer taxes; with $\eta^{DX}_i<\infty$ [\textsc{soe}], price of output for the domestic market & \texttt{P(i,r)} \\
+$P_{Cr}$ & Price index of private consumption & \texttt{P("c",r)} \\
+$P_{Gr}$ & Price index of public demand & \texttt{P("g",r)} \\
+$P_{Ir}$ & Price index of investment & \texttt{P("i",r)} \\
+$P_{\mathit{DD}r}$$^*$ & Price index of discretionary demand [\textsc{les}] & \texttt{P("dd",r)} \\
+$P_{\mathit{SD}r}$$^*$ & Price index of subsistence demand [\textsc{les}] & \texttt{P("sd",r)} \\
+$\mathit{PM}_{ir}$ & Import price, gross of export taxes and tariffs & \texttt{PM(i,r)} \\
+$\mathit{PE}_{ir}$$^*$ & Export price: of rest-of-world regions [\textsc{soe}, \textsc{sate}], and of model regions if $\eta^{DX}_i<\infty$ [\textsc{soe}] & \texttt{PE(i,r)} \\
+$\mathit{PT}_j$ & Price of international transport services & \texttt{PT(j)} \\
+$\mathit{PF}_{fr}$ & Price of primary factors (mobile factors; aggregate of sector-specific factors) & \texttt{PF(f,r)} \\
+$\mathit{PS}_{fir}$ & Price of sector-specific primary factors & \texttt{PS(f,i,r)} \\
+$\mathit{PA}_{ir}$$^*$ & Armington composite price of final demand [\textsc{cde}] & \texttt{PA(i,r)} \\
+$\mathit{CC}_r$$^*$ & Consumption cost index (auxiliary variable) [\textsc{cde}] & \texttt{CC(r)} \\
+$p^{FX}$$^*$ & Price of foreign exchange (real exchange rate) [\textsc{soe}, \textsc{sate}] & \texttt{PFX} \\
+$p^X_{ir}$$^*$ & Price of exports in the export market [\texttt{sate}] & \texttt{P\_X(i,r)} \\
+$\mathit{PFIX}_{ir}$$^*$ & Price of the rest-of-world-owned fixed factor in export demand [\texttt{sate2}] & \texttt{PFIX(i,r)} \\
 \bottomrule
 \end{tabular}
+\par\smallskip
+\begin{minipage}{\textwidth}\footnotesize
+$^*$ Only in some variants of the model, as indicated in brackets:
+\LES or \CDE final demand; the small open economy closures \SOE and \SATE, in which a rest-of-world agent trades with the modelled region; or one of the two implementations of the \SATE closure, \texttt{sate} and \texttt{sate2}.
+\end{minipage}
 \end{center}
-\vspace{0.4in}
 \end{table}
 
 While the core \GTAPINGAMS model is base on Cobb-Douglas final demand,
 the canonical models incorporate logic for two additional demand
 systems: the \LES and the \CDE demand system. In particular, the \LES
 representation distinguishes between subsistence demand and
-discretionary demand, and we define the additional variables in Table
-\ref{dsysprices}. Similarly, we define an Armington composite price
-index for products entering \CDE final demand.  (Details of these
+discretionary demand, and the \CDE demand system requires an Armington
+composite of the goods entering final demand, a composite price, and
+auxiliary variables for demand, utility, cost, and welfare indices.
+Tables \ref{activities} and \ref{prices} include these variables
+(marked by an asterisk).  (Details of these
 demand systems are provided in Appendices \ref{CDE} and \ref{LES} of
 \DOCU.)
 
-\begin{table}[t!]
-\begin{center}
-\caption{Additional variables for \LES and \CDE demand systems.} \label{dsysprices}
-\small
-\begin{tabular}{lp{3in}r}
-\toprule
-Variable &Definition & GAMS variable\\
-\addlinespace
-\midrule
-\addlinespace
-$SD_{r}$&       Subsistence demand & \texttt{Y("sd",r)} \\
-\\
-$DD_{r}$&       Discretionary demand & \texttt{Y("dd",r)} \\
-\\
-$p^{DD}_{r}$   &       Discretionary demand price index &\texttt{P("dd",r)}\\
-\\
-$p^{SD}_{r}$   &       Subsistence demand price index &\texttt{P("sd",r)}\\
-\\
-$p^A_{iCr}$     &      Armington composite price representing the
-market price of goods entering \CDE demand.&\texttt{PA(i,r)}\\
-\addlinespace
-\bottomrule
-\end{tabular}
-\end{center}
-\vspace{0.4in}
-\end{table}
 
 Finally, Table \ref{taxes} reports the definition of tax and subsidy
 rates applied in the model, both in terms of the notation employed to
@@ -285,7 +266,7 @@ The economic structure underlying the \GTAP dataset and model is
 illustrated in Figure \ref{fig:region}. Symbols in this flow chart
 correspond to variables in the economic model (see Table
 \ref{activities}): $Y_{ir}$ is the production of good $i$ in region
-$r$, $C_r$, $I_r$ and $G_r$ portray private consumption, investment
+$r$, $Y_{Cr}$, $Y_{Ir}$ and $Y_{Gr}$ portray private consumption, investment
 and public demand, respectively, $M_{ir}$ portrays the import of good
 $i$ into region $r$, $\textit{RA}_r$ stand for representative
 consumers, and $FT_{s_{f}r}$ is the activity through which the set of
@@ -384,10 +365,10 @@ each production sector:
 \item[$Y_{ir}$:] $\sum_f \textit{vfm}_{fir} + \sum_j
 \left(\textit{vdfm}_{ijr} + \textit{vifm}_{ijr} \right) +
 \mathcal{R}^Y_{ir} = \textit{vom}_{ir}\,,$
-\item[$C_{r}$:] $\sum_i \left(\textit{vdfm}_{iCr} +
+\item[$Y_{Cr}$:] $\sum_i \left(\textit{vdfm}_{iCr} +
 \textit{vifm}_{iCr} \right) + \mathcal{R}^C_{ir} = \textit{vom}_{Cr}\,,$
-\item[$I_{r}$:] $\sum_i \textit{vdfm}_{iIr} = \textit{vom}_{Ir}$
-\item[$G_{r}$:] $\sum_i \left(\textit{vdfm}_{iGr} +
+\item[$Y_{Ir}$:] $\sum_i \textit{vdfm}_{iIr} = \textit{vom}_{Ir}$
+\item[$Y_{Gr}$:] $\sum_i \left(\textit{vdfm}_{iGr} +
 \textit{vifm}_{iGr} \right) + \mathcal{R}^G_{ir} =
 \textit{vom}_{Gr}\,,$
 \item[$M_{ir}$:] $\sum_s \left(\textit{vxmd}_{isr} + \sum_j
@@ -428,10 +409,10 @@ choices as though they arose from minimization of unit costs:
 \begin{eqnarray}\label{profitmax}
 \min_{\textit{ddfm,dfm,difm}} \quad & c^D_{ir} + c^M_{ir} +
 c^F_{ir} & \\
-&s.t.&c^D_{ir} = \sum_j p^Y_{jr} (1 + t^{fd}_{jir})
+&s.t.&c^D_{ir} = \sum_j P_{jr} (1 + t^{fd}_{jir})
 \textit{ddfm}_{jir} \nonumber\\
-&&c^M_{ir} = \sum_j p^M_{jr} (1 + t^{fi}_{jir}) \textit{difm}_{jir}\nonumber\\
-&&c^F_{ir} = \sum_f (p^F_{fr}|_{f \in m_f} + p^S_{fir}|_{f \in s_f}) (1 +
+&&c^M_{ir} = \sum_j \mathit{PM}_{jr} (1 + t^{fi}_{jir}) \textit{difm}_{jir}\nonumber\\
+&&c^F_{ir} = \sum_f (\mathit{PF}_{fr}|_{f \in m_f} + \mathit{PS}_{fir}|_{f \in s_f}) (1 +
 t^f_{fir} ) \textit{dfm}_{fir}\nonumber\\
 &&F_{ir}(\textit{ddfm,difm,dfm}) = Y_{ir}\nonumber
 \end{eqnarray}
@@ -467,8 +448,8 @@ markets. In particular, the supply of goods to domestic and export
 markets are portrayed as arising from the following
 profit-maximization problem:
 \begin{eqnarray}\label{cet_dx}
-\max_{\textit{dxm},\textit{ddm}} \quad && p^D_{ir} \textit{ddm}_{ir}
-+ p^X_{ir} \textit{dxm}_{ir}
+\max_{\textit{dxm},\textit{ddm}} \quad && P_{ir} \textit{ddm}_{ir}
++ \mathit{PE}_{ir} \textit{dxm}_{ir}
 \\
 &s.t.& G_{ir}(\textit{ddm}_{ir},\textit{dxm}_{ir}) = Y_{ir}
 \end{eqnarray}
@@ -476,12 +457,13 @@ where $G$ is the \CET function with structure illustrated in Figure
 \ref{prodfunDX}. In the \GMR model,
 transformation elasticities $\eta^{DX}_{ir} = \textit{etrndx}_{i}$ are
 set to infinity, which is the default value in the \GTAP 12 Data Base.
-This implies that the supply price of output $p^Y_{jr}$ is the same if
+This implies that the supply price of output $P_{jr}$ is the same if
 output is used locally or in a different region. By contrast, in the
 \SOE model we have that $\textit{etrndx}_{i} < \infty$,
 which implies that output price may differ when supplied domestically
-or abroad. In this case, $p^Y_{jr}$ in equation \eqref{profitmax} is
-replaced by $p^D_{jr}.$ We come back to the choice of
+or abroad. In this case, $P_{jr}$ denotes the price of output for the
+domestic market and $\mathit{PE}_{jr}$ the price of output for export
+markets. We come back to the choice of
 $\textit{etrndx}_{i}$ in the \textsc{soe} model when we present our
 illustrative calculations.
 
@@ -500,10 +482,10 @@ $\textit{Y}_{ir} = G_{ir}(\textit{dxm},\textit{ddm})$.}
 Private consumption consistent with utility maximization is portrayed
 by minimization of the cost of a given level of aggregate consumption:
 \begin{eqnarray}\label{utils}
-\min_{\textit{ddfm}_{iCr},\textit{difm}_{iCr}} \quad &&\sum_i p^Y_{ir}
-(1 + t^{pd}_{ir}) \textit{ddfm}_{iCr} + p^M_{ir} (1 +t^{pi}_{ir})
+\min_{\textit{ddfm}_{iCr},\textit{difm}_{iCr}} \quad &&\sum_i P_{ir}
+(1 + t^{pd}_{ir}) \textit{ddfm}_{iCr} + \mathit{PM}_{ir} (1 +t^{pi}_{ir})
 \textit{difm}_{iCr} \\
-&s.t.& H_r(\textit{ddfm}_{iCr},\textit{difm}_{iCr}) = C_{ir} \nonumber
+&s.t.& H_r(\textit{ddfm}_{iCr},\textit{difm}_{iCr}) = Y_{Cr} \nonumber
 \end{eqnarray}
 where $H_r$ represents final demand from the representative consumer.
 
@@ -540,7 +522,7 @@ Figure \ref{prodfunG} illustrates the functional form.
 \centering
 \includegraphics{figures/prodfunG.tikz}
 \vspace{0.1in}
-\caption{Nesting structure for public consumption $G_r = G_r(\textit{ddfm}_{iGr},\textit{difm}_{iGr})$.}
+\caption{Nesting structure for public consumption $Y_{Gr} = G_r(\textit{ddfm}_{iGr},\textit{difm}_{iGr})$.}
 \label{prodfunG}
 \vspace{0.3in}
 \end{figure}
@@ -551,15 +533,15 @@ The choice among imports from different trading partners is based on
 Armington's idea of regionally differentiated products. The following
 cost minimization problem formalizes this choice:
 \begin{eqnarray}\label{optA}
-\min_{\textit{dxmd,dtwr}} \quad &&\sum_s (1+t^{ms}_{isr}) \left(p^Y_{is}
+\min_{\textit{dxmd,dtwr}} \quad &&\sum_s (1+t^{ms}_{isr}) \left(P_{is}
 (1-t^{xs}_{isr}) \textit{dxmd}_{isr} +
-\sum_j p^T_j \textit{dtwr}_{jisr} \right)\\
+\sum_j \mathit{PT}_j \textit{dtwr}_{jisr} \right)\\
 &s.t.&A_{ir}(\textit{dxmd,dtwr}) = M_{ir} \nonumber
 \end{eqnarray}
 where $A$ is the import aggregation function, described by the nested
 \CES-Leontief function shown in Figure \ref{prodfunA}. In
 the case of the \SOE model, in which $\textit{etrndx}_{i}<\infty$,
-$p^Y_{is}$ in (\ref{optA}) is replaced by $p^X_{is}$.
+$P_{is}$ in (\ref{optA}) is replaced by $\mathit{PE}_{is}$.
 
 \begin{figure}[t!]
 \centering
@@ -584,7 +566,7 @@ through an aggregation of transportation services exported from
 countries throughout the world. More specifically, we consider the
 following cost minimization problem for the aggregation of
 transportation services:
-$$\min_{\textit{dst}} \quad \sum_r p^Y_{ir} \textit{dst}_{ir} \quad
+$$\min_{\textit{dst}} \quad \sum_r P_{ir} \textit{dst}_{ir} \quad
 \text{s.t.} \quad T_i(\textit{dst}) = \textit{YT}_i$$
 where the aggregation function $T_i$ combines transport service
 exports from multiple regions. The functional form which aggregates
@@ -610,7 +592,7 @@ allocates composite factors to sectoral markets. Formally, the supply
 of sectoral factors of production is modeled through the following
 profit-maximization problem:
 \begin{eqnarray}\label{cet_input}
-\max_{\textit{dfm}} \quad && \sum_j \textit{dfm}_{s_{f},jr} p^S_{s_{f},jr}\\
+\max_{\textit{dfm}} \quad && \sum_j \textit{dfm}_{s_{f},jr} \mathit{PS}_{s_{f},jr}\\
 &s.t.& \Gamma_{s_{f},r}(\textit{dfm}) = \textit{evom}_{s_{f},r}
 \end{eqnarray}
 where $\Gamma$ is the \CET function with structure illustrated in

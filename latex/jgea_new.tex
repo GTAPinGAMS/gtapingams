@@ -200,9 +200,9 @@ As $r$ becomes small, $s_{irk}\to 0$ for all importers, and the elasticity of th
 The demand of the rest of the world for the exports of the small economy is therefore not perfectly elastic, while the small economy's imports do have fixed world prices in the limit.
 The \SATE closure replaces the perfectly elastic export demand of the \SOE closure by
 \begin{equation}\label{sate}
-E_{ir} = \left(\frac{p^{FX}}{p^{PX}_{ir}}\right)^{\sigma^m_i},
+E_{ir} = \left(\frac{p^{FX}}{p^X_{ir}}\right)^{\sigma^m_i},
 \end{equation}
-where $E_{ir}$ is an index of export quantities (unity in the benchmark) and $p^{PX}_{ir}$ is the price of $r$'s exports of $i$.
+where $E_{ir}$ is an index of export quantities (unity in the benchmark) and $p^X_{ir}$ is the price of $r$'s exports of $i$.
 Import prices remain fixed in terms of foreign exchange.
 % Figure \ref{fig:exportdemand} illustrates the difference between the two closures.
 
@@ -231,10 +231,9 @@ First, in the \GTAP model the elasticity in \eqref{elasticity} refers to the imp
 Second, the limit argument does not hold for the largest economies, whose shares $\theta_{irk}$ are far from zero in some markets; for these, \eqref{sate} is an approximation whose quality is an empirical question.
 % Both caveats suggest that $\sigma^m_i$ is an upper bound for the true export demand elasticity.
 
-% TODO: make sure \SATE is described appropriately (equilibirum conditions) without relying on an appendix. Or reintroduce Appendix...
-I implement the \SATE closure in two ways:
+I implement the \SATE closure in two ways (Appendix \ref{app:closures} gives the equilibrium conditions):
 \begin{description}
-\item[\texttt{sate}] The export activity of the modelled region sells into an export market with price $p^{PX}_{ir}$.
+\item[\texttt{sate}] The export activity of the modelled region sells into an export market with price $p^X_{ir}$.
 Equation \eqref{sate} is added as an auxiliary constraint, and the representative agent receives the foreign exchange value of the exports.
 This implementation is particularly simple: It requires only a demand function for each export good and no explicit accounts of the rest of the world.
 %While listing the accounts of the rest of the world comes naturally in a single-country model derived from global \GTAP data, it means extra effort in single-country models calibrated to national \IOT{}s or \SAM{}s.
@@ -384,7 +383,7 @@ sectors and 8 factors of \GTAP 12. \\
 checks, simulations, and figures. \\
 \addlinespace
 \multicolumn{2}{l}{\textit{Extensions for this paper}} \\
-\texttt{code/mge.gms} & \SATE closures: commodities \texttt{PPX},
+\texttt{code/mge.gms} & \SATE closures: commodities \texttt{P\_X},
 \texttt{PFIX}, auxiliary variables \texttt{EXPORTS}, \texttt{REVEXP},
 new endowments of \texttt{RA(r)} and \texttt{ROW}, two variants of the
 export activity \texttt{X(i,r)}; \texttt{thetadx} and \texttt{fsubm}

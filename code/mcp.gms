@@ -1,7 +1,9 @@
 $title	 GTAP12inGAMS -- GAMS/MCP Formulation
 
-$if not set yr $set yr 23
-$if not set ds $set ds g20_macro
+$if not set yr		$set yr 23
+$if not set ds		$set ds g20_macro
+$if not set thetadx	$setglobal thetadx	0.5
+$if not set fsubm	$setglobal fsubm	1
 $include "%system.fp%gtap12data"
 
 nonnegative
@@ -24,6 +26,8 @@ variables
 	PF(f,r)		Primary factors rent
 	PS(f,g,r)	Sector-specific primary factors
 	PFX		Real exchange rate (SOE model)
+	P_X(i,r)	Export foreign exchange price (sate)
+	PFIX(i,r)	Fixed factor for exports (sate2)
 
 *$consumers:
 	RA(r)		Representative agent
@@ -33,7 +37,9 @@ variables
 	D(i,r)		CDE Demand (index)
 	U(r)		CDE utility (index)
 	CC(r)		CDE Consumption cost index,
-	W(r)		CDE money metric welfare;
+	W(r)		CDE money metric welfare,
+	EXPORTS(i,r)	Endogenous level of exports (sate),
+	REVEXP(i,r)	Revenues of FX from exports (sate);
 
 equations
         prf_y(g,r)              Supply,
@@ -51,6 +57,8 @@ equations
         mkt_pf(f,r)             Primary factor markets,
         mkt_ps(f,j,r)           Specific factor markets,
 	mkt_pfx			Market for foreign exchange,
+	mkt_px(i,r)		Export market (sate),
+	mkt_pfix(i,r)		Market for the fixed factor in export demand (sate2),
 
         inc_ra(r)               Representative agent
 	inc_row			Rest of world agent
@@ -58,7 +66,9 @@ equations
 	constraint_D		Defines D (CDE model)
 	constraint_U		Defines U (CDE model)
 	constraint_CC		Defines CC (CDE model),
-	constraint_W		Defines W (CDE model);
+	constraint_W		Defines W (CDE model),
+	constraint_EXPORTS	Defines EXPORTS (sate),
+	constraint_REVEXP	Defines REVEXP (sate);
 
 *       -----------------------------------------------------------------------------
 
@@ -88,7 +98,8 @@ parameter
 	vxmt(i,s,r)		Value of imports gross transport cost,
 	vxmd0(i,r,s)		Trade - bilateral exports at market prices (dataset values),
 	vtwr0(j,i,r,s)		Trade - margins for international transportation at world prices,
-	theta_evom(f,j,r)	Value shares of specific factors;
+	theta_evom(f,j,r)	Value shares of specific factors,
+	theta_xe(i,r)		Value share of exports in the export activity (sate2);
 
 vxmd0(i,r,s) = vxmd(i,r,s);
 vtwr0(j,i,r,s) = vtwr(j,i,r,s);
@@ -193,8 +204,17 @@ prf_y(g,r)$(rm(r)*vom(g,r))..   cy0(g,r)*C_Y(g,r) =e= vom(g,r)*(1-rto(g,r))*R_Y(
 *	-----------------------------------------------------------------------------
 *	Profit function for exports to ROW:
 
-* $prod:X(i,r)$(rm(r)*vem(i,r))
-*	o:PFX				q:(pem0(i,r)*vem(i,r))
+* $prod:X(i,r)$(rm(r)*vem(i,r) and not sate) s:1
+*	o:PFX$(not sate2)		q:(pem0(i,r)*vem(i,r))
+*	o:PFX$sate2			q:(pem0(i,r)*vem(i,r)+fix0(i,r))
+*	i:P(i,r)$(not vxm(i,r))		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
+* +					p:pem0(i,r)
+*	i:PE(i,r)$vxm(i,r)		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
+* +					p:pem0(i,r)
+*	i:PFIX(i,r)$sate2		q:fix0(i,r)
+*
+* $prod:X(i,r)$(rm(r)*vem(i,r) and sate)
+*	o:P_X(i,r)			q:(pem0(i,r)*vem(i,r))
 *	i:P(i,r)$(not vxm(i,r))		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 *	i:PE(i,r)$vxm(i,r)		q:vem(i,r)	a:RA(r)	t:(-rtxs_row(i,r))
 
@@ -207,8 +227,22 @@ prf_y(g,r)$(rm(r)*vom(g,r))..   cy0(g,r)*C_Y(g,r) =e= vom(g,r)*(1-rto(g,r))*R_Y(
 
 $macro	PX(i,r)		((P(i,r)$(not vxm(i,r)) + PE(i,r)$vxm(i,r))$rm(r) + PE(i,r)$rx(r))
 
+*	Price of the export good relative to its reference price, and unit
+*	cost of the Cobb-Douglas export activity in sate2:
+
+$macro	PXN(i,r)	(PX(i,r) * (1-rtxs_row(i,r)) / pem0(i,r))
+$macro	C_X(i,r)	(PXN(i,r)**theta_xe(i,r) * PFIX(i,r)**(1-theta_xe(i,r)))
+
+*	Demand for exports to ROW (Leontief, except in sate2) and output of
+*	foreign exchange (not in sate, where X produces P_X):
+
+$macro	DXROW(i,r)	((X(i,r)*vem(i,r)*(1$(not sate2) + (C_X(i,r)/PXN(i,r))$sate2))$vem(i,r))
+$macro	XOUT(i,r)	(X(i,r)*(pem0(i,r)*vem(i,r) + fix0(i,r)$sate2))
+
 prf_x(i,r)$vem(i,r)..
-		(PX(i,r) * (1-rtxs_row(i,r)) - pem0(i,r)*    PFX)$rm(r) +
+		(PX(i,r) * (1-rtxs_row(i,r)) - pem0(i,r)*    PFX)$(rm(r) and not (sate or sate2)) +
+		(PX(i,r) * (1-rtxs_row(i,r)) - pem0(i,r)*P_X(i,r))$(rm(r) and sate) +
+		(C_X(i,r)                    -               PFX)$(rm(r) and sate2) +
 		(PFX                         -           PE(i,r))$rx(r) =e= 0;
 
 *	-----------------------------------------------------------------------------
@@ -277,7 +311,7 @@ $macro DTWR(j,i,s,r) ((vtwr(j,i,s,r) * M(i,r) * (PM(i,r)/PT_M(i,s,r))**esubm(i))
 
 alias (rm,sm);
 
-$macro XMD(i,s,r)	((DXMD(i,s,r)/vxmd(i,s,r))$(rm(r)*vim(i,r)*vxmd(i,s,r)) + X(i,s)$(rm(s) and rx(r) and vxmd(i,s,r)))
+$macro XMD(i,s,r)	((DXMD(i,s,r)/vxmd(i,s,r))$(rm(r)*vim(i,r)*vxmd(i,s,r)) + (DXROW(i,s)/vem(i,s))$(rm(s) and rx(r) and vxmd(i,s,r)))
 $macro REV_TXS(i,s,r)	((XMD(i,s,r)*vxmd(i,s,r)*PX(i,s)*rtxs(i,s,r))$(rm(s) and vxmd(i,s,r)))
 
 $if defined j2 $abort "The REVTMS(r) macro requires a uniquely defined alias for j."
@@ -321,6 +355,8 @@ prf_a(i,r)$(cde(r)*rm(r)*vcm(i,r))..	C_A(i,"c",r) =g= PA(i,r);
 *	d:PF(f,r)$cde(r)	q:evom(f,r)
 *	e:PF(f,r)$cde(r)	q:evom(f,r)
 *	e:PA(i,r)		q:(-vcm(i,r))	R:D(i,r)
+*	e:P_X(g,r)$(sate)	q:(-vem(g,r)*pem0(g,r))		r:EXPORTS(g,r)
+*	e:PFX#(g)$(sate)	q:(vem(g,r)*pem0(g,r))		r:REVEXP(g,r)
 
 inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..
 	RA(r) =e=	( sum(f$evom(f,r), PF(f,r)*evom(f,r))
@@ -335,7 +371,9 @@ inc_ra(rm(r))$(RA.LO(r) < RA.UP(r))..
 			+ sum((i,g),REV_TFI(i,g,r))
 			+ sum((f,g),REV_TF(f,g,r))
 			- sum((i,s),REV_TXS(i,r,s))
-			+ sum((i,s),REV_TMS(i,s,r));
+			+ sum((i,s),REV_TMS(i,s,r))
+			+ sum(i$vem(i,r), pem0(i,r)*vem(i,r)*
+				(PFX*REVEXP(i,r) - P_X(i,r)*EXPORTS(i,r)))$sate;
 
 constraint_D(i,r)$(cde(r)*rm(r)*vcm(i,r))..
 	D(i,r) * sum(j$thetac(j,r), thetac(j,r) *
@@ -356,6 +394,7 @@ constraint_W(r)$(cde(r)*rm(r))..
 			 (1/W(r))**(1-subpar(i,r))) =e= 1;
 
 *	$demand:ROW$card(rx)
+*	e:PFIX(i,rm)$(vem(i,rm) and sate2)	q:fix0(i,rm)
 *	e:PFX			q:(rowpfx)
 *	e:P("i",rnum)$rm(rnum)	q:(-sum(rm,vb(rm)))
 *	e:PT(j)			q:(-sum((i,s,r)$rx(r), vtwr(j,i,s,r)))
@@ -364,7 +403,8 @@ constraint_W(r)$(cde(r)*rm(r))..
 inc_row$card(rx)..
 	ROW =e= PFX*rowpfx - (P("i",rnum)*sum(rm,vb(rm)))$rm(rnum)
 		- sum(j, PT(j)*sum((i,s,rx), vtwr(j,i,s,rx)))
-		- sum((i,rx,rm)$vxmd(i,rx,rm), rtxs(i,rx,rm) * PFX * DXMD(i,rx,rm));
+		- sum((i,rx,rm)$vxmd(i,rx,rm), rtxs(i,rx,rm) * PFX * DXMD(i,rx,rm))
+		+ sum((i,rm)$vem(i,rm), PFIX(i,rm)*fix0(i,rm))$sate2;
 
 *	-----------------------------------------------------------------------------
 *	Market clearance associated with firm output:
@@ -376,10 +416,10 @@ mkt_p(g,rm(r))$(rm(r)*(vom(g,r)-vxm(g,r)))..
 		vom(g,r)$(sameas(g,"G") or sameas(g,"I") or sameas(g,"sd")) +
 		sum(i$sameas(i,g),
 		  sum(gg,DDFM(i,gg,r)) +
-			(X(i,r)*vem(i,r)+sum(sm(s),DXMD(i,r,s)) + DST(i,r))$(not vxm(i,r)));
+			(DXROW(i,r)+sum(sm(s),DXMD(i,r,s)) + DST(i,r))$(not vxm(i,r)));
 
 mkt_pe(i,r)$(rm(r)*vxm(i,r) or rx(r)*vem(i,r))..
-	S_E(i,r)$rm(r) + (X(i,r)*vem(i,r))$rx(r) =e= sum(sm(s),DXMD(i,r,s)) + (X(i,r)*vem(i,r) + DST(i,r))$rm(r);
+	S_E(i,r)$rm(r) + (X(i,r)*vem(i,r))$rx(r) =e= sum(sm(s),DXMD(i,r,s)) + (DXROW(i,r) + DST(i,r))$rm(r);
 
 *	-----------------------------------------------------------------------------
 *	Market clearance associated with imports:
@@ -412,19 +452,49 @@ mkt_pa(i,rm(r))$(cde(r)*vcm(i,r))..  A(i,r)*vcm(i,r) =e= D(i,r)*vcm(i,r);
 *	Market clearance foreign exchange:
 
 mkt_pfx$card(rx)..
-	sum(rm(r), vb(r))$rx(rnum) + sum((i,rm)$vem(i,rm), X(i,rm)*pem0(i,rm)*vem(i,rm)) + rowpfx
+	sum(rm(r), vb(r))$rx(rnum) + sum((i,rm)$vem(i,rm), XOUT(i,rm))$(not sate)
+		+ sum((i,rm)$vem(i,rm), pem0(i,rm)*vem(i,rm)*REVEXP(i,rm))$sate + rowpfx
 		=e= sum(j$vtw(j),sum(rx,vst(j,rx))*YT(j)*PT(j)/PFX) + sum((i,rx)$vem(i,rx),X(i,rx)*vem(i,rx)) + ROW/PFX;
+
+*	-----------------------------------------------------------------------------
+*	Market clearance for the export market (sate):
+
+mkt_px(i,rm(r))$(sate*vem(i,r))..
+	X(i,r)*pem0(i,r)*vem(i,r) =e= EXPORTS(i,r)*pem0(i,r)*vem(i,r);
+
+*	Market clearance for the fixed factor in export demand (sate2):
+
+mkt_pfix(i,rm(r))$(sate2*vem(i,r))..
+	fix0(i,r) =e= fix0(i,r)*X(i,r)*C_X(i,r)/PFIX(i,r);
+
+*	-----------------------------------------------------------------------------
+*	Export demand and foreign exchange earned from exports (sate):
+
+*	$constraint:EXPORTS(g,r)$(rm(r)*sate*vem(g,r))
+*	     EXPORTS(g,r)*P_X(g,r)**esubm(g)	=n= ( PFX )**esubm(g);
+
+constraint_EXPORTS(i,rm(r))$(sate*vem(i,r))..
+	EXPORTS(i,r)*P_X(i,r)**esubm(i) =e= PFX**esubm(i);
+
+*	$constraint:REVEXP(g,r)$(rm(r)*sate*vem(g,r))
+*	     REVEXP(g,r)*PFX		=n= EXPORTS(g,r)*P_X(g,r);
+
+constraint_REVEXP(i,rm(r))$(sate*vem(i,r))..
+	REVEXP(i,r)*PFX =e= EXPORTS(i,r)*P_X(i,r);
 
 model gtap12 /
 	prf_y.Y,prf_x.X,prf_a.A,prf_m.M,prf_yt.YT,prf_ft.FT,
 	mkt_p.P,mkt_pe.PE,mkt_pa.PA,mkt_pm.PM,mkt_pt.PT,mkt_pf.PF,mkt_ps.PS,mkt_pfx.PFX,
+	mkt_px.P_X,mkt_pfix.PFIX,
 	constraint_D.D, constraint_U.U, constraint_CC.CC, constraint_W.W,
+	constraint_EXPORTS.EXPORTS, constraint_REVEXP.REVEXP,
 	inc_ra.RA, inc_row.ROW/;
 
 model gtap12cns /
 	prf_y,prf_x,prf_a,prf_m,prf_yt,prf_ft,
-	mkt_p,mkt_pe,mkt_pa,mkt_pm,mkt_pt,mkt_pf,mkt_ps,mkt_pfx,
+	mkt_p,mkt_pe,mkt_pa,mkt_pm,mkt_pt,mkt_pf,mkt_ps,mkt_pfx,mkt_px,mkt_pfix,
 	constraint_D, constraint_U, constraint_CC, constraint_W,
+	constraint_EXPORTS, constraint_REVEXP,
 	inc_ra, inc_row/;
 
 *	Assign default values:
@@ -449,6 +519,10 @@ D.L(i,r) = 1;
 U.L(r) = 1;
 CC.L(r) = 1;
 W.L(r) = 1;
+P_X.L(i,r) = 1;
+PFIX.L(i,r) = 1;
+EXPORTS.L(i,r) = 1;
+REVEXP.L(i,r) = 1;
 
 *	Assign some lower bounds to avoid bad function calls:
 
@@ -457,6 +531,8 @@ PM.LO(j,r)$vim(j,r) = 0.001;
 PT.LO(j) = 0.001;
 PF.LO(f,r)$evom(f,r) = 0.001;
 PS.LO(sf,g,r)$vfm(sf,g,r) = 0.001;
+P_X.LO(i,r) = 0.001;
+PFIX.LO(i,r) = 0.001;
 
 *	Calibration algebra:
 
@@ -482,17 +558,19 @@ theta_vxmd(i,s,r)= (vxmd(i,s,r)*pvxmd(i,s,r) / vxmt(i,s,r))$vxmt(i,s,r);
 theta_vtwr(j,i,s,r) = (vtwr(j,i,s,r)*pvtwr(i,s,r) / vxmt(i,s,r))$vxmt(i,s,r);
 theta_vim(i,s,r)$vxmt(i,s,r)	= vxmt(i,s,r)/vim(i,r);
 theta_evom(sf,j,r)$evom(sf,r) = vfm(sf,j,r)/evom(sf,r);
+theta_xe(i,r)$(rm(r)*vem(i,r)) = pem0(i,r)*vem(i,r)/(pem0(i,r)*vem(i,r)+fix0(i,r)$sate2);
 
 RA.L(r) = vom("c",r)$cd(r) + vom("dd",r)$les(r) + sum(f,evom(f,r))$cde(r);
 
 ROW.L = rowpfx 	- sum(rm,vb(rm))$rm(rnum) - sum((j,i,s,rx), vtwr(j,i,s,rx))
-	- sum((i,rx,rm), rtxs(i,rx,rm)*vxmd(i,rx,rm));
+	- sum((i,rx,rm), rtxs(i,rx,rm)*vxmd(i,rx,rm))
+	+ sum((i,rm)$vem(i,rm), fix0(i,rm))$sate2;
 RA.LO(r) = 0; RA.UP(r) = +INF; RA.FX(rnum) = RA.L(rnum);
 $offecho
 
 $macro pnum(r) (sum(i_, P.L(i_,r)*vdfm(i_,"c",r)+PM.L(i_,r)*vifm(i_,"c",r))/sum(i_,vdfm(i_,"c",r)+vifm(i_,"c",r)))
 
-parameter	maxdev /1e-3/;
+parameter	maxdev /1.4e-4/;
 
 gtap12.workspace = 1024;
 gtap12.iterlim = 0;

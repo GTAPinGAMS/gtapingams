@@ -162,6 +162,10 @@ def task_test():
         'bmkchk',
         'mge_mcp',
         'mcp_mge',
+        'mge_mcp_sate',
+        'mcp_mge_sate',
+        'mge_mcp_sate2',
+        'mcp_mge_sate2',
         'cdechk',
     ]
 
@@ -192,6 +196,14 @@ def task_test():
             'build/listings/mcp2_g20.lst',
             'build/listings/mge1_g20.lst',
             'build/listings/mge2_g20.lst',
+            'build/listings/mcp1_g20_sate.lst',
+            'build/listings/mcp2_g20_sate.lst',
+            'build/listings/mge1_g20_sate.lst',
+            'build/listings/mge2_g20_sate.lst',
+            'build/listings/mcp1_g20_sate2.lst',
+            'build/listings/mcp2_g20_sate2.lst',
+            'build/listings/mge1_g20_sate2.lst',
+            'build/listings/mge2_g20_sate2.lst',
             'build/test.lst',
         ],
         'verbosity': 2,
@@ -207,19 +219,18 @@ ds = 'g20_macro'
 def task_grid():
     """Run all model runs necessary for paper reconstruction"""
     dependencies = [
+        'code/mge.gms',
+        'code/gtap12data.gms',
         'forensics/ssasolve.gms',
         'forensics/tgrid.gms',
         ]
     targets = [
-        'forensics/USA_soe_g20.data',
-        'forensics/CHN_soe_g20.data',
-        'forensics/USA_gmr_g20.data',
-        'forensics/CHN_gmr_g20.data',
-        f'forensics/output/{ds}/gtap/gmr/CHN.gdx',
-        f'forensics/output/{ds}/gtap/gmr_ls/CHN.gdx',
-        f'forensics/output/{ds}/gtap/soe/CHN.gdx',
-        f'forensics/output/{ds}/gtap/sate/CHN.gdx',
-        f'forensics/output/{ds}/gtap/sate2/CHN.gdx',
+        f'forensics/output/{ds}/gmr/CHN.gdx',
+        f'forensics/output/{ds}/gmr_ls/CHN.gdx',
+        f'forensics/output/{ds}/soe/CHN.gdx',
+        f'forensics/output/{ds}/sate/CHN.gdx',
+        f'forensics/output/{ds}/sate_ls/CHN.gdx',
+        f'forensics/output/{ds}/sate2/CHN.gdx',
         # lst files in output/g20/
     ]
 
@@ -234,16 +245,44 @@ def task_grid():
     }
 
 
+def task_grid_fine():
+    """Run all model runs necessary for paper reconstruction"""
+    dependencies = [
+        'code/mge.gms',
+        'code/gtap12data.gms',
+        'forensics/ssasolve_fine.gms',
+        'forensics/tgrid_fine.gms',
+        ]
+    targets = [
+        f'forensics/output_fine/{ds}/gmr/CHN.gdx',
+        f'forensics/output_fine/{ds}/gmr_ls/CHN.gdx',
+        f'forensics/output_fine/{ds}/sate/CHN.gdx',
+        f'forensics/output_fine/{ds}/sate_ls/CHN.gdx',
+        # lst files in output/g20/
+    ]
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [
+            f"cd forensics & gams ssasolve_fine --ds={ds} & cd .."
+        ],
+
+    }
+
+
 def task_merge():
     """Run all model runs necessary for paper reconstruction"""
     dependencies = [
         'forensics/ssamerge.gms',
         'forensics/results_git.xlsx',
-        f'forensics/output/{ds}/gtap/gmr/CHN.gdx',
-        f'forensics/output/{ds}/gtap/gmr_ls/CHN.gdx',
-        f'forensics/output/{ds}/gtap/soe/CHN.gdx',
-        f'forensics/output/{ds}/gtap/sate/CHN.gdx',
-        f'forensics/output/{ds}/gtap/sate2/CHN.gdx',
+        f'forensics/output/{ds}/gmr/CHN.gdx',
+        f'forensics/output/{ds}/gmr_ls/CHN.gdx',
+        f'forensics/output/{ds}/soe/CHN.gdx',
+        f'forensics/output/{ds}/sate/CHN.gdx',
+        f'forensics/output/{ds}/sate_ls/CHN.gdx',
+        f'forensics/output/{ds}/sate2/CHN.gdx',
         ]
     targets = [
         'forensics/results.gdx',
@@ -268,22 +307,52 @@ def task_merge():
     }
 
 
+def task_merge_fine():
+    """Run all model runs necessary for paper reconstruction"""
+    dependencies = [
+        'forensics/ssamerge_fine.gms',
+        'forensics/results_git.xlsx',
+        f'forensics/output_fine/{ds}/gmr/CHN.gdx',
+        f'forensics/output_fine/{ds}/gmr_ls/CHN.gdx',
+        f'forensics/output_fine/{ds}/sate/CHN.gdx',
+        f'forensics/output_fine/{ds}/sate_ls/CHN.gdx',
+        ]
+    targets = [
+        'forensics/results_fine.gdx'
+    ]
+
+    def copy_excel():
+        shutil.copy('forensics/results_git.xlsx', 'forensics/results.xlsx')
+
+    def merge():
+        os.system(f"cd forensics & gams ssamerge_fine --ds={ds} & cd ..")
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [
+            copy_excel,
+            merge
+        ],
+
+    }
+
+
 def task_tarifffigs():
     dependencies = [
         'forensics/tradetax.gms',
-        'forensics/texcoords.py',
-        f'gamsdata/20{yr}/{ds}.gdx',
+        # f'gamsdata/20{yr}/{ds}.gdx',  #
     ]
     targets = [
         'forensics/tradetax.gdx',
+        'forensics/figures/USA_commodity_m.gdx',
+        'forensics/figures/USA_txtm_m.gdx',
     ]
 
     def run_paperfigs():
         # extract import tariffs and export taxes from
-        os.system(f'cd forensics & gams tradetax --ds={ds} & cd ..')
-        os.system(
-            "cd forensics & python texcoords.py" +
-            " --top 23 & cd ..")
+        os.system('cd forensics & gams tradetax --ds=g20 & cd ..')
 
     return {
         'file_dep': dependencies,
@@ -296,26 +365,95 @@ def task_tarifffigs():
 def task_resultsfigs():
     dependencies = [
         'forensics/process_results.gms',
-        'forensics/copyfigs.py',
-        'forensics/figures/g20_macro_USA_W.tex',
         'forensics/results.gdx',
     ]
     targets = [
-        'forensics/figures/g20_macro_CHN_W.tex',
         'forensics/figures/g20_macro_USA_W.data',
         'forensics/figures/g20_macro_CHN_W.data',
+        'forensics/figures/g20_macro_USA.data',
+        'forensics/figures/g20_macro_CHN.data',
     ]
 
     def create_figs():
         # extract import tariffs and export taxes from
         os.system(f'cd forensics & gams process_results --ds={ds} & cd ..')
-        os.system(
-            "cd forensics & python copyfigs.py & cd .."
-        )
 
     return {
         'file_dep': dependencies,
         'targets': targets,
         'verbosity': 2,
         'actions': [create_figs],
+    }
+
+
+def task_paperfigs():
+    dependencies = [
+        'latex/jgea_new/make_dumbbells.py',
+        'latex/jgea_new/make_figs.py',
+        'forensics/figures/g20_macro_USA_W.data',
+        'forensics/figures/g20_macro_USA.data',
+    ]
+    targets = [
+        f'latex/jgea_new/figures/dumbbell_{ds}_USA.tex',
+        'latex/jgea_new/figures/res_USA_W.tex',
+        'latex/jgea_new/figures/tariff_commodity_USA.tex',
+        'latex/jgea_new/figures/tariff_txtm_USA.tex',
+        'latex/jgea_new/figures/tab_optimum.tex',
+        'latex/jgea_new/figures/tab_rmsd_W.tex',
+    ]
+
+    def create_figs():
+        os.system('cd latex & cd jgea_new' +
+                  ' & python make_figs.py' +
+                  ' & python make_dumbbells.py' +
+                  ' & cd .. & cd ..')
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': [create_figs],
+    }
+
+
+def task_compile_paper():
+    dependencies = [
+        'latex/jgea_new.tex',
+        'latex/jgea.cls',
+        'latex/jgea_new/jgea_new.bib',
+        # Appendices:
+        'latex/jgea_new/appendices/appendix_model.tex',
+        'latex/jgea_new/appendices/appendix_tariffs.tex',
+        'latex/jgea_new/appendices/calibration_lr.tex',
+        'latex/jgea_new/appendices/model_lr.tex',
+        'latex/jgea_new/appendices/closures.tex',
+        'latex/jgea_new/appendices/programs.tex',
+        # Figures from results:
+        f'latex/jgea_new/figures/dumbbell_{ds}_USA.tex',
+        'latex/jgea_new/figures/res_USA_W.tex',
+        'forensics/figures/g20_macro_USA_W.data',
+        'forensics/figures/g20_macro_USA.data',
+        # Figures for tax illustration
+        'latex/jgea_new/figures/tariff_commodity_USA.tex',
+        'latex/jgea_new/figures/tariff_txtm_USA.tex',
+        'forensics/figures/USA_commodity_m.gdx',
+        'forensics/figures/USA_txtm_m.gdx',
+        # Tables
+        'latex/jgea_new/figures/tab_optimum.tex',
+        'latex/jgea_new/figures/tab_rmsd_W.tex',
+    ]
+
+    targets = [
+        'latex/jgea_new.pdf'
+    ]
+
+    return {
+        'file_dep': dependencies,
+        'targets': targets,
+        'verbosity': 2,
+        'actions': ['cd latex' +
+                    ' & pdflatex jgea_new.tex' +
+                    ' & bibtex jgea_new.aux' +
+                    ' & pdflatex jgea_new.tex & pdflatex jgea_new.tex' +
+                    ' & cd ..'],
     }

@@ -1,0 +1,122 @@
+\documentclass{article}
+
+\setcounter{page}{1} % Please input the first page number in place of "1". This will change the starting page number of the paper.
+
+%	-------------------------------------------------------------------
+
+\usepackage{setspace}
+
+\usepackage{natbib}
+\usepackage{doi}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage[toc,page]{appendix}
+
+\usepackage{rotating}
+\usepackage{xspace}
+\usepackage{tikzscale}
+\usepackage{filecontents}
+\usepackage{tikz}
+\usepackage{fancyvrb}
+\usepackage{subcaption}
+\usepackage{pgfplotstable}
+\usepackage{longtable}
+\usepackage{pgfplots}
+\usepackage{hyperref}
+\usepackage{helvet}
+\usepackage[eulergreek]{sansmath}
+
+\pgfplotsset{compat=1.3}
+
+\fvset{formatcom=\color{black},fontsize=\scriptsize,frame=single,rulecolor=\color{black},baselinestretch=1,framesep=5mm}
+\renewcommand{\FancyVerbFormatLine}[1]{\textcolor{blue}{#1}}
+\DefineVerbatimEnvironment {GAMSCode*}{Verbatim}
+{framesep=5mm,frame=none,fontsize=\scriptsize, baselinestretch=1}
+
+\newcommand{\GDX}{\textsc{gdx}\xspace}
+\newcommand{\LST}{\textsc{lst}\xspace}
+\newcommand{\RHS}{\textsc{rhs}\xspace}
+\newcommand{\LHS}{\textsc{lhs}\xspace}
+\newcommand{\CES}{\textsc{ces}\xspace}
+\newcommand{\CET}{\textsc{cet}\xspace}
+\newcommand{\CD}{\textsc{cd}\xspace}
+\newcommand{\CDE}{\textsc{cde}\xspace}
+\newcommand{\LES}{\textsc{les}\xspace}
+\newcommand{\CGE}{\textsc{cge}\xspace}
+\newcommand{\SOE}{\textsc{soe}\xspace}
+\newcommand{\LOE}{\textsc{loe}\xspace}
+\newcommand{\SATE}{\textsc{sate}\xspace}
+\newcommand{\AUES}{\textsc{aues}\xspace}
+\newcommand{\GMR}{\textsc{gmr}\xspace}
+\newcommand{\GMRLS}{\textsc{gmr\_ls}\xspace}
+\newcommand{\SATELS}{\textsc{sate\_ls}\xspace}
+\newcommand{\HAR}{\textsc{har}\xspace}
+\newcommand{\MCP}{\textsc{mcp}\xspace}
+\newcommand{\MGE}{\textsc{mge}\xspace}
+\newcommand{\USA}{\textsc{usa}\xspace}
+\newcommand{\CHN}{\textsc{chn}\xspace}
+\newcommand{\HKG}{\textsc{hkg}\xspace}
+\newcommand{\GAMS}{\textsc{gams}\xspace}
+\newcommand{\MPSGE}{\textsc{mpsge}\xspace}
+\newcommand{\GTAP}{\textsc{gtap}\xspace}
+\newcommand{\GTAPINGAMS}{\textsc{gtapingams}\xspace}
+\newcommand{\GEMPACK}{\textsc{gempack}\xspace}
+\newcommand{\DOCU}{\texttt{documentation.pdf}\xspace}
+\newcommand{\GIGURL}{\url{https://github.com/landisf/gtapingams}}
+%	-------------------------------------------------------------------
+
+\input{figures}
+
+\begin{document}
+\title{Documentation of \GTAPINGAMS}
+\author{}
+\date{}
+%
+\maketitle
+
+\begin{abstract} % Environment defined for JGEA style.
+
+This paper describes the implementation in the General Algebraic
+Modeling Language (\GAMS) of an economic equilibrium model based on
+the Global Trade Analysis Project (\GTAP) dataset. We call this model
+and the ancillary programming tools \GTAPINGAMS.  Relative to previous
+installments of \GTAPINGAMS, an innovation in this model is that it
+can easily switch between global multiregional (\GMR) and small open
+economy (\SOE) closures. We also include the possibility to compare
+results for alternative representations of final demand, based on
+Cobb-Douglas, linear expenditure system and constant difference in
+elasticities demand systems. In this paper we outline the model
+structure, document the associated equilibrium conditions and describe
+computer programs which calibrate the model to the desired regional
+and sectoral aggregation from the \GTAP12 dataset.
+
+\end{abstract}
+
+% Three sections:
+\section{Data, Technology and Preferences}\label{model}
+\input{data_tech_pref}
+\section[Equilibrium conditions]{Equilibrium Conditions}\label{equil}
+\input{equilibrium}
+\section[Implementation]{Implementation}\label{data}
+\input{implementation}
+
+\clearpage
+
+% Six appendices:
+\begin{appendices}
+\input{"Appendices/appendixa"}
+\input{"Appendices/appendixb"}
+\input{"Appendices/appendixc"}
+\input{"Appendices/appendixd"}
+\input{"Appendices/appendixe"}
+\input{"Appendices/appendixf"}
+\end{appendices}
+
+\newpage
+
+% plainnat would be an alternative:
+\bibliographystyle{jgea}
+\bibliography{gtap12ingams}
+
+\end{document}

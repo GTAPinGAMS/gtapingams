@@ -19,7 +19,7 @@ $if not set ds $set ds g20
 $if not set code $set code ..%fs%code%fs%
 $include %code%gtap12data
 
-set	rcalc(r)	Regions to report /usa, chn/,
+set	rcalc(r)	Regions to report /usa, chn, zaf, arg/,
 	item		/tm_m, tx_m, "tm$", tmrev, cif/;
 
 parameter

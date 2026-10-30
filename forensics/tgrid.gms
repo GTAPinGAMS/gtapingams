@@ -26,10 +26,12 @@ $if not set ds      	$set 	ds	g20_macro
 $if not set rcalc   	$set 	rcalc	CHN
 $if not set mdl     	$set 	mdl	sate2
 $if not set soextax 	$set	soextax yes
-$if not set thetadx 	$setglobal thetadx	1
 $if not set fsubm	$setglobal fsubm	1
 
-set	tlvl /0*10/;
+$if not set thetadx 	$setglobal thetadx	1
+$if %mdl%==soe		$setglobal thetadx	0.5
+
+set	tlvl /0*20/;
 
 *	Read the model here (this writes gtap12.gen in the working directory,
 *	which is moved to the scratch directory so that parallel runs do not
@@ -159,12 +161,3 @@ $include %code%gdpcalc
   );
 );
 display results;
-
-*	pgfplots table, one column per demand system (EV in % of benchmark).
-*	Figure 12 uses column cde from the gmr and soe runs; Figure 13 uses
-*	cde, cd and les from the gmr run:
-
-file kdat /%rcalc%_%mdl%_%ds%.data/; kdat.nd = 6; kdat.nw = 12;
-put kdat 'tariff' @13; loop(dsys, put dsys.tl:12;); put /;
-loop(tlvl, put tlvl.tl:12; loop(dsys, put results(dsys,tlvl,"W"):12:6;); put /;);
-putclose kdat;

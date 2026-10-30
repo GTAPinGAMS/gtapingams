@@ -1,0 +1,536 @@
+An Arrow-Debreu model concerns itself with the interactions of
+decentralized decisions by consumers and producers in markets.
+\citet{Lars} proposed a representation of this class of models in
+which two types of equations define an equilibrium: zero profit and
+market clearance. The corresponding variables defining an equilibrium
+are activity levels (for constant-returns-to-scale firms) and
+commodity prices.\footnote{Under a maintained assumption of perfect
+competition, \citet{Lars} may characterize technology as
+constant-returns-to-scale without loss of generality. Specifically,
+decreasing returns are accommodated through introduction of a specific
+factor, while increasing returns are inconsistent with the assumption
+of perfect competition. Note that in this environment zero excess
+profit is consistent with free entry for atomistic firms producing an
+identical product.} Here we extend Mathiesen's framework with a third
+class of variables corresponding to consumer income levels. Commodity
+markets encompass primary endowments of households with producer
+outputs. In equilibrium the aggregate supply of each good must be at
+least as great as total intermediate and final demand. Initial
+endowments are exogenous. Producer supplies and demands are defined by
+producer activity levels and relative prices. Final demands are
+determined by market prices.
+
+Economists who have worked with conventional textbook equilibrium
+models can find Mathiesen's framework to be somewhat opaque because
+many quantity variables need not be explicitly specified in the model.
+Variables such as final demand by consumers, factor demands by
+producers and commodity supplies by producers, are defined implicitly
+in Mathiesen's model. For example, given equilibrium prices for
+primary factors, consumer incomes can be computed, and given income
+and goods prices, consumers' demands can then be determined. The
+consumer demand functions are written down in order to define an
+equilibrium, but quantities demanded need not appear in the model as
+separate variables. The same is true of inputs or outputs from the
+production process: relative prices determine conditional demand, and
+conditional demand times the activity level represents market demand.
+Omitting decisions variables and suppressing definitional equations
+corresponding to intermediate and final demand provides significant
+computational advantages at the cost of a somewhat more complicated
+model statement.
+
+In the following, we detail (i) zero profit conditions, (ii) market
+clearance conditions, and (iii) income balance conditions, which in
+the present case is equivalent to the regional budget constraint.
+These three sets of conditions form the basic system of equation to be
+solved. Note that the actual code for the model is implemented both in
+the algebraic mixed complementarity format \citep[\GAMS/\MCP,
+see][]{Rutherford1995} and through the more compact formulation
+afforded by the Mathematical Programming System for General
+Equilibruim (\MPSGE) syntax \citep{Rutherford1999}.
+
+\subsection[Zero profit]{Zero profit (arbitrage) conditions}
+
+All production activities in the model are represented by
+constant-returns-to-scale technologies, and markets are assumed to
+operate competitively with free entry and exit. As a consequence,
+equilibrium profits are driven to zero and the price of output
+reflects the cost of inputs. The following sets of equations relating
+output price to marginal cost are part of the definition of an
+equilibrium.\footnote{To retain consistency with the \MCP format, we
+express zero profit conditions as ``oriented equations,'' with
+marginal (=average) cost on the \LHS and marginal (=average) revenue on
+the \RHS.}
+
+The calculation of unit cost and unit revenue functions involves the
+definition of a number of ancillary variables (that do not appear in
+the \GAMS code as explicit choice variables). In the following we
+define ancillary variables in un-numbered equations, indicating that
+these variables are ``optional'' in the sense that they may be
+substituted out of the non-linear system of equations. Moreover, we
+use the symbol $\theta$ to portray value shares from the base year
+data. In most cases subscripts on these value shares are omitted in
+order to economize on notation. Finally, to denote benchmark values we
+use an overline, so that $\overline{t}^{pd}_{ir}$ represents the
+benchmark value of ${t}^{pd}_{ir}$.
+
+\subsubsection[Production]{Sectoral production (\texttt{Y(j,r)})}
+
+Sectoral production combines intermediate inputs with a value-added
+nest combining primary inputs (see Figure \ref{prodfunY}). The unit
+cost of value-added is a \CES composite of skilled and unskilled labor,
+land, resources and capital inputs to production, gross of taxes.
+Factor inputs may be sector-specific or mobile across sectors:
+$$p^{pf}_{fjr} = \left\{\begin{array}{lr}
+\mathit{PF}_{fr} \frac{(1+t^f_{fjr})}{1+\overline{t}^f_{fjr}} & f \in m_f\\
+\mathit{PS}_{fjr} \frac{(1+t^f_{fjr})}{1+\overline{t}^f_{fjr}} & f \in s_f
+\end{array} \right.$$
+and the unit cost function is given by:
+$$c^f_{jr} = \left( \sum_f \theta_f \left( p^{pf}_{fjr}
+\right)^{1-\sigma} \right)^{1/(1-\sigma)},$$
+in which $\theta_f$ represents the factor share of value added
+[{\small \texttt{theta\_vfm(f,g,r)}}].
+
+The user cost of intermediate inputs differs from the market price
+due to the presence of taxes on intermediate inputs:
+$$p^d_{ijr} = P_{ir} \frac{1+t^{fd}_{ijr}}{1+\overline{t}^{fd}_{ijr}}$$
+$$p^i_{ijr} = \mathit{PM}_{ir}
+\frac{1+t^{fi}_{ijr}}{1+\overline{t}^{fi}_{ijr}}$$ A \CES cost function
+describes the minimum cost of a bundle of domestic and imported inputs
+to production, based on benchmark value shares and an elasticity of
+substitution $\sigma [\texttt{esubd(i)}]$:
+$$c^i_{ijr} = \left( \theta (p^d_{ijr})^{1-\sigma} +
+             (1-\theta) (p^i_{ijr})^{1-\sigma}
+\right)^{1/(1-\sigma)},$$
+in which $\theta$ represents the domestic share of the Armington
+composite  \hfill \break [{\small \texttt{theta\_vdfm(i,j,r)}}].
+
+Unit cost of sectoral output is then a Leontief (linear) composite of
+the costs of intermediate and value-added composite inputs, based on
+base-year value shares:
+$$c^Y_{jr} = \sum_i \theta_i c^i_{ijr} + \theta^f c^f_{jr},$$
+in which $\theta_i$ represents the cost share of intermediate input
+$i$ [{\small \texttt{theta\_cm0(i,j,r)}}]; and
+$\theta^f$ represents the cost share of value added in sectoral
+output [{\small \texttt{theta\_cf0(j,r)}}].
+
+Having formulated the unit cost function, it is possible to compactly
+portray the zero profit condition for $y_{jr}$. In equilibrium, the
+marginal cost of supply equals the market price, net of taxes:
+\begin{equation}
+c^Y_{jr} = P_{jr} \frac{1-t^o_{jr}}{1-\overline{t}^o_{jr}}
+\end{equation}
+In the \SOE model production for domestic and export
+markets are differentiated, and we replace $P_{jr}$ by a unit
+revenue function,
+$$r^Y_{jr} = \left( \theta (P_{jr})^{1+\eta} +
+(1-\theta) (\mathit{PE}_{jr})^{1+\eta} \right)^{1/(1+\eta)},$$
+in which $\theta$ represents the export share of output
+[{\small \texttt{theta\_vxm(j,r)}}].
+
+\subsubsection[Private demand]{Consumer demand (\texttt{Y("c",r)})}
+
+In previous versions of \GTAPINGAMS the consumer price index
+represented a Cobb-Douglas demand system with an Armington
+substitution between domestic and imported goods prices gross of tax.
+This model is retained as one option in the new model, price indices
+for domestic and imported goods are given by:
+$$p^{dc}_{ir} = P_{ir} \frac{1+t^{pd}_{ir}}{1+\overline{t}^{pd}_{ir}},$$
+and
+$$p^{ic}_{ir} = \mathit{PM}_{ir} \frac{1+t^{pi}_{ir}}{1+\overline{t}^{pi}_{ir}},$$
+and the Armington composite price of good $i$ is a \CES composite price
+defined over these indices:
+$$p^c_{ir} = \left(\theta (p^{dc}_{ir})^{1-\sigma} +
+                (1-\theta) (p^{ic}_{ir})^{1-\sigma}
+\right)^{1/(1-\sigma)},$$
+in which $\theta$ represents the domestic demand share
+[{\small \texttt{theta\_vdfm(i,"c",r)}}].
+
+In addition to the Cobb-Douglas representation of the final demand
+system, our core model includes a \LES, which combines a Cobb-Douglas
+discretionary demand with a Leontief subsistence demand activity.  The
+added complexity of the \LES specification permits the model to be
+calibrated both to the income and \textit{average} price elasticities
+of demand. (See Appendix \ref{LES} of \texttt{documentation.pdf} for details.) The price indices for
+discretionary and subsistence demand are defined by:
+\begin{equation}
+P_{\mathit{DD}r} = \prod_i (p^c_{ir})^{\theta_i},
+\end{equation}
+in which $\theta_i$ represents the discretionary value share
+[{\small \texttt{theta\_cm0(i,"dd",r)}}].
+
+The price index for subsistence demand is defined by a Leontief
+cost function:
+\begin{equation}
+P_{\mathit{SD}r} = \sum_i \theta_i p^c_{ir},
+\end{equation}
+in which $\theta_i$ represents the commodity $i$ share of subsistence
+demand  \hfill \break [{\small \texttt{theta\_cm0(i,"sd",r)}}].
+
+Finally, \GAMS code includes a third representation of final demand in
+the form of the \CDE demand system \citep{Hanoch1975}. This
+representation, details of which are presented in Appendix \ref{CDE} of \texttt{documentation.pdf},
+has been part of the \GTAP model in \textsc{gempack} for many years,
+and our implementation follows those of
+\citet{HertelvanderMensbrugghe2015} and \citet{Chen}. Similar to the
+LES demand system, this approach permits calibrating empirical
+evidence on both own-price and income elasticities.
+
+\subsubsection[Government demand]{Government demand (\texttt{Y("g",r)})}
+
+Public expenditure is a fixed-coefficient aggregate of Armington
+composite goods. Within each composite domestic and imported goods
+trade off with a constant elasticity of substitution. The unit price
+indices for domestic and imported goods are given by:
+$$p^{dg}_{ir} = P_{ir} \frac{1+t^{dg}_{ir}}{1+\overline{t}^{gd}_{ir}} $$
+and
+$$p^{ig}_{ir} = \mathit{PM}_{ir} \frac{1+t^{ig}_{ir}}{1+\overline{t}^{ig}_{ir}}$$
+The composite price of the $i$th good is then:
+$$pg_{ir} = \left( \theta (p^{dg}_{ir})^{1-\sigma} + (1-\theta)
+(p^{ig}_{ir})^{1-\sigma} \right)^{1/(1-\sigma)},$$
+in which  $\theta$ represents the domestic share of public demand
+[{\small \texttt{theta\_vdfm(i,"g",r)}}].
+
+The unit cost of public services ($Y_{Gr}$) is defined by the Leontief
+cost coefficients:
+\begin{equation}
+\sum_i \theta_i pg_{ir}  = P_{Gr},
+\end{equation}
+in which $\theta_i$ represents the value share of commodity $i$ in
+public expenditure \hfill \break [{\small \texttt{theta\_cm0(i,"g",r)}}].
+
+\subsubsection[Aggregate imports]{Aggregate imports (\texttt{M(i,r)})}
+
+An import cost index applies export taxes, trade and transport margins
+and import tariffs to the producer supply prices in exporting regions:
+$$py^m_{isr} = P_{is}
+\frac{(1-t^{xs}_{isr})(1+t^{ms}_{isr})}
+{(1-\overline{t}^{xs}_{isr})(1+\overline{t}^{ms}_{isr})}\,.$$ In the
+case of the \SOE model, the supply price $P_{is}$ is replaced by
+export price $\mathit{PE}_{is}$. The unit price of transportation services is
+given by: $$pt^m_{jisr} = \mathit{PT}_j
+\frac{1+t^{ms}_{isr}}{1+\overline{t}^{ms}_{isr}}\,.$$
+
+Transportation margins enter as fixed coefficients with bilateral
+trade flows, so the unit delivered price is a convex combination of
+the unit prices with weights corresponding to base year value shares:
+$$pyt^m_{isr} = \theta py^m_{isr} + \sum_j \theta^T_j pt^m_{jisr},$$
+in which $\theta$ represents good $i$ share of imports
+[{\small \texttt{theta\_vxmd(i,s,r)}}]; and $\theta^T_j$
+represents the value share of transportation service $j$ in the import
+price \hfill \break [{\small \texttt{theta\_vtwr(j,i,s,r)}}].
+
+Having formed a price index for bilateral imports from region $s$ to
+region $r$, the \CES cost index can be defined on the basis of value
+shares and the elasticity of substitution across imports from
+different regions, $\sigma = \textit{esubm}_i$:
+$$\textit{cim}_{ir} = \left(\sum_s \theta_s (pyt^m_{isr})^{1-\sigma)}
+\right)^{1/(1-\sigma)} ,$$
+in which $\theta_s$ is the  value share of bilateral imports from
+region $s$ [{\small \texttt{theta\_m(i,s,r)}}].
+
+The import activity ($m_{ir}$) has a zero
+profit condition which relates the unit cost of imports to the market
+price of the import aggregate:
+\begin{equation}
+cim_{ir} = \mathit{PM}_{ir}\,.
+\end{equation}
+
+\subsubsection[Transportation]{International transportation services
+(\texttt{YT(j)})}
+
+For simplicity, the unit cost of a transportation service depends on
+the benchmark value shares of region-specific services through a
+Cobb-Douglas cost function. Under perfect competition with free entry,
+the unit cost of international transport services equals the
+equilibrium market price:
+\begin{equation}
+\prod_r (P_{jr})^{\theta_r} = \mathit{PT}_j
+\end{equation}
+in which $\theta_r$ represents the region $r$ share of transportation
+service $j$ [{\small \texttt{theta\_vst(j,r)}}].
+In the \SOE model, the supply price $P_{is}$ in equation is replaced
+by export price $\mathit{PE}_{is}$.
+
+\subsubsection[Sector-specific factors]{Sector-specific factor transformation (\texttt{FT(f,r)})}
+
+The unit value of sector-specific factors is defined as a \CET
+aggregate of returns to factor $f$ across sectors $j$:
+$$\textit{pvfm}_{fr} = \left( \sum_j \theta_j ps_{fjr}^{1+\eta}
+\right)^{1/(1+\eta)} \quad f \in s_{f}\,.$$
+in which $\theta_j$ is the sector $j$ share of earnings for factor
+$f$ [{\small \texttt{theta\_evom(f,j,r)}}].
+
+The constant elasticity of transformation frontier defines the
+profit-maximizing allocation of factors to individual sectors. In
+equilibrium, the unit value of the aggregate factor is equal to the
+maximum unit earnings:
+\begin{equation}
+\mathit{PS}_{fr} = \textit{pvfm}_{fr} \quad f \in s_f
+\end{equation}
+
+\subsection{Market clearance}
+
+Supply-demand conditions apply to all goods and factors. Benchmark
+demand and supply quantities appear as scale factors in many of these
+equations, typically multiplied by activity levels which are equal to
+unity in the reference equilibrium.\footnote{While not crucial for
+representation of the model as a nonlinear system of equations, we
+follow the \MCP convention in writing out the market clearance
+conditions. The equations are ``oriented'', with supply variables on
+the \LHS and demands on the \RHS. Hence, the sense of the equation is
+$supply \geq demand$. In the core model equilibrium prices should
+always be positive, but in extensions of the standard model it might
+be quite common to introduce inequalities and complementary slackness,
+in which case the proper orientation of the equations is essential.
+Hence, in equilibrium should the price of a good be zero, economic
+equilibrium is then consistent with a market in which $supply >
+demand$.}
+
+\subsubsection[Firm output]{Firm output (\texttt{P(i,r)})}
+
+Aggregate output of good $i$ in region $r$ in the reference equilibrium is
+\texttt{vom(i,r)}:
+\begin{equation}
+\label{Youtput}
+Y_{ir} \textit{vom}_{ir} =
+\sum_j \textit{ddfm}_{ijr} + \textit{ddfm}_{iCr} + \textit{ddfm}_{iIr}
++ \textit{ddfm}_{iGr} + \sum_s \textit{dxmd}_{irs} + \textit{dst}_{ir}
+\end{equation}
+where the compensated demand functions can be obtained by
+differentiating the unit cost functions:
+\begin{eqnarray}
+\textit{ddfm}_{ijr} &=& Y_{jr} \textit{vdfm}_{ijr} \left( \frac{\textit{ci}_{ijr}}{p^d_{ijr}} \right)^\sigma \nonumber\\
+\textit{ddfm}_{iCr}  &=& Y_{Cr} \left( \textit{vdfm}_{iCr}\frac{P_{Cr}}{pc_{ir}} \right) \left(\frac{p^c_{ir}}{p^{\textit{dc}}_{ir}} \right)^\sigma \nonumber\\
+\textit{ddfm}_{iIr}  &=& Y_{Ir} \textit{vdfm}_{iIr} \nonumber\\
+\textit{ddfm}_{iGr} &=& Y_{Gr} \textit{vdfm}_{iGr}\left(\frac{pg_{ir}}{p^{\textit{dg}}_{ir}} \right)^\sigma   \nonumber\\
+\textit{dxmd}_{isr} &=& M_{ir} \textit{vxmd}_{isr} \left(\frac{\mathit{PM}_{ir}}{\textit{pyt}^m_{isr}} \right)^\sigma \nonumber\\
+\textit{dst}_{jr} &=& \textit{YT}_j  \textit{vst}_{jr} \frac{\mathit{PT}_j}{P_{jr}}\nonumber
+\end{eqnarray}
+
+In the \SOE model ($\textit{etrndx}_{i}<\infty$) equation
+(\ref{Youtput}) is replaced by two equations, one representing the
+market for domestic output and another representing the market for
+exports:
+\begin{eqnarray}
+Y_{ir} \textit{ddm}_{ir} &=&
+\sum_j \textit{ddfm}_{ijr} + \textit{ddfm}_{iCr} + \textit{ddfm}_{iIr}
++ \textit{ddfm}_{iGr} \label{Doutput}\\
+Y_{ir} \textit{dxm}_{ir} &=&
+\sum_s \textit{dxmd}_{irs} + \textit{dst}_{ir}
+\,.\label{Xoutput}
+\end{eqnarray}
+In these expressions, the compensated domestic and export supply
+coefficients are given by:
+\begin{eqnarray}
+\textit{ddm}_{ir} &=& \textit{vdm}_{ir} \left( \frac{ r^Y_{ir} } {
+P_{ir}} \right)^{\eta} \nonumber \\
+\textit{dxm}_{ir} &=& \textit{vxm}_{ir} \left( \frac{ r^Y_{ir} } {
+\mathit{PE}_{ir}} \right)^{\eta}. \nonumber
+\end{eqnarray}
+
+\subsubsection[Private consumption]{Private
+consumption (\texttt{P("c",r)})}
+
+Consumer demand in region $r$ in the reference equilibrium is
+$\textit{vom}_{Cr}$  hence:
+\begin{equation}
+Y_{Cr} \textit{vom}_{Cr}  = \frac{\textit{RA}_r}{P_{Cr}}
+\end{equation}
+
+\subsubsection[Composite imports]{Composite imports (\texttt{PM(i,r)})}
+
+The aggregate value of imports of good $i$ in region $r$ in the
+reference equilibrium is $\textit{vim}_{ir}$:
+\begin{equation}
+M_{ir} \textit{vim}_{ir} = \sum_j \textit{difm}_{ijr} +
+\textit{difm}_{iCr} + \textit{difm}_{iGr}
+\end{equation}
+where compensated demand functions are given by:
+\begin{eqnarray}
+\textit{difm}_{ijr} &=& Y_{jr} \textit{vifm}_{ijr} \left( \frac{ci_{ijr}}{p^i_{ijr}} \right)^\sigma\nonumber\\
+\textit{difm}_{iCr} &=& Y_{Cr} \textit{vifm}_{iCr}  \left(\frac{pc_{ir}}{p^{ic}_{ir}}\right)^\sigma  \frac{P_{Cr}}{\textit{pc}_{ir}} \nonumber\\
+\textit{difm}_{iGr} &=& Y_{Gr} \textit{vifm}_{iGr} \left(\frac{pg_{ir}}{p^{ig}_{ir}}\right)^\sigma \nonumber
+\end{eqnarray}
+
+\subsubsection[Transport services]{Transport services (\texttt{PT(j)})}
+
+The aggregate demand (and supply) for transport service $j$ in the
+benchmark equilibrium is $\textit{vtw}_j$:
+\begin{equation}
+\textit{YT}_j  \textit{vtw}_j = \sum_{isr} \textit{dtwr}_{jisr}
+\end{equation}
+where
+$$\textit{dtwr}_{jisr} = M_{ir} \textit{vtwr}_{jisr}  \left(
+\frac{\mathit{PM}_{ir}}{\textit{pyt}^m_{isr}} \right)^\sigma\,.$$
+
+\subsubsection[Primary factors]{Primary factors (\texttt{PF(f,r)})}
+
+The aggregate demand (and supply) of primary factor $f$ in region $r$
+is $\textit{evom}_{fr}$:
+\begin{equation}
+\textit{evom}_{fr} = \left\{
+\begin{array}{lr}
+\sum_j \textit{dfm}_{fjr} & f \in m_f \\
+\textit{evom}_{fr} \textit{FT}_{fr} & f \in s_f
+\end{array} \right.
+\end{equation}
+where the demand for primary factor is given by:
+$$\textit{dfm}_{fjr}  = Y_{jr} \textit{vfm}_{fjr}
+\left( \frac{c^f_{jr}}{p^{pf}_{fjr}}\right)^\sigma\,.$$
+
+\subsubsection[Specific factors]{Specific factors (\texttt{PS(f,j,r)})}
+
+The net value of benchmark payments to factor $f$ in sector $j$ in
+region $r$ is \texttt{vfm(f,j,r)}:
+\begin{equation}
+\textit{vfm}_{fjr} \left( \frac{\mathit{PS}_{s_{f},jr}}{\mathit{PF}_{s_{f},r}} \right)^\eta =
+\textit{dfm}_{fjr}\end{equation}
+where the demand for primary factor is written above.
+
+\subsection[Regional budget]{Regional budget (\texttt{RA(r)})}
+
+Private and public incomes are given by :
+\begin{equation}
+\textit{RA}_r = \sum_f \mathit{PF}_{fr} \textit{evom}_{fr} + P_{Cn}
+\textit{vb}_r -  P_{Ir} \textit{vom}_{Ir} - P_{Gr}
+\textit{vom}_{Gr}  + \mathcal{R}_r
+\end{equation}
+The base year current account deficit in region $r$ is \texttt{vb(r)},
+and region $r=n$ corresponds to the ``numeraire region'' who's
+consumption prices denominates international capital flows (following
+conventional static trade theory, we hold the current account deficit
+fixed in counterfactual analysis).
+Furthermore, tax revenue in region $r$ consists of output taxes,
+intermediate demand taxes, factor taxes, final demand taxes, import
+tariffs and export subsidies:
+\begin{equation}
+\begin{array}{ll}
+\mathcal{R}_r = & \sum_j \mathcal{R}^o_{jr}
+                 + \sum_{ij} \left( \mathcal{R}^{fd}_{ijr} +
+                 \mathcal{R}^{fi}_{ijr} \right)
+                 + \sum_{fj} \mathcal{R}^f_{fjr} \\
+                &+ \sum_{i}  \left( \mathcal{R}^{pd}_{ir} +
+                 \mathcal{R}^{pi}_{ir} + \mathcal{R}^{gd}_{ir} +
+                 \mathcal{R}^{gi}_{ir}  \right)
+                 - \sum_{is} \mathcal{R}^{xs}_{irs}
+                 + \sum_{is} \mathcal{R}^{ms}_{isr}
+\end{array}
+\end{equation}
+Each of these components of tax revenue can be calculated as an
+ad-valorem or proportional tax rate times a market price times the
+quantity demanded or produced.
+
+Taxes related to $Y_{jr}$ include output taxes:\footnote{Tax revenues
+in the GAMS codes -- both \MCP and \MGE are represented by the
+\textit{macros} indicated in square brackets.}
+$$\mathcal{R}^o_{jr} =  t^o_{jr} \textit{vom}_{jr} P_{jr}
+Y_{jr}\, \quad [\footnotesize{\texttt{REV\_TO(g,r)}}]\,,$$
+tax revenue from intermediate inputs:
+$$\mathcal{R}^{fd}_{ijr} =  t^{fd}_{ijr} P_{ir}
+\textit{ddfm}_{ijr}\,  \quad [\footnotesize{\texttt{REV\_TFD(i,j,r)}}]\,,$$
+$$\mathcal{R}^{fi}_{ijr} = t^{fi}_{ijr} \mathit{PM}_{ir}
+\textit{difm}_{ijr}, \quad [\footnotesize{\texttt{REV\_TFI(i,j,r)}}]\,,$$
+and factor tax revenue:
+$$\mathcal{R}^f_{fjr} = t^{f}_{fjr} \mathit{PF}_{fr} \textit{dfm}_{fjr} \quad
+[\footnotesize{\texttt{REV\_TF(f,g,r)}}]\,.$$
+
+Taxes on household consumption of domestic and
+imported goods are:
+$$\mathcal{R}^{pd}_{ir} = t^{pd}_{ir} P_{ir} \textit{ddfm}_{iCr},
+\quad [\footnotesize{\texttt{REV\_TFD(i,"C",r)}}]\,,$$
+and
+$$\mathcal{R}^{pi}_{ir} = t^{pi}_{ir} \mathit{PM}_{ir} \textit{difm}_{iGr}
+\quad [\footnotesize{\texttt{REV\_TFI(i,"C",r)}}]\,.$$
+
+Taxes on public demand for domestic and imported
+goods are:
+$$\mathcal{R}^{gd}_{ir} = t^{gd}_{ir} P_{ir} \textit{ddfm}_{iGr}
+\quad [\footnotesize{\texttt{REV\_TFD(i,"G",R)}}]\,,$$
+and
+$$\mathcal{R}^{gi}_{ir} =  t^{gi}_{ir} \mathit{PM}_{ir} \textit{difm}_{iGr}
+\quad [\footnotesize{\texttt{REV\_TFI(i,"G",r)}}]\,.$$
+
+Export subsidies (paid by the government in the exporting region) are:
+$$\mathcal{R}^{xs}_{irs} = t^{xs}_{irs} P_{ir}
+\textit{dxmd}_{irs} \quad [\footnotesize{\texttt{REV\_TXS(i,r,s)}}]\,,$$
+and import tariff revenues are given by:
+$$\mathcal{R}^{ms}_{isr} = t^{ms}_{isr} \left(P_{is}
+(1-t^{xs}_{isr}) \textit{dxmd}_{isr} + \sum_j \mathit{PT}_j \textit{dtwr}_{jisr}
+\right) \quad [\footnotesize{\texttt{REV\_TMS(i,s,r)}}]\,.$$
+
+\providecommand{\SATE}{\textsc{sate}\xspace}
+\subsection[Closures]{Closure with respect to the rest of the world: \GMR, \SOE, and \SATE}\label{app:closures}
+
+This subsection documents how the macro \texttt{loadrm(rr)} (file \texttt{code/loadmdl.gms}) and the flags \texttt{sate} and \texttt{sate2} (file \texttt{code/gtap12data.gms}) select the trade closure, and it states the equilibrium conditions which are added to or replace the conditions above.
+It is new relative to \citet{LanzRutherford2016}.
+Let $R^M$ (\texttt{rm(r)}) denote the regions that are part of the model and $R^X$ (\texttt{rx(r)}) the remaining regions, which form the rest of the world (\textsc{row}).
+The \GMR model is obtained with $R^M$ equal to all regions and $R^X=\emptyset$; the conditions above then apply to all regions, and none of the variables of this subsection is active.
+The variables of the small open economy closures are marked with an asterisk in Tables \ref{activities} and \ref{prices}.
+
+For $r\in R^M$, \texttt{loadrm} computes the following benchmark parameters: exports to the rest of the world, $\textit{vem}_{ir}=\sum_{s\in R^X}\textit{vxmd}_{irs}$ [\texttt{vem(i,r)}]; the trade-weighted average export subsidy rate on these exports, $t^{xs,row}_{ir}=\sum_{s\in R^X}\textit{vxmd}_{irs}\,t^{xs}_{irs}/\textit{vem}_{ir}$ [\texttt{rtxs\_row(i,r)}]; and the associated reference price $\textit{pem}^0_{ir}=1-\overline{t}^{xs,row}_{ir}$ [\texttt{pem0(i,r)}].
+For $s\in R^X$, $\textit{vem}_{is}=\sum_{r\in R^M}\textit{vxmd}_{isr}$ denotes the exports of \textsc{row} region $s$ to the modelled regions.
+Exports of region $r\in R^M$ to the rest of the world are supplied at the domestic supply price $P_{ir}$, or at the export price $\mathit{PE}_{ir}$ if $\eta^{DX}_i<\infty$ (Section \ref{model}).
+
+\subsubsection{Small open economy with fixed world prices (\SOE)}
+
+Exports of a modelled region to the rest of the world are converted into foreign exchange at a fixed rate.
+With a finite elasticity of transformation, which the \SOE closure requires (see below), the zero profit condition of $X_{ir}$ reads
+\begin{equation}\label{zpX}
+\mathit{PE}_{ir}\,\frac{1-t^{xs,row}_{ir}}{1-\overline{t}^{xs,row}_{ir}} \;\geq\; p^{FX}
+\qquad \perp \; X_{ir}\geq 0, \quad r\in R^M,
+\end{equation}
+so that the world market absorbs any quantity at a price which is fixed in terms of foreign exchange.
+Symmetrically, \textsc{row} supplies the varieties it exports to the modelled regions at a fixed price, $\mathit{PE}_{is}=p^{FX}$ for $s\in R^X$, and these varieties enter the Armington import aggregates of the modelled regions as described above.
+The market for foreign exchange clears through $p^{FX}$:
+\begin{equation}\label{mktFX}
+\sum_{r\in R^M}\textit{pem}^0_{ir}\textit{vem}_{ir}X_{ir} + \textit{rowpfx}
+= \sum_{s\in R^X}\textit{vem}_{is}X_{is} + \sum_{j,s\in R^X}\textit{vst}_{js}\,\mathit{YT}_j
++ \frac{\mathit{ROW}}{p^{FX}},
+\end{equation}
+where the rest-of-world agent is endowed with an amount of foreign exchange, \textit{rowpfx} [\texttt{rowpfx}], provides the transport services that \textsc{row} regions export, and finances the current account balances of the modelled regions.
+Its income is $\mathit{ROW}=p^{FX}\textit{rowpfx} - P_{In}\sum_{r\in R^M}\textit{vb}_r - \sum_j \mathit{PT}_j\sum_{i,s}\sum_{k\in R^X}\textit{vtwr}_{jisk}$ (the last term being the transport services used in shipments to \textsc{row} regions), which it spends on foreign exchange.
+Equations \eqref{zpX}--\eqref{mktFX} are the closure of \citet{LanzRutherford2016}.
+Without a finite elasticity of transformation between domestic and export supply ($\eta^{DX}_i=\infty$, \texttt{thetadx}$=1$), the domestic supply price $P_{ir}$ takes the place of $\mathit{PE}_{ir}$ in \eqref{zpX}; the condition then pins down the domestic producer price of every exported good, and output responds to trade policy in a bang-bang fashion.
+The \SOE closure is therefore solved with \texttt{thetadx}$=0.5$.
+The \SATE closures below do not need a finite transformation elasticity and use \texttt{thetadx}$=1$, as the \GMR model; in the following, the supply price of exports is therefore $P_{ir}$.
+
+\subsubsection{Small Armington trade economy, implementation \texttt{sate}}
+
+In the \SATE closure, the export activity sells into a separate export market with price $p^X_{ir}$,
+\begin{equation}\label{zpXsate}
+P_{ir}\,\frac{1-t^{xs,row}_{ir}}{1-\overline{t}^{xs,row}_{ir}} \;\geq\; p^X_{ir}
+\qquad \perp \; X_{ir}\geq 0,
+\end{equation}
+where the world's demand for the region's exports has the constant price elasticity $\sigma^m_i=\textit{esubm}_i$:
+\begin{equation}\label{exportdemand}
+E_{ir} = \left(\frac{p^{FX}}{p^X_{ir}}\right)^{\sigma^m_i},
+\qquad\quad
+\textit{pem}^0_{ir}\textit{vem}_{ir}X_{ir} = \textit{pem}^0_{ir}\textit{vem}_{ir}E_{ir}
+\quad \perp\; p^X_{ir}.
+\end{equation}
+The representative agent of region $r$ sells the exports and receives their value in foreign exchange,
+\begin{equation}\label{revexp}
+\mathit{RE}_{ir}\,p^{FX} = E_{ir}\,p^X_{ir},
+\end{equation}
+so that the term $\sum_i \textit{pem}^0_{ir}\textit{vem}_{ir}\left(p^{FX}\mathit{RE}_{ir}-p^X_{ir}E_{ir}\right)=0$ is added to the income $\mathit{RA}_r$, and the supply of foreign exchange from exports in \eqref{mktFX} becomes $\sum_{r\in R^M}\textit{pem}^0_{ir}\textit{vem}_{ir}\mathit{RE}_{ir}$.
+In \MPSGE, $E_{ir}$ and $\mathit{RE}_{ir}$ are auxiliary variables which ration an endowment of $-\textit{pem}^0_{ir}\textit{vem}_{ir}$ units of export goods and $+\textit{pem}^0_{ir}\textit{vem}_{ir}$ units of foreign exchange of agent \texttt{RA(r)} (see the \texttt{\$demand:RA(r)} blocks and the blocks \texttt{\$constraint:EXPORTS} and \texttt{\$constraint:REVEXP} in \texttt{code/mge.gms}).
+Equations \eqref{zpXsate}--\eqref{revexp} require no information about the accounts of the rest of the world: the export demand curve is fully characterized by benchmark exports and the Armington elasticity.
+Imports remain available at fixed world prices.
+
+\subsubsection{Small Armington trade economy, implementation \texttt{sate2}}
+
+Implementation \texttt{sate2} follows the large open economy formulation of \citet{Schreiber2024}.
+The export activity combines the region's exports with a fixed factor owned by the rest of the world in a Cobb-Douglas technology and produces foreign exchange:
+\begin{equation}\label{zpXsate2}
+\left(P_{ir}\,\frac{1-t^{xs,row}_{ir}}{1-\overline{t}^{xs,row}_{ir}}\right)^{1-\theta^{x}_{i}}
+\left(\mathit{PFIX}_{ir}\right)^{\theta^{x}_{i}} \;\geq\; p^{FX}
+\qquad \perp \; X_{ir}\geq 0,
+\end{equation}
+with the cost share of the fixed factor set to $\theta^x_i=1/\sigma^m_i$ [\texttt{theta\_xi(i)}] and a benchmark endowment of the fixed factor of $\textit{fix}^0_{ir}=\theta^x_i/(1-\theta^x_i)\,\textit{pem}^0_{ir}\textit{vem}_{ir}$ [\texttt{fix0(i,r)}], which accrues to the \textsc{row} agent.
+With $p^{FX}$ given, the derived demand for the region's exports has price elasticity $1/\theta^x_i=\sigma^m_i$ \citep[Proposition 2]{Schreiber2024}, so that \texttt{sate} and \texttt{sate2} describe the same export demand curve.
+The two implementations differ only in bookkeeping: in \texttt{sate2}, the rents associated with the downward sloping export demand curve are explicitly attributed to the rest of the world.
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "documentation"
+%%% End:

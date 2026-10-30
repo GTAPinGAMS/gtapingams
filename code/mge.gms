@@ -231,5 +231,5 @@ gtap12.iterlim = 0;
 $include gtap12.gen
 solve gtap12 using mcp;
 
-parameter	maxdev /1e-3/;
+parameter	maxdev /1.4e-4/;
 abort$(gtap12.objval > maxdev) "GTAP12 replication fails.", gtap12.objval;

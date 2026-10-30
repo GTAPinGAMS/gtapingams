@@ -48,6 +48,54 @@ $call gams mcpmge --mdl=mcp --ds=%ds% o=listings%fs%mcp2_%ds%.lst ps=0
 $call gams mcpmge --mdl=mge --ds=%ds% o=listings%fs%mge2_%ds%.lst ps=0
 $exit
 
+*	Next we perform a check of consistency for the MCP and
+*	MGE models at a counterfactual point WITH SATE.
+
+$label mge_mcp_sate
+$log	Solve the MGE model then verify that the solution is
+$log	valid for the MCP model:
+
+$set ds g20
+$if exist gtap12_p.gdx $call del gtap12_p.gdx
+$call gams mcpmge --mdl=mge --mv=sate --ds=%ds% o=listings%fs%mge1_%ds%_sate.lst ps=0
+$call gams mcpmge --mdl=mcp --mv=sate --ds=%ds% o=listings%fs%mcp1_%ds%_sate.lst ps=0
+$exit
+
+
+$label mcp_mge_sate
+$log	Then solve the MCP model and verify that the solution is
+$log	valid for the MGE model:
+
+$set ds g20
+$if exist gtap12_p.gdx $call del gtap12_p.gdx
+$call gams mcpmge --mdl=mcp --mv=sate --ds=%ds% o=listings%fs%mcp2_%ds%_sate.lst ps=0
+$call gams mcpmge --mdl=mge --mv=sate --ds=%ds% o=listings%fs%mge2_%ds%_sate.lst ps=0
+$exit
+
+*	Next we perform a check of consistency for the MCP and
+*	MGE models at a counterfactual point WITH SATE2.
+
+$label mge_mcp_sate2
+$log	Solve the MGE model then verify that the solution is
+$log	valid for the MCP model:
+
+$set ds g20
+$if exist gtap12_p.gdx $call del gtap12_p.gdx
+$call gams mcpmge --mdl=mge --mv=sate2 --ds=%ds% o=listings%fs%mge1_%ds%_sate2.lst ps=0
+$call gams mcpmge --mdl=mcp --mv=sate2 --ds=%ds% o=listings%fs%mcp1_%ds%_sate2.lst ps=0
+$exit
+
+
+$label mcp_mge_sate2
+$log	Then solve the MCP model and verify that the solution is
+$log	valid for the MGE model:
+
+$set ds g20
+$if exist gtap12_p.gdx $call del gtap12_p.gdx
+$call gams mcpmge --mdl=mcp --mv=sate2 --ds=%ds% o=listings%fs%mcp2_%ds%_sate2.lst ps=0
+$call gams mcpmge --mdl=mge --mv=sate2 --ds=%ds% o=listings%fs%mge2_%ds%_sate2.lst ps=0
+$exit
+
 *	Finally, verify that the CDE demand system reproduces the
 *	exogenous own-price and income demand elasticities:
 

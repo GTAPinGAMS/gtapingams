@@ -15,6 +15,8 @@
 %	model runs.
 %	-------------------------------------------------------------------
 
+\usepackage{xr}
+\externaldocument{documentation}
 \usepackage{rotating}
 \usepackage{xspace}
 \usepackage{tikzscale}
@@ -70,6 +72,9 @@
 \newcommand{\GTAPtwelve}{\textsc{gtap12ingams}\xspace}
 \newcommand{\GTAPnine}{\textsc{gtap9ingams}\xspace}
 \newcommand{\GEMPACK}{\textsc{gempack}\xspace}
+\newcommand{\DOCU}{\texttt{documentation.pdf}\xspace}
+\newcommand{\GIGURL}{\url{https://github.com/landisf/gtapingams}}
+
 %	-------------------------------------------------------------------
 
 \begin{document}
@@ -156,7 +161,9 @@ In the following, I describe the model and the modifications relative to \citet{
 
 The model is the static \GTAPINGAMS model of \citet{LanzRutherford2016}, implemented in \GAMS/\MPSGE, updated to the \GTAP 12 Data Base, and extended by the \SATE closure.
 This section gives an overview of the main features and emphasizes what has changed.
-A complete documentation is given in the supplementary material.
+An updated version of the model description by \citet{LanzRutherford2016} is given in Appendices \ref{model} and \ref{equil} and a complete documentation of the software package for \GTAPINGAMS is given in the file \DOCU of the software package on Github.\footnote{%
+  \GIGURL
+}
 
 \subsection{Overview of the \GTAPINGAMS model}
 
@@ -584,6 +591,24 @@ Any remaining errors are mine.
 
 \newpage
 \begin{appendices}
+\section{Data, Technology and Preferences}\label{model}
+This Appendix reflects the contents of Section 1 of the file \DOCU
+provided with \GTAPINGAMS\footnote{\GIGURL}, which in turn contains an
+updated versions of the documentation provided by
+\citet{LanzRutherford2016}.  It refers to Appendices of \DOCU in
+several places.
+
+\input{data_tech_pref}
+
+\section[Equilibrium conditions]{Equilibrium Conditions}\label{equil}
+This Appendix reflects the contents of Section 2 of the file \DOCU
+provided with \GTAPINGAMS\footnote{\GIGURL}, which in turn contains an
+updated versions of the documentation provided by
+\citet{LanzRutherford2016}.  It refers to Appendices of \DOCU in
+several places.
+
+\input{equilibrium}
+
 \input{jgea_new/appendices/appendix_tariffs}
 \end{appendices}
 

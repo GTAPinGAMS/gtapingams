@@ -17,10 +17,10 @@ Consult that paper and its supplementary information for documentation of the GT
 System requirements:
 - Scripts run on Windows, but should only require minor adjustments to be run on other systems.
 - GAMS (www.gams.com) with system's PATH pointing to the gams executable. (routinges checked for GAMS 44.4)
-- python with python doit (https://pydoit.org/index.html) available in the active environment
+- python with python doit (https://pydoit.org/index.html) available in the active environment. (If in doubt, consult requirements.txt for exact python package versions to install.)
 
 Running the code:
-- On the system's command line, navigate to the root folder of the repository, then type 'doit' and press Enter.
+- On the system's command line, navigate to the root folder of the repository, activate your python environment that includes python doit, then type 'doit' and press Enter.
  (This will run python doit and execute the different scripts according to the sequence given to python doit by dodo.py.)
 - Follow instructions on the command line for placing GTAP data in the correct folder.
 Currently, this means placing the GDX version of GTAP12a that includes all shipped reference years ('GDX12a_AY168994.zip') in folder ./gtapdata.

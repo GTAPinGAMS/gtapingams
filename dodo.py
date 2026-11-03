@@ -223,7 +223,6 @@ def task_compile_doc():
         'latex/implementation.tex',
         # Appendices:
         'latex/Appendices/appendixa.tex',
-        'latex/Appendices/appendixb.log',
         'latex/Appendices/appendixb.tex',
         'latex/Appendices/appendixc.tex',
         'latex/Appendices/appendixd.tex',
